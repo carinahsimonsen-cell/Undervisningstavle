@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Undervisningstavle – 0.5</title>
+<style>
+:root{--bg:#f4f6f8;--panel:#fff;--text:#20242a;--muted:#667085;--border:#d9dee6;--accent:#405a74;--accentbg:#eaf0f5}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+.board{min-height:100vh;padding:28px;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:22px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px}
+.header{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.headActions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.kicker{color:var(--muted);font-size:15px}.header h1{margin:3px 0 0;font-size:30px}
+button,input,select{font:inherit}.btn{min-height:46px;border:1px solid var(--border);background:#fff;border-radius:11px;padding:0 14px;cursor:pointer}
+.btn.primary{background:var(--accentbg);border-color:#b9c9d8}.iconbtn{width:46px;height:46px;border:1px solid var(--border);background:#fff;border-radius:11px;font-size:20px;cursor:pointer}
+.agenda{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:11px;border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff}
+.item.current{border:2px solid var(--accent);background:var(--accentbg)}
+.handle{font-size:23px;color:var(--muted);cursor:grab;user-select:none;padding:10px}.handle:active{cursor:grabbing}
+.status{width:25px;text-align:center;font-size:21px;font-weight:bold}.content{flex:1;min-width:0}
+.title{font-size:18px;font-weight:650}.meta{margin-top:6px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.meta a{color:inherit;font-size:19px}.actions{display:flex;gap:7px}.done .title{text-decoration:line-through;opacity:.55}.done{opacity:.72}.skipped{opacity:.35}.dragging{opacity:.25}.over{outline:3px solid #a8b8c7}
+.side{display:flex;flex-direction:column;gap:14px}.side .panel{padding:17px}.side h3{margin:0 0 12px}.timer{font-size:36px;text-align:center;font-weight:700;margin:12px 0}.timerSet,.timerControls{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}.timerSet input{width:68px;min-height:40px;border:1px solid var(--border);border-radius:9px;padding:6px;text-align:center}.timerSet span{color:var(--muted);font-size:13px}.sound.on{background:var(--accentbg);border-color:#b9c9d8}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}.legend{grid-column:1/-1;color:var(--muted);font-size:14px;padding:0 4px}
+.editorback{position:fixed;inset:0;background:rgba(0,0,0,.22);display:none;align-items:center;justify-content:center;padding:20px}.editor{background:#fff;width:min(620px,100%);border-radius:18px;padding:22px;border:1px solid var(--border)}
+.editor h2{margin-top:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin:12px 0}.field label{display:block;font-size:14px;font-weight:600;margin-bottom:5px}.field input,.field select{width:100%;min-height:45px;border:1px solid var(--border);border-radius:9px;padding:8px 10px;background:#fff}
+.editor-actions{display:flex;gap:9px;margin-top:18px}.danger{margin-left:auto}.hint{font-size:12px;color:var(--muted);margin-top:5px}
+body.view .edit-only{display:none!important}body.view .item{padding-left:18px}body.view .legend{display:none}body.view .title{font-size:20px}body.view .meta{font-size:15px}@media(max-width:780px){.board{grid-template-columns:1fr;padding:12px}.side{grid-row:2}.header h1{font-size:25px}.item{align-items:flex-start}.actions{flex-direction:column}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="board">
+<section class="panel">
+  <div class="header"><div><div class="kicker">7.B · Historie</div><h1>Dagens program</h1></div><div class="headActions"><button class="btn primary edit-only" id="new">+ Nyt punkt</button><button class="btn" id="view">👁 Visning</button><button class="btn" id="full">⛶ Fuld skærm</button></div></div>
+  <div id="agenda" class="agenda"></div>
+</section>
+<aside class="side">
+ <section class="panel"><h3>📌 Besked</h3><div>Husk: Vi samler op de sidste 10 minutter.</div></section>
+ <section class="panel"><h3>⏱ Timer</h3><div class="timerSet"><input id="tm" type="number" min="0" max="180" value="10"><span>min</span><input id="ts" type="number" min="0" max="59" value="0"><span>sek</span><button class="btn" id="set">Indstil</button></div><div id="timer" class="timer">10:00</div><div class="timerControls"><button class="btn primary" id="start">Start</button><button class="btn" id="reset">Nulstil</button><button class="btn sound" id="sound">🔔 Til</button></div></section>
+ <section class="panel"><h3>⚡ Hurtigværktøjer</h3><div class="tools"><button class="btn">🎲 Elev</button><button class="btn">👥 Makkere</button><button class="btn">🧠 Pause</button><button class="btn">🚦 Ro</button></div></section>
+</aside>
+<div class="legend">☰ Træk for at flytte · ✎ Redigér · ✓ gennemført · ↷ sprunget over · 🔗 tilknyttet materiale</div>
+</main>
+
+<div class="editorback" id="back">
+<form class="editor" id="form">
+ <h2 id="edtitle">Redigér programpunkt</h2>
+ <div class="field"><label>Titel</label><input id="txt" required maxlength="100"></div>
+ <div class="grid">
+  <div class="field"><label>Arbejdsform</label><select id="mode"><option value="">Ingen</option><option>👩‍🏫 Fælles</option><option>👤 Individuelt</option><option>👥 Makker</option><option>👥👥 Gruppe</option><option>🚶 Bevægelse</option></select></div>
+  <div class="field"><label>Tid i minutter</label><input id="mins" type="number" min="1" max="180"></div>
+ </div>
+ <div class="field"><label>🔗 Eksternt link</label><input id="link" type="url" placeholder="https://..."><div class="hint">Fx Blooket, YouTube, en hjemmeside eller andet materiale.</div></div>
+ <div class="editor-actions"><button class="btn primary" type="submit">Gem</button><button class="btn" type="button" id="cancel">Annuller</button><button class="btn danger" type="button" id="del">Slet</button></div>
+</form>
+</div>
+
+<script>
+let items=[
+{id:1,text:"10 @ktuelle",mode:"👩‍🏫 Fælles",mins:10,link:"",status:"done"},
+{id:2,text:"Opsamling fra sidst",mode:"👩‍🏫 Fælles",mins:10,link:"",status:"open"},
+{id:3,text:"Blooket – repetition",mode:"👩‍🏫 Fælles",mins:12,link:"https://www.blooket.com/",status:"open"},
+{id:4,text:"Intro til skriftlige kilder",mode:"👩‍🏫 Fælles",mins:8,link:"",status:"open"},
+{id:5,text:"Kildeopgave: Christian 2. og Sigbrit",mode:"👥 Makker",mins:20,link:"",status:"open"},
+{id:6,text:"Opsamling",mode:"👩‍🏫 Fælles",mins:null,link:"",status:"open"}];
+let next=7,editing=null,drag=null;
+const A=document.getElementById("agenda");
+function current(){return items.findIndex(x=>x.status==="open")}
+function render(){
+ A.innerHTML=""; const cur=current();
+ items.forEach((x,i)=>{
+  const r=document.createElement("div"); r.className="item "+(i===cur?"current ":"")+(x.status==="done"?"done ":"")+(x.status==="skipped"?"skipped ":"");r.draggable=!document.body.classList.contains("view");r.dataset.id=x.id;
+  const h=document.createElement("div");h.className="handle edit-only";h.textContent="☰";h.title="Træk for at flytte";r.append(h);
+  const s=document.createElement("div");s.className="status";s.textContent=x.status==="done"?"✓":x.status==="skipped"?"↷":"";r.append(s);
+  const c=document.createElement("div");c.className="content";c.innerHTML='<div class="title"></div><div class="meta"></div>';c.querySelector(".title").textContent=x.text;
+  const m=c.querySelector(".meta"); if(x.mode){let q=document.createElement("span");q.textContent=x.mode;m.append(q)}
+  if(x.mins){let q=document.createElement("button");q.className="btn";q.style.minHeight="32px";q.textContent="⏱ "+x.mins+" min";q.onclick=()=>setTimer(x.mins);m.append(q)}
+  if(x.link){let q=document.createElement("a");q.href=x.link;q.target="_blank";q.rel="noopener";q.textContent="🔗";q.title="Åbn tilknyttet materiale";m.append(q)}
+  r.append(c); const acts=document.createElement("div");acts.className="actions";
+  let eb=make("✎","Redigér",()=>edit(x.id));eb.classList.add("edit-only");acts.append(eb);
+  if(i===cur){acts.append(make("✓","Gennemført",()=>{x.status="done";render()}));acts.append(make("↷","Spring over",()=>{x.status="skipped";render()}))}
+  else if(x.status!=="open") acts.append(make("↶","Fortryd",()=>{x.status="open";render()}));
+  r.append(acts);
+  r.ondragstart=()=>{drag=x.id;r.classList.add("dragging")};r.ondragend=()=>{drag=null;document.querySelectorAll(".item").forEach(z=>z.classList.remove("dragging","over"))};
+  r.ondragover=e=>{e.preventDefault();if(drag!==x.id)r.classList.add("over")};r.ondragleave=()=>r.classList.remove("over");
+  r.ondrop=e=>{e.preventDefault();r.classList.remove("over");if(drag===x.id)return;let f=items.findIndex(z=>z.id===drag),t=items.findIndex(z=>z.id===x.id);let moved=items.splice(f,1)[0];items.splice(t,0,moved);render()};
+  A.append(r);
+ })
+}
+function make(t,title,fn){let b=document.createElement("button");b.className="iconbtn";b.type="button";b.textContent=t;b.title=title;b.onclick=fn;return b}
+const back=document.getElementById("back"),form=document.getElementById("form"),txt=document.getElementById("txt"),mode=document.getElementById("mode"),mins=document.getElementById("mins"),link=document.getElementById("link"),del=document.getElementById("del");
+function openEditor(x){back.style.display="flex";editing=x?x.id:null;document.getElementById("edtitle").textContent=x?"Redigér programpunkt":"Nyt programpunkt";txt.value=x?x.text:"";mode.value=x?x.mode:"";mins.value=x&&x.mins?x.mins:"";link.value=x?x.link:"";del.style.display=x?"block":"none";txt.focus()}
+function edit(id){openEditor(items.find(x=>x.id===id))}
+document.getElementById("new").onclick=()=>openEditor(null);document.getElementById("cancel").onclick=()=>back.style.display="none";
+form.onsubmit=e=>{e.preventDefault();let o={text:txt.value.trim(),mode:mode.value,mins:mins.value?Math.max(1,Math.min(180,+mins.value)):null,link:link.value.trim()};if(editing){Object.assign(items.find(x=>x.id===editing),o)}else items.push({id:next++,...o,status:"open"});back.style.display="none";render()};
+del.onclick=()=>{items=items.filter(x=>x.id!==editing);back.style.display="none";render()};
+let seconds=600,initialSeconds=600,interval=null;const td=document.getElementById("timer"),start=document.getElementById("start"),tm=document.getElementById("tm"),ts=document.getElementById("ts"),sound=document.getElementById("sound");let soundOn=localStorage.getItem("boardSound")!=="off";
+function draw(){td.textContent=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0")}
+function soundLabel(){sound.textContent=soundOn?"🔔 Til":"🔕 Fra";sound.classList.toggle("on",soundOn)}
+function alarm(){if(!soundOn)return;try{const C=window.AudioContext||window.webkitAudioContext,ctx=new C();[0,.35,.7].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.18,ctx.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+d+.22);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+.23)})}catch(e){}}
+function setTimer(m,s=0){clearInterval(interval);interval=null;seconds=Math.max(0,Math.round((+m||0)*60+(+s||0)));initialSeconds=seconds;tm.value=Math.floor(seconds/60);ts.value=seconds%60;start.textContent="Start";draw()}
+document.getElementById("set").onclick=()=>setTimer(tm.value,ts.value);
+start.onclick=()=>{if(interval){clearInterval(interval);interval=null;start.textContent="Start";return}if(seconds<=0)setTimer(tm.value,ts.value);if(seconds<=0)return;start.textContent="Pause";interval=setInterval(()=>{if(seconds>0)seconds--;draw();if(seconds<=0){clearInterval(interval);interval=null;start.textContent="Start";alarm()}},1000)};
+document.getElementById("reset").onclick=()=>{clearInterval(interval);interval=null;seconds=initialSeconds;start.textContent="Start";draw()};
+sound.onclick=()=>{soundOn=!soundOn;localStorage.setItem("boardSound",soundOn?"on":"off");soundLabel()};soundLabel();
+const view=document.getElementById("view");view.onclick=()=>{document.body.classList.toggle("view");view.textContent=document.body.classList.contains("view")?"✎ Redigering":"👁 Visning";render()};
+const full=document.getElementById("full");full.onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){alert("Browseren tillader ikke fuld skærm her.")}};
+document.addEventListener("fullscreenchange",()=>full.textContent=document.fullscreenElement?"⛶ Afslut fuld skærm":"⛶ Fuld skærm");
+back.onclick=e=>{if(e.target===back)back.style.display="none"};render();
+</script>
+</body></html>
