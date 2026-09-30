@@ -1,111 +1,375 @@
 <!doctype html>
 <html lang="da">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Undervisningstavle – 0.5</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Undervisningstavle 0.7</title>
 <style>
-:root{--bg:#f4f6f8;--panel:#fff;--text:#20242a;--muted:#667085;--border:#d9dee6;--accent:#405a74;--accentbg:#eaf0f5}
-*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-.board{min-height:100vh;padding:28px;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:22px}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px}
-.header{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.headActions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.kicker{color:var(--muted);font-size:15px}.header h1{margin:3px 0 0;font-size:30px}
-button,input,select{font:inherit}.btn{min-height:46px;border:1px solid var(--border);background:#fff;border-radius:11px;padding:0 14px;cursor:pointer}
-.btn.primary{background:var(--accentbg);border-color:#b9c9d8}.iconbtn{width:46px;height:46px;border:1px solid var(--border);background:#fff;border-radius:11px;font-size:20px;cursor:pointer}
-.agenda{display:flex;flex-direction:column;gap:10px}
-.item{display:flex;align-items:center;gap:11px;border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff}
-.item.current{border:2px solid var(--accent);background:var(--accentbg)}
-.handle{font-size:23px;color:var(--muted);cursor:grab;user-select:none;padding:10px}.handle:active{cursor:grabbing}
-.status{width:25px;text-align:center;font-size:21px;font-weight:bold}.content{flex:1;min-width:0}
-.title{font-size:18px;font-weight:650}.meta{margin-top:6px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
-.meta a{color:inherit;font-size:19px}.actions{display:flex;gap:7px}.done .title{text-decoration:line-through;opacity:.55}.done{opacity:.72}.skipped{opacity:.35}.dragging{opacity:.25}.over{outline:3px solid #a8b8c7}
-.side{display:flex;flex-direction:column;gap:14px}.side .panel{padding:17px}.side h3{margin:0 0 12px}.timer{font-size:36px;text-align:center;font-weight:700;margin:12px 0}.timerSet,.timerControls{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}.timerSet input{width:68px;min-height:40px;border:1px solid var(--border);border-radius:9px;padding:6px;text-align:center}.timerSet span{color:var(--muted);font-size:13px}.sound.on{background:var(--accentbg);border-color:#b9c9d8}
-.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}.legend{grid-column:1/-1;color:var(--muted);font-size:14px;padding:0 4px}
-.editorback{position:fixed;inset:0;background:rgba(0,0,0,.22);display:none;align-items:center;justify-content:center;padding:20px}.editor{background:#fff;width:min(620px,100%);border-radius:18px;padding:22px;border:1px solid var(--border)}
-.editor h2{margin-top:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin:12px 0}.field label{display:block;font-size:14px;font-weight:600;margin-bottom:5px}.field input,.field select{width:100%;min-height:45px;border:1px solid var(--border);border-radius:9px;padding:8px 10px;background:#fff}
-.editor-actions{display:flex;gap:9px;margin-top:18px}.danger{margin-left:auto}.hint{font-size:12px;color:var(--muted);margin-top:5px}
-body.view .edit-only{display:none!important}body.view .item{padding-left:18px}body.view .legend{display:none}body.view .title{font-size:20px}body.view .meta{font-size:15px}@media(max-width:780px){.board{grid-template-columns:1fr;padding:12px}.side{grid-row:2}.header h1{font-size:25px}.item{align-items:flex-start}.actions{flex-direction:column}.grid{grid-template-columns:1fr}}
+:root{--bg:#eef1ed;--paper:#fffefa;--ink:#202621;--muted:#6b746d;--line:#d5dbd5;--accent:#45645b;--soft:#e1ebe5;--shadow:0 5px 18px #26302914}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}
+button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:0 13px}.btn.primary{background:var(--soft);border-color:#b8cbbf}.icon{width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:18px}
+.hidden{display:none!important}
+#scheduleView{padding:22px;min-height:100vh}.apphead{display:flex;gap:10px;align-items:center;margin-bottom:18px}.brand{font-weight:800;font-size:24px;margin-right:auto}.weeknav{display:flex;gap:8px;align-items:center}.weektitle{min-width:190px;text-align:center;font-weight:700}
+.schedule{display:grid;grid-template-columns:115px repeat(5,minmax(150px,1fr));border:1px solid var(--line);border-radius:16px;overflow:auto;background:#fff;box-shadow:var(--shadow)}
+.cell{min-height:112px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:11px}.corner,.dayhead{min-height:72px;background:#f7f8f6}.dayhead{font-weight:750;font-size:17px}.dayhead small{display:block;color:var(--muted);font-weight:400;margin-top:5px}.timecell{background:#f7f8f6;font-size:14px}.timecell strong{display:block;margin-bottom:5px}.slot{display:flex;align-items:center;justify-content:center}.addslot{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:22px;color:var(--muted)}.boardcard{width:100%;min-height:78px;text-align:left;border:1px solid #bdcec3;background:#edf5f0;border-radius:12px;padding:11px}.boardcard strong{display:block;font-size:16px}.boardcard small{display:block;color:var(--muted);margin-top:6px}
+#boardView{min-height:100vh;padding:22px;background:var(--boardbg,#edf0ea);background-size:cover;background-position:center}.top{display:flex;align-items:center;gap:9px;margin-bottom:16px}.identity{margin-right:auto}.boardname{font-size:31px;font-weight:800;margin:2px 0}.sub{color:var(--muted);font-size:14px}.clock{font-size:26px;font-weight:750;min-width:78px;text-align:center}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:17px;align-items:start}.workspace.noWidgets{grid-template-columns:1fr}.workspace.noWidgets #widgets{display:none}
+.panel,.widget{background:#fffffff0;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}.panel{padding:19px}.agenda{display:flex;flex-direction:column;gap:9px}.item{display:flex;gap:9px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:11px}.item.current{border:2px solid var(--accent);background:#f5faf6}.handle{padding:7px;color:var(--muted);cursor:grab;font-size:20px}.status{width:23px;text-align:center;font-weight:800;font-size:19px}.content{flex:1;min-width:0}.title{font-weight:750;font-size:19px}.desc,.need{margin-top:5px;line-height:1.35}.desc{font-size:15px;color:#465149}.need{font-size:14px}.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);margin-top:7px}.timebtn{min-height:29px;padding:0 8px}.actions{display:flex;gap:5px}.done{opacity:.68}.done .title{text-decoration:line-through}.skipped{opacity:.38}.dragging{opacity:.3}.over{outline:3px solid #aabbb1}.legend{font-size:12px;color:var(--muted);margin-top:12px}
+#widgets{display:flex;flex-direction:column;gap:11px}.widget{padding:15px}.whead{display:flex;align-items:center;gap:6px}.whead h3{margin:0;flex:1}.wtext{margin-top:11px;white-space:pre-wrap;line-height:1.45}.notes{width:100%;min-height:220px;margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical;background:#fffefa}.notes:focus{min-height:360px}.saveflash{font-weight:700;color:var(--accent)}.timer{font-size:38px;text-align:center;font-weight:800;margin:12px}.timerrow{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}.timerrow input{width:58px;text-align:center}
+.viewing .editonly{display:none!important}.viewing .item{padding:14px}.viewing .title{font-size:21px}
+.modalback{position:fixed;inset:0;background:#0004;display:none;align-items:center;justify-content:center;padding:18px;z-index:50}.modal{background:#fff;width:min(650px,100%);max-height:92vh;overflow:auto;border-radius:18px;padding:21px}.modal h2{margin-top:0}.field{margin:11px 0}.field label{display:block;font-weight:700;font-size:14px;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px}.field input,.field select{min-height:43px}.field textarea{min-height:85px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}.mactions{display:flex;gap:8px;margin-top:16px}.danger{margin-left:auto}.pick{display:grid;gap:8px}
+.overlay{position:fixed;inset:0;background:#111;display:none;z-index:100;flex-direction:column}.obar{height:58px;background:#202522;color:#fff;display:flex;align-items:center;gap:8px;padding:0 13px}.obar strong{flex:1}.overlay iframe{height:calc(100vh - 58px);width:100%;border:0;background:#fff}
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.theme{height:70px;border:2px solid transparent;border-radius:10px}.theme.sel{border-color:var(--accent)}.t-light{background:#edf0ea}.t-white{background:#fafafa}.t-warm{background:#f2eee5}.t-dark{background:#667a71}.t-grid{background-color:#f7f7f4;background-image:linear-gradient(#dfe4df 1px,transparent 1px),linear-gradient(90deg,#dfe4df 1px,transparent 1px);background-size:24px 24px}.t-lines{background:repeating-linear-gradient(#f8f8f5 0,#f8f8f5 23px,#dfe4df 24px)}
+@media(max-width:820px){.schedule{grid-template-columns:100px repeat(5,180px)}.workspace{grid-template-columns:1fr}.top{flex-wrap:wrap}.identity{width:100%}.grid2{grid-template-columns:1fr}.actions{flex-direction:column}.themes{grid-template-columns:repeat(3,1fr)}}
+
+.classlist{display:grid;gap:8px}.classcard{border:1px solid var(--line);border-radius:12px;padding:11px;display:flex;gap:8px;align-items:center}.classcard strong{flex:1}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.pill{border:1px solid var(--line);border-radius:999px;background:#fff;padding:7px 10px}.pill.off{opacity:.38;text-decoration:line-through}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin-top:10px}.group{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}.group h4{margin:0 0 7px}.student{border:1px solid var(--line);background:#f7f8f6;border-radius:8px;padding:7px;margin:5px 0;cursor:grab}
+.bigpick{text-align:center;font-size:32px;font-weight:800;padding:20px 8px}.toolrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+
+.richbar{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}.richbar button{min-width:36px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px}.richbar .sep{width:1px;background:var(--line);margin:3px}
+.richedit{width:100%;min-height:95px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;line-height:1.45;overflow:auto}.richedit ul{margin:5px 0;padding-left:23px}
+.richdisplay ul{margin:5px 0;padding-left:23px}.richdisplay p{margin:4px 0}.notesrich{min-height:220px;resize:vertical}.notesrich:focus{min-height:360px}
+
+.birthday{position:relative;background:#fff;border:2px solid #d9b9b9;border-radius:16px;padding:18px 46px 18px 18px;box-shadow:var(--shadow);font-size:18px;overflow:hidden;margin-bottom:12px}
+.birthday .birthtitle{display:flex;align-items:center;justify-content:center;gap:12px;text-align:center;font-size:25px;font-weight:850;letter-spacing:.04em}
+.dkflag{display:inline-block;position:relative;width:34px;height:25px;background:#c8102e;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08);flex:0 0 auto}
+.dkflag:before{content:"";position:absolute;left:10px;top:0;width:4px;height:100%;background:#fff}
+.dkflag:after{content:"";position:absolute;left:0;top:10px;width:100%;height:4px;background:#fff}
+.birthday strong{display:block;text-align:center;font-size:29px;margin-top:8px}.birthday .confetti{text-align:center;letter-spacing:9px;color:#b3262e;font-size:14px;margin-top:7px}.birthday .x{position:absolute;right:8px;top:8px;border:0;background:transparent;font-size:16px;opacity:.4}
+.birthrows{display:grid;gap:7px;margin-top:12px}.birthrow{display:grid;grid-template-columns:minmax(120px,1fr) minmax(210px,260px);gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:7px}
+.birthselects{display:grid;grid-template-columns:90px 1fr;gap:7px}.birthselects select{min-height:40px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:#fff;font:inherit}
+@media(max-width:600px){.birthrow{grid-template-columns:1fr}.birthselects{grid-template-columns:90px 1fr}}
+</style>
+<style id="pdfSlideStyles">
+#pdfSlideOverlay{position:fixed;inset:0;z-index:10000;background:#111;display:none;flex-direction:column}
+#pdfSlideOverlay.open{display:flex}
+#pdfSlideStage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px 60px 8px}
+#pdfSlideCanvas{display:block;max-width:100%;max-height:100%;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#pdfSlidePageWrap{position:relative;display:inline-block;line-height:0}
+#pdfSlideLinks{position:absolute;inset:0;pointer-events:none}
+.pdfSlideLink{position:absolute;display:block;pointer-events:auto;cursor:pointer;background:rgba(255,255,255,0);border:0;border-radius:3px}
+.pdfSlideLink:hover{outline:3px solid rgba(255,255,255,.72);background:rgba(255,255,255,.12)}
+#pdfSlideBar{height:64px;display:flex;align-items:center;justify-content:center;gap:12px;color:#fff;padding:0 18px}
+#pdfSlideBar button,#pdfSlideClose{height:44px;border:1px solid #555;border-radius:12px;background:#242424;color:#fff;cursor:pointer}
+#pdfSlideBar button{min-width:50px;font-size:22px}
+#pdfSlideCount{min-width:88px;text-align:center;font-weight:800;font-size:17px}
+#pdfSlideClose{position:absolute;right:18px;top:14px;padding:0 16px;font-size:16px;z-index:2}
+#pdfSlideHint{position:absolute;left:18px;bottom:20px;color:#aaa;font-size:13px}
+
+#ytVideoOverlay{position:fixed;inset:0;z-index:11000;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;padding:54px 70px}
+#ytVideoOverlay.open{display:flex}
+#ytVideoBox{width:min(1200px,96vw);aspect-ratio:16/9;position:relative;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#ytVideoFrame{width:100%;height:100%;border:0;display:block}
+#ytVideoClose{position:absolute;right:18px;top:14px;height:44px;padding:0 16px;border:1px solid #666;border-radius:12px;background:#242424;color:#fff;cursor:pointer;font-size:16px;z-index:2}
 </style>
 </head>
 <body>
-<main class="board">
-<section class="panel">
-  <div class="header"><div><div class="kicker">7.B · Historie</div><h1>Dagens program</h1></div><div class="headActions"><button class="btn primary edit-only" id="new">+ Nyt punkt</button><button class="btn" id="view">👁 Visning</button><button class="btn" id="full">⛶ Fuld skærm</button></div></div>
-  <div id="agenda" class="agenda"></div>
+<section id="scheduleView">
+ <div class="apphead"><div class="brand">Undervisningstavle</div><div class="weeknav"><button class="btn" id="prevWeek">‹</button><div class="weektitle" id="weekTitle"></div><button class="btn" id="nextWeek">›</button><button class="btn" id="todayWeek">Denne uge</button><button class="btn" id="scheduleSettings">⚙️ Ringetider</button><button class="btn" id="classesBtn">👥 Klasser</button></div></div>
+ <div class="schedule" id="schedule"></div>
 </section>
-<aside class="side">
- <section class="panel"><h3>📌 Besked</h3><div>Husk: Vi samler op de sidste 10 minutter.</div></section>
- <section class="panel"><h3>⏱ Timer</h3><div class="timerSet"><input id="tm" type="number" min="0" max="180" value="10"><span>min</span><input id="ts" type="number" min="0" max="59" value="0"><span>sek</span><button class="btn" id="set">Indstil</button></div><div id="timer" class="timer">10:00</div><div class="timerControls"><button class="btn primary" id="start">Start</button><button class="btn" id="reset">Nulstil</button><button class="btn sound" id="sound">🔔 Til</button></div></section>
- <section class="panel"><h3>⚡ Hurtigværktøjer</h3><div class="tools"><button class="btn">🎲 Elev</button><button class="btn">👥 Makkere</button><button class="btn">🧠 Pause</button><button class="btn">🚦 Ro</button></div></section>
-</aside>
-<div class="legend">☰ Træk for at flytte · ✎ Redigér · ✓ gennemført · ↷ sprunget over · 🔗 tilknyttet materiale</div>
-</main>
 
-<div class="editorback" id="back">
-<form class="editor" id="form">
- <h2 id="edtitle">Redigér programpunkt</h2>
- <div class="field"><label>Titel</label><input id="txt" required maxlength="100"></div>
- <div class="grid">
-  <div class="field"><label>Arbejdsform</label><select id="mode"><option value="">Ingen</option><option>👩‍🏫 Fælles</option><option>👤 Individuelt</option><option>👥 Makker</option><option>👥👥 Gruppe</option><option>🚶 Bevægelse</option></select></div>
-  <div class="field"><label>Tid i minutter</label><input id="mins" type="number" min="1" max="180"></div>
+<section id="boardView" class="hidden">
+ <div class="top">
+  <button class="btn" id="backSchedule">← Skema</button>
+  <div class="identity"><div class="sub" id="boardWhen"></div><div class="boardname" id="boardName"></div></div>
+  <div class="sub" id="saveIndicator">✓ Gemt</div><div class="clock" id="clock"></div>
+  <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
+  <button class="btn editonly" id="appearance">🎨 Udseende</button>
+  <button class="btn primary editonly" id="addWidget">+ Tilføj element</button>
+  <button class="btn" id="viewBtn">👁 Visning</button>
+  <button class="btn" id="fullBtn">⛶ Fuld skærm</button>
  </div>
- <div class="field"><label>🔗 Eksternt link</label><input id="link" type="url" placeholder="https://..."><div class="hint">Fx Blooket, YouTube, en hjemmeside eller andet materiale.</div></div>
- <div class="editor-actions"><button class="btn primary" type="submit">Gem</button><button class="btn" type="button" id="cancel">Annuller</button><button class="btn danger" type="button" id="del">Slet</button></div>
-</form>
-</div>
+ <div class="workspace" id="workspace"><main class="panel"><div id="agenda" class="agenda"></div><div class="legend editonly">☰ Flyt · ✎ Redigér · ✓ gennemført · ↷ sprunget over · 📎 materiale</div><button class="btn primary editonly" id="newItem" style="margin-top:12px">+ Nyt punkt</button></main><aside id="elementArea"><div id="birthdayBanner" class="birthday hidden"></div><div id="widgets"></div></aside></div>
+</section>
+
+<div class="modalback" id="createBack"><form class="modal" id="createForm"><h2>Ny tavle</h2><div class="field"><label>Navn på tavle</label><input id="createName" required placeholder="Fx 7.B · Historie"></div><div class="field"><label>Klasse (valgfri)</label><select id="createClass"></select></div><div id="createInfo" class="sub"></div><div class="mactions"><button class="btn primary">Opret tavle</button><button class="btn" type="button" data-close>Fortryd</button></div></form></div>
+
+<div class="modalback" id="itemBack"><form class="modal" id="itemForm"><h2 id="itemHead">Nyt programpunkt</h2>
+<div class="field"><label>Aktivitet</label><input id="itTitle" required></div>
+<div class="field"><label>Beskrivelse <span style="font-weight:400">(valgfri)</span></label><div id="itDescBar" class="richbar"></div><div id="itDesc" class="richedit" contenteditable="true"></div></div>
+<div class="field"><label>🎒 Du skal bruge… <span style="font-weight:400">(valgfri)</span></label><input id="itNeed" placeholder="Fx computer, lineal, bog, idrætstøj…"></div>
+<div class="grid2"><div class="field"><label>Arbejdsform</label><select id="itMode"><option value="">Ingen</option><option>👩‍🏫 Fælles</option><option>👤 Individuelt</option><option>👥 Makker</option><option>👥👥 Gruppe</option><option>🚶 Bevægelse</option></select></div><div class="field"><label>Forventet tid (min.)</label><input id="itMins" type="number" min="1" max="180"></div></div>
+<div class="field"><label>📎 Materiale <span style="font-weight:400">(valgfrit)</span></label><div class="sub" style="margin-bottom:7px">Indsæt et link eller vælg en fil fra computeren.</div><input id="itLink" type="url" placeholder="Indsæt link…"><div class="toolrow"><button class="btn" id="chooseMaterialFile" type="button">📎 Vælg fil</button><span id="materialFileName" class="sub"></span></div><input id="materialFile" type="file" hidden>
+<div class="field hidden" id="pdfStartField" style="margin-top:10px"><label>Start på slide</label><input id="pdfStartPage" type="number" min="1" value="1" style="max-width:120px"><div class="sub">PDF-slideshowet åbner direkte på denne side.</div></div></div>
+<div class="mactions"><button class="btn primary">Gem</button><button class="btn" type="button" data-close>Fortryd</button><button class="btn danger" type="button" id="deleteItem">Slet</button></div></form></div>
+
+<div class="modalback" id="widgetPick"><div class="modal"><h2>Tilføj element</h2><div class="pick"><button class="btn" data-wtype="message">📌 Besked</button><button class="btn" data-wtype="notes">✏️ Tavlenoter</button><button class="btn" data-wtype="youtube">▶️ YouTube-video</button><button class="btn" data-wtype="timer">⏱ Timer</button><button class="btn" data-wtype="groups">👥 Grupper / makkere</button><button class="btn" data-wtype="picker">🎯 Én elev</button><button class="btn" data-close>Fortryd</button></div></div></div>
+<div class="modalback" id="widgetEdit"><form class="modal" id="widgetForm"><h2 id="widgetHead"></h2><div class="field" id="wTitleField"><label>Overskrift</label><input id="wTitle"></div><div class="field" id="wTextField"><label>Indhold</label><div id="wTextBar" class="richbar"></div><div id="wText" class="richedit" contenteditable="true"></div></div>
+<div class="field hidden" id="wYoutubeField"><label>YouTube-link</label><input id="wYoutubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=…"><div class="sub">Indsæt et almindeligt YouTube- eller youtu.be-link.</div></div><div class="mactions"><button class="btn primary">Gem</button><button class="btn" type="button" data-close>Fortryd</button><button class="btn danger" type="button" id="deleteWidget">Fjern</button></div></form></div>
+
+<div class="modalback" id="boardEdit"><form class="modal" id="boardForm"><h2>Redigér tavle</h2><div class="field"><label>Navn</label><input id="editBoardName" required></div><div class="field"><label>Klasse (valgfri)</label><select id="editBoardClass"></select></div><div class="mactions"><button class="btn primary">Gem</button><button class="btn" type="button" data-close>Fortryd</button><button class="btn" type="button" id="copyBoard">Kopiér/flyt…</button><button class="btn danger" type="button" id="deleteBoard">Slet tavle</button></div></form></div>
+
+<div class="modalback" id="appearanceBack"><div class="modal"><h2>Tavleudseende</h2><div class="themes" id="themes"></div><div class="field"><label>Eget baggrundsbillede</label><input id="bgUpload" type="file" accept="image/*"><div class="sub">Billedet gemmes lokalt sammen med tavlen. Brug rolige billeder, så dagsordenen stadig er tydelig.</div></div><div class="field"><label>Baggrundens styrke</label><input id="bgStrength" type="range" min="15" max="100" value="45"></div><div class="mactions"><button class="btn" data-close>Luk</button><button class="btn danger" id="removeBg" type="button">Fjern eget billede</button></div></div></div>
+
+
+
+<div class="modalback" id="classesBack"><div class="modal"><h2>Klasser</h2><div id="classList" class="classlist"></div><div class="mactions"><button class="btn primary" id="newClassBtn" type="button">+ Ny klasse</button><button class="btn" data-close type="button">Luk</button></div></div></div>
+<div class="modalback" id="classEditBack"><form class="modal" id="classForm"><h2 id="classHead">Ny klasse</h2><div class="field"><label>Klassenavn</label><input id="className" required placeholder="Fx 7.B"></div><div class="field"><label>Elever – ét navn pr. linje</label><textarea id="classStudents" style="min-height:240px" placeholder="Anna&#10;Benjamin&#10;Clara"></textarea></div>
+<div class="field"><label>🎂 Fødselsdage <span style="font-weight:400">(valgfrit)</span></label><div class="sub">Gem/opdatér elevlisten først. Derefter kan fødselsdage vælges her.</div><div id="birthdayRows" class="birthrows"></div></div><div class="mactions"><button class="btn primary">Gem klasse</button><button class="btn" data-close type="button">Fortryd</button><button class="btn danger" id="deleteClass" type="button">Slet klasse</button></div></form></div>
+<div class="modalback" id="participantsBack"><div class="modal"><h2>Dagens elever</h2><div class="sub">Slå elever fra, som ikke skal indgå i grupper eller lodtrækning på denne tavle.</div><div id="participantPills" class="pills"></div><div class="mactions"><button class="btn" id="allParticipants" type="button">Alle med</button><button class="btn" data-close type="button">Luk</button></div></div></div>
+<div class="modalback" id="settingsBack"><div class="modal"><h2>Ringetider</h2>
+<div class="sub">Indstil én gang. Tiderne gemmes automatisk og bruges i alle uger.</div>
+<div id="timeRows" style="margin-top:12px"></div>
+<div class="mactions"><button class="btn" type="button" id="addLesson">+ Lektion</button><button class="btn primary" type="button" id="saveTimes">Gem ringetider</button><button class="btn" type="button" data-close>Luk</button></div>
+</div></div>
+
+<div class="modalback" id="placeBack"><div class="modal"><h2 id="placeHead">Kopiér tavle</h2>
+<div class="field"><label>Dato</label><input id="placeDate" type="date"></div>
+<div class="field"><label>Lektion</label><select id="placeSlot"></select></div>
+<div class="field"><label><input id="placeMove" type="checkbox" style="width:auto;min-height:auto"> Flyt i stedet for at kopiere</label></div>
+<div class="field"><label><input id="resetStatus" type="checkbox" checked style="width:auto;min-height:auto"> Nulstil ✓ / ↷ på kopien</label></div>
+<div class="mactions"><button class="btn primary" type="button" id="confirmPlace">Gem</button><button class="btn" type="button" data-close>Fortryd</button></div>
+</div></div>
+
+<div class="overlay" id="overlay"><div class="obar"><strong id="overlayTitle"></strong><button class="btn" id="openTab">↗ Ny fane</button><button class="btn" id="closeOverlay">✕ Luk</button></div><iframe id="frame"></iframe></div>
 
 <script>
-let items=[
-{id:1,text:"10 @ktuelle",mode:"👩‍🏫 Fælles",mins:10,link:"",status:"done"},
-{id:2,text:"Opsamling fra sidst",mode:"👩‍🏫 Fælles",mins:10,link:"",status:"open"},
-{id:3,text:"Blooket – repetition",mode:"👩‍🏫 Fælles",mins:12,link:"https://www.blooket.com/",status:"open"},
-{id:4,text:"Intro til skriftlige kilder",mode:"👩‍🏫 Fælles",mins:8,link:"",status:"open"},
-{id:5,text:"Kildeopgave: Christian 2. og Sigbrit",mode:"👥 Makker",mins:20,link:"",status:"open"},
-{id:6,text:"Opsamling",mode:"👩‍🏫 Fælles",mins:null,link:"",status:"open"}];
-let next=7,editing=null,drag=null;
-const A=document.getElementById("agenda");
-function current(){return items.findIndex(x=>x.status==="open")}
-function render(){
- A.innerHTML=""; const cur=current();
- items.forEach((x,i)=>{
-  const r=document.createElement("div"); r.className="item "+(i===cur?"current ":"")+(x.status==="done"?"done ":"")+(x.status==="skipped"?"skipped ":"");r.draggable=!document.body.classList.contains("view");r.dataset.id=x.id;
-  const h=document.createElement("div");h.className="handle edit-only";h.textContent="☰";h.title="Træk for at flytte";r.append(h);
-  const s=document.createElement("div");s.className="status";s.textContent=x.status==="done"?"✓":x.status==="skipped"?"↷":"";r.append(s);
-  const c=document.createElement("div");c.className="content";c.innerHTML='<div class="title"></div><div class="meta"></div>';c.querySelector(".title").textContent=x.text;
-  const m=c.querySelector(".meta"); if(x.mode){let q=document.createElement("span");q.textContent=x.mode;m.append(q)}
-  if(x.mins){let q=document.createElement("button");q.className="btn";q.style.minHeight="32px";q.textContent="⏱ "+x.mins+" min";q.onclick=()=>setTimer(x.mins);m.append(q)}
-  if(x.link){let q=document.createElement("a");q.href=x.link;q.target="_blank";q.rel="noopener";q.textContent="🔗";q.title="Åbn tilknyttet materiale";m.append(q)}
-  r.append(c); const acts=document.createElement("div");acts.className="actions";
-  let eb=make("✎","Redigér",()=>edit(x.id));eb.classList.add("edit-only");acts.append(eb);
-  if(i===cur){acts.append(make("✓","Gennemført",()=>{x.status="done";render()}));acts.append(make("↷","Spring over",()=>{x.status="skipped";render()}))}
-  else if(x.status!=="open") acts.append(make("↶","Fortryd",()=>{x.status="open";render()}));
-  r.append(acts);
-  r.ondragstart=()=>{drag=x.id;r.classList.add("dragging")};r.ondragend=()=>{drag=null;document.querySelectorAll(".item").forEach(z=>z.classList.remove("dragging","over"))};
-  r.ondragover=e=>{e.preventDefault();if(drag!==x.id)r.classList.add("over")};r.ondragleave=()=>r.classList.remove("over");
-  r.ondrop=e=>{e.preventDefault();r.classList.remove("over");if(drag===x.id)return;let f=items.findIndex(z=>z.id===drag),t=items.findIndex(z=>z.id===x.id);let moved=items.splice(f,1)[0];items.splice(t,0,moved);render()};
-  A.append(r);
+const KEY="undervisningstavle.v07";
+const defaultTimes=[["1. lektion","08:00","08:45"],["2. lektion","08:45","09:30"],["3. lektion","09:50","10:35"],["4. lektion","10:35","11:20"],["5. lektion","11:50","12:35"],["6. lektion","12:35","13:20"],["7. lektion","13:30","14:15"]];
+let state=load(), weekStart=monday(new Date()), currentId=null, pendingSlot=null, editingItem=null, editingWidget=null, dragItem=null, dragWidget=null;
+function load(){try{let z=JSON.parse(localStorage.getItem(KEY))||{boards:[],times:defaultTimes,sound:true,classes:[]};z.classes=z.classes||[];z.boards=z.boards||[];return z}catch(e){return{boards:[],times:defaultTimes,sound:true,classes:[]}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));let el=document.getElementById("saveIndicator");if(el){el.textContent="Gemmer…";el.classList.add("saveflash");clearTimeout(window.__saved);window.__saved=setTimeout(()=>{el.textContent="✓ Gemt";el.classList.remove("saveflash")},250)}}
+function monday(d){let x=new Date(d);x.setHours(12,0,0,0);let n=x.getDay()||7;x.setDate(x.getDate()-n+1);return x}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function fmtDate(d){return d.toLocaleDateString("da-DK",{day:"numeric",month:"short"})}
+function niceDate(s){return new Date(s+"T12:00").toLocaleDateString("da-DK",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function board(){return state.boards.find(b=>b.id===currentId)}
+function renderSchedule(){
+ schedule.innerHTML="";let end=new Date(weekStart);end.setDate(end.getDate()+4);weekTitle.textContent=fmtDate(weekStart)+" – "+fmtDate(end);
+ let c=document.createElement("div");c.className="cell corner";schedule.append(c);
+ const names=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag"];
+ for(let d=0;d<5;d++){let date=new Date(weekStart);date.setDate(date.getDate()+d);let h=document.createElement("div");h.className="cell dayhead";h.innerHTML=names[d]+"<small>"+fmtDate(date)+"</small>";schedule.append(h)}
+ state.times.forEach((t,ri)=>{let tc=document.createElement("div");tc.className="cell timecell";tc.innerHTML="<strong>"+t[0]+"</strong>"+((t[1]||t[2])?((t[1]||"")+"<br>"+(t[2]||"")):"");schedule.append(tc);
+  for(let d=0;d<5;d++){let date=new Date(weekStart);date.setDate(date.getDate()+d);let ds=iso(date),sl=document.createElement("div");sl.className="cell slot";let b=state.boards.find(x=>x.date===ds&&x.slot===ri);
+   if(b){let bt=document.createElement("button");bt.className="boardcard";bt.innerHTML="<strong></strong><small>"+((t[1]||t[2])?((t[1]||"")+"–"+(t[2]||"")):"")+"</small>";bt.querySelector("strong").textContent=b.name;bt.onclick=()=>openBoard(b.id);sl.append(bt)}
+   else{let plus=document.createElement("button");plus.className="addslot";plus.textContent="+";plus.title="Opret tavle";plus.onclick=()=>newBoard(ds,ri);sl.append(plus)}schedule.append(sl)}
+ });
+}
+function classOptions(sel,chosen=""){sel.innerHTML='<option value="">Ingen klasse</option>'+state.classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");sel.value=chosen||""}
+function newBoard(date,slot){pendingSlot={date,slot};createName.value="";classOptions(createClass);createInfo.textContent=niceDate(date)+(state.times[slot][1]||state.times[slot][2]?" · "+(state.times[slot][1]||"")+"–"+(state.times[slot][2]||""):"");show(createBack);createName.focus()}
+createForm.onsubmit=e=>{e.preventDefault();let b={id:uid(),name:createName.value.trim(),date:pendingSlot.date,slot:pendingSlot.slot,classId:createClass.value,excluded:[],birthdayDismissed:false,theme:"light",bgImage:"",bgStrength:45,items:[],widgets:[],timer:{seconds:600,initial:600,running:false}};state.boards.push(b);save();hide(createBack);openBoard(b.id)}
+function openBoard(id){currentId=id;let bb=state.boards.find(x=>x.id===id);bb.excluded=bb.excluded||[];bb.classId=bb.classId||"";scheduleView.classList.add("hidden");boardView.classList.remove("hidden");renderBoard()}
+backSchedule.onclick=()=>{stopTimer();currentId=null;boardView.classList.add("hidden");scheduleView.classList.remove("hidden");renderSchedule()}
+function renderBoard(){let b=board();if(!b)return;boardName.textContent=b.name;let t=state.times[b.slot];boardWhen.textContent=niceDate(b.date)+(t[1]||t[2]?" · "+(t[1]||"")+"–"+(t[2]||""):"");applyTheme();renderAgenda();renderBirthday();renderWidgets()}
+function applyTheme(){let b=board(),v=document.getElementById("boardView");v.className=v.className.replace(/\btheme-\S+/g,"");let colors={light:"#edf0ea",white:"#f7f7f7",warm:"#eee9df",dark:"#667a71",grid:"#f7f7f4",lines:"#f8f8f5"};v.style.setProperty("--boardbg",colors[b.theme]||colors.light);
+ if(b.theme==="grid")v.style.backgroundImage="linear-gradient(#dfe4df 1px,transparent 1px),linear-gradient(90deg,#dfe4df 1px,transparent 1px)",v.style.backgroundSize="24px 24px";
+ else if(b.theme==="lines")v.style.backgroundImage="repeating-linear-gradient(#f8f8f5 0,#f8f8f5 23px,#dfe4df 24px)";
+ else v.style.backgroundImage="none";
+ if(b.bgImage){let strength=(100-b.bgStrength)/100;v.style.backgroundImage=`linear-gradient(rgba(255,255,255,${strength}),rgba(255,255,255,${strength})),url("${b.bgImage}")`;v.style.backgroundSize="cover";v.style.backgroundPosition="center"}
+}
+function cur(){return board().items.findIndex(x=>x.status==="open")}
+function ib(t,title,fn,cls=""){let x=document.createElement("button");x.className="icon "+cls;x.textContent=t;x.title=title;x.onclick=fn;return x}
+function renderAgenda(){agenda.innerHTML="";let b=board();if(!b.items.length){let empty=document.createElement("div");empty.className="sub editonly";empty.textContent="Ingen programpunkter endnu. Tavlen kan sagtens bruges med fx Tavlenoter, Besked eller Timer.";agenda.append(empty)}let ci=cur();b.items.forEach((x,i)=>{let r=document.createElement("div");r.className="item "+(i===ci?"current ":"")+(x.status==="done"?"done ":"")+(x.status==="skipped"?"skipped ":"");
+ let h=document.createElement("span");h.className="handle editonly";h.textContent="☰";r.append(h);let st=document.createElement("span");st.className="status";st.textContent=x.status==="done"?"✓":x.status==="skipped"?"↷":"";r.append(st);
+ let co=document.createElement("div");co.className="content";let ti=document.createElement("div");ti.className="title";ti.textContent=x.title;co.append(ti);if(x.desc){let d=document.createElement("div");d.className="desc";d.classList.add("richdisplay");d.innerHTML=x.desc;co.append(d)}if(x.need){let n=document.createElement("div");n.className="need";n.textContent="🎒 Du skal bruge: "+x.need;co.append(n)}
+ let m=document.createElement("div");m.className="meta";if(x.mode){let q=document.createElement("span");q.textContent=x.mode;m.append(q)}if(x.mins){let q=document.createElement("button");q.className="btn timebtn";q.textContent="⏱ "+x.mins+" min";q.onclick=()=>setTimer(x.mins*60);m.append(q)}if(x.link||x.material){let q=document.createElement("button");q.className="btn timebtn";q.textContent="📎";q.onclick=()=>smartOpenMaterial(x);m.append(q)}co.append(m);r.append(co);
+ let ac=document.createElement("div");ac.className="actions";ac.append(ib("✎","Redigér",()=>editItem(x),"editonly"));if(i===ci){ac.append(ib("✓","Gennemført",()=>{x.status="done";save();renderAgenda()}));ac.append(ib("↷","Spring over",()=>{x.status="skipped";save();renderAgenda()}))}else if(x.status!=="open")ac.append(ib("↶","Fortryd",()=>{x.status="open";save();renderAgenda()}));r.append(ac);
+ r.draggable=!document.body.classList.contains("viewing");r.ondragstart=()=>{dragItem=x.id;r.classList.add("dragging")};r.ondragend=()=>dragItem=null;r.ondragover=e=>{if(dragItem&&dragItem!==x.id){e.preventDefault();r.classList.add("over")}};r.ondragleave=()=>r.classList.remove("over");r.ondrop=e=>{e.preventDefault();let f=b.items.findIndex(z=>z.id===dragItem),to=b.items.findIndex(z=>z.id===x.id);if(f>=0&&to>=0&&f!==to){b.items.splice(to,0,b.items.splice(f,1)[0]);save();renderAgenda()}};agenda.append(r)})}
+function editItem(x=null){editingItem=x?.id||null;itemHead.textContent=x?"Redigér programpunkt":"Nyt programpunkt";itTitle.value=x?.title||"";itDesc.innerHTML=x?.desc||"";itNeed.value=x?.need||"";itMode.value=x?.mode||"";itMins.value=x?.mins||"";itLink.value=x?.link||"";pendingMaterialFile=null;materialFile.value="";materialFileName.textContent=x?.material?.name||"";pdfStartPage.value=Math.max(1,+(x?.material?.startPage||1));let existingPdf=!!(x?.material&&(x.material.type==="application/pdf"||/\.pdf$/i.test(x.material.name||"")));pdfStartField.classList.toggle("hidden",!existingPdf);deleteItem.style.display=x?"block":"none";show(itemBack);itTitle.focus()}
+newItem.onclick=()=>editItem();itemForm.onsubmit=async e=>{e.preventDefault();let existing=editingItem?board().items.find(x=>x.id===editingItem):null;let o={title:itTitle.value.trim(),desc:cleanRich(itDesc.innerHTML),need:itNeed.value.trim(),mode:itMode.value,mins:itMins.value?+itMins.value:null,link:itLink.value.trim(),material:existing?.material||null};if(pendingMaterialFile){let fid=uid();await putFile(fid,pendingMaterialFile);let isPdf=pendingMaterialFile.type==="application/pdf"||/\.pdf$/i.test(pendingMaterialFile.name||"");o.material={fileId:fid,name:pendingMaterialFile.name,type:pendingMaterialFile.type,startPage:isPdf?Math.max(1,+pdfStartPage.value||1):1};o.link=""}else if(o.link){o.material=null}else if(o.material){let isPdf=o.material.type==="application/pdf"||/\.pdf$/i.test(o.material.name||"");if(isPdf)o.material.startPage=Math.max(1,+pdfStartPage.value||1)}if(existing)Object.assign(existing,o);else board().items.push({id:uid(),...o,status:"open"});save();hide(itemBack);renderAgenda()}
+
+let pendingMaterialFile=null;chooseMaterialFile.onclick=()=>materialFile.click();materialFile.onchange=()=>{pendingMaterialFile=materialFile.files[0]||null;materialFileName.textContent=pendingMaterialFile?pendingMaterialFile.name:"";let isPdf=!!(pendingMaterialFile&&(pendingMaterialFile.type==="application/pdf"||/\.pdf$/i.test(pendingMaterialFile.name||"")));pdfStartField.classList.toggle("hidden",!isPdf);if(isPdf&&!pdfStartPage.value)pdfStartPage.value=1};
+deleteItem.onclick=()=>{board().items=board().items.filter(x=>x.id!==editingItem);save();hide(itemBack);renderAgenda()}
+function wname(t){return t==="message"?"📌 Besked":t==="notes"?"✏️ Tavlenoter":t==="youtube"?"▶️ YouTube-video":t==="groups"?"👥 Grupper / makkere":t==="picker"?"🎯 Én elev":"⏱ Timer"}
+function renderWidgets(){widgets.innerHTML="";let b=board();workspace.classList.toggle("noWidgets",!b.widgets.length && birthdayBanner.classList.contains("hidden"));b.widgets.forEach(w=>{let box=document.createElement("section");box.className="widget";let hd=document.createElement("div");hd.className="whead";let ha=document.createElement("span");ha.className="handle editonly";ha.textContent="☰";hd.append(ha);let h=document.createElement("h3");h.textContent=w.title||wname(w.type);hd.append(h);
+ if(w.type!=="timer")hd.append(ib("✎","Redigér",()=>editWidget(w),"editonly"));hd.append(ib("×","Fjern",()=>{b.widgets=b.widgets.filter(x=>x.id!==w.id);save();renderWidgets()},"editonly"));box.append(hd);
+ if(w.type==="groups"){box.append(groupsUI(w))}else if(w.type==="picker"){box.append(pickerUI(w))}else if(w.type==="notes"){let bar=document.createElement("div");bar.className="richbar";box.append(bar);let ta=document.createElement("div");ta.className="richedit notesrich";ta.contentEditable="true";ta.dataset.placeholder="Skriv på tavlen under undervisningen…";ta.innerHTML=w.text||"";ta.oninput=()=>{w.text=cleanRich(ta.innerHTML);save()};box.append(ta);makeToolbar(bar,ta)}else if(w.type==="message"){let tx=document.createElement("div");tx.className="wtext";tx.classList.add("richdisplay");tx.innerHTML=w.text||"";box.append(tx)}else if(w.type==="youtube"){let id=youtubeId(w.url||"");if(id){let wrap=document.createElement("div");wrap.style.cssText="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden";let fr=document.createElement("iframe");fr.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?rel=0";fr.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";fr.allowFullscreen=true;fr.style.cssText="width:100%;height:100%;border:0;display:block";wrap.append(fr);box.append(wrap);let tr=document.createElement("div");tr.className="toolrow";tr.style.marginTop="9px";let big=document.createElement("button");big.className="btn";big.type="button";big.textContent="⛶ Vis stort";big.onclick=()=>openYouTubeVideo(w.url);tr.append(big);box.append(tr)}else{let p=document.createElement("div");p.className="sub";p.textContent="Indsæt et gyldigt YouTube-link via Redigér.";box.append(p)}}else box.append(timerUI());
+ box.draggable=!document.body.classList.contains("viewing");box.ondragstart=()=>{dragWidget=w.id};box.ondragover=e=>e.preventDefault();box.ondrop=e=>{e.preventDefault();let f=b.widgets.findIndex(z=>z.id===dragWidget),to=b.widgets.findIndex(z=>z.id===w.id);if(f>=0&&to>=0&&f!==to){b.widgets.splice(to,0,b.widgets.splice(f,1)[0]);save();renderWidgets()}};widgets.append(box)})}
+let tick=null;function stopTimer(){if(tick){clearInterval(tick);tick=null}}
+function setTimer(s){let b=board();if(!b.widgets.some(w=>w.type==="timer"))b.widgets.push({id:uid(),type:"timer",title:"⏱ Timer",text:""});stopTimer();b.timer={seconds:s,initial:s,running:false};save();renderWidgets()}
+function timerUI(){let b=board(),wrap=document.createElement("div"),d=document.createElement("div");d.className="timer";d.id="td";d.textContent=tf(b.timer.seconds);wrap.append(d);let set=document.createElement("div");set.className="timerrow editonly";set.innerHTML=`<input id="tm" type="number" min="0" value="${Math.floor(b.timer.initial/60)}">:<input id="ts" type="number" min="0" max="59" value="${b.timer.initial%60}"><button class="btn" id="tset">Indstil</button>`;wrap.append(set);let row=document.createElement("div");row.className="timerrow";
+ let start=document.createElement("button");start.className="btn primary";start.textContent=tick?"Pause":"Start";start.onclick=()=>{if(tick){stopTimer();b.timer.running=false;save();renderWidgets();return}b.timer.running=true;tick=setInterval(()=>{if(b.timer.seconds>0)b.timer.seconds--;let q=document.getElementById("td");if(q)q.textContent=tf(b.timer.seconds);save();if(b.timer.seconds<=0){stopTimer();b.timer.running=false;alarm();renderWidgets()}},1000);renderWidgets()};row.append(start);
+ let reset=document.createElement("button");reset.className="btn";reset.textContent="Nulstil";reset.onclick=()=>{stopTimer();b.timer.seconds=b.timer.initial;save();renderWidgets()};row.append(reset);let snd=document.createElement("button");snd.className="btn";snd.textContent=state.sound?"🔔 Til":"🔕 Fra";snd.onclick=()=>{state.sound=!state.sound;save();renderWidgets()};row.append(snd);wrap.append(row);setTimeout(()=>{let z=document.getElementById("tset");if(z)z.onclick=()=>setTimer((+tm.value||0)*60+Math.min(59,+ts.value||0))},0);return wrap}
+function tf(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}function alarm(){if(!state.sound)return;try{let a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.value=.12;o.start();setTimeout(()=>{o.stop();a.close()},900)}catch(e){}}
+
+
+function renderBirthday(){
+ let el=birthdayBanner,b=board();el.classList.add("hidden");el.innerHTML="";
+ if(!b||!b.classId)return;
+ let c=state.classes.find(x=>x.id===b.classId);if(!c)return;
+ let md=b.date.slice(5),names=c.students.filter(x=>typeof x!=="string"&&x.birthday===md).map(x=>x.name).sort();
+ if(!names.length)return;
+ let sig=b.date+"|"+names.join("|");
+ if(b.birthdayDismissed===true){b.birthdayDismissed=false;save()}
+ if(b.birthdayDismissedSignature===sig)return;
+ let joined=names.length===1?names[0]:names.slice(0,-1).join(", ")+" & "+names[names.length-1];
+ el.innerHTML=`<button class="x" title="Skjul">×</button><div class="birthtitle"><span class="dkflag" aria-hidden="true"></span><span>TILLYKKE!</span><span class="dkflag" aria-hidden="true"></span></div><strong>${joined}</strong><div class="confetti">• ◆ • ◆ •</div>`;
+ el.querySelector(".x").onclick=()=>{b.birthdayDismissedSignature=sig;save();el.classList.add("hidden")};el.classList.remove("hidden")
+}
+
+function cls(){return state.classes.find(c=>c.id===board()?.classId)}
+function activeStudents(){let c=cls();if(!c)return[];let ex=board().excluded||[];return c.students.map(x=>typeof x==="string"?x:x.name).filter(n=>!ex.includes(n))}
+classesBtn.onclick=()=>{renderClasses();show(classesBack)}
+function renderClasses(){classList.innerHTML="";if(!state.classes.length)classList.innerHTML='<div class="sub">Ingen klasser endnu.</div>';state.classes.forEach(c=>{let d=document.createElement("div");d.className="classcard";d.innerHTML=`<strong>${c.name}</strong><span>${c.students.length} elever</span>`;let b=document.createElement("button");b.className="btn";b.textContent="Redigér";b.onclick=()=>editClass(c);d.append(b);classList.append(d)})}
+let editingClass=null;newClassBtn.onclick=()=>editClass(null)
+function editClass(c){editingClass=c?.id||null;classHead.textContent=c?"Redigér klasse":"Ny klasse";className.value=c?.name||"";classStudents.value=(c?.students||[]).map(x=>typeof x==="string"?x:x.name).join("\n");deleteClass.style.display=c?"block":"none";renderBirthdayRows(c);hide(classesBack);show(classEditBack)}
+function renderBirthdayRows(c){
+ birthdayRows.innerHTML="";
+ if(!c)return;
+ const months=["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
+ const maxDays=[31,29,31,30,31,30,31,31,30,31,30,31];
+ c.students.forEach(st=>{
+   let name=typeof st==="string"?st:st.name, birth=typeof st==="string"?"":(st.birthday||"");
+   let parts=birth.split("-"),bm=parts.length===2?parseInt(parts[0],10):0,bd=parts.length===2?parseInt(parts[1],10):0;
+   let row=document.createElement("div");row.className="birthrow";
+   let lab=document.createElement("span");lab.textContent=name;
+   let picks=document.createElement("div");picks.className="birthselects";
+   let day=document.createElement("select"),month=document.createElement("select");
+   month.innerHTML='<option value="">Måned</option>'+months.map((m,i)=>`<option value="${i+1}">${m}</option>`).join("");
+   month.value=bm||"";
+   function fillDays(){
+     let selected=+day.value||bd||0, m=+month.value||0, max=m?maxDays[m-1]:31;
+     day.innerHTML='<option value="">Dag</option>'+Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
+     if(selected&&selected<=max)day.value=selected; else day.value="";
+   }
+   fillDays(); if(bd)day.value=bd;
+   function store(){
+     let cur=state.classes.find(x=>x.id===c.id);if(!cur)return;
+     let idx=cur.students.findIndex(x=>(typeof x==="string"?x:x.name)===name);if(idx<0)return;
+     let obj=cur.students[idx],m=+month.value,d=+day.value,md=(m&&d)?String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0"):"";
+     if(typeof obj==="string")cur.students[idx]={name:obj,birthday:md};else obj.birthday=md;
+     save()
+   }
+   month.onchange=()=>{bd=+day.value||0;fillDays();store()};day.onchange=store;
+   picks.append(day,month);row.append(lab,picks);birthdayRows.append(row)
  })
 }
-function make(t,title,fn){let b=document.createElement("button");b.className="iconbtn";b.type="button";b.textContent=t;b.title=title;b.onclick=fn;return b}
-const back=document.getElementById("back"),form=document.getElementById("form"),txt=document.getElementById("txt"),mode=document.getElementById("mode"),mins=document.getElementById("mins"),link=document.getElementById("link"),del=document.getElementById("del");
-function openEditor(x){back.style.display="flex";editing=x?x.id:null;document.getElementById("edtitle").textContent=x?"Redigér programpunkt":"Nyt programpunkt";txt.value=x?x.text:"";mode.value=x?x.mode:"";mins.value=x&&x.mins?x.mins:"";link.value=x?x.link:"";del.style.display=x?"block":"none";txt.focus()}
-function edit(id){openEditor(items.find(x=>x.id===id))}
-document.getElementById("new").onclick=()=>openEditor(null);document.getElementById("cancel").onclick=()=>back.style.display="none";
-form.onsubmit=e=>{e.preventDefault();let o={text:txt.value.trim(),mode:mode.value,mins:mins.value?Math.max(1,Math.min(180,+mins.value)):null,link:link.value.trim()};if(editing){Object.assign(items.find(x=>x.id===editing),o)}else items.push({id:next++,...o,status:"open"});back.style.display="none";render()};
-del.onclick=()=>{items=items.filter(x=>x.id!==editing);back.style.display="none";render()};
-let seconds=600,initialSeconds=600,interval=null;const td=document.getElementById("timer"),start=document.getElementById("start"),tm=document.getElementById("tm"),ts=document.getElementById("ts"),sound=document.getElementById("sound");let soundOn=localStorage.getItem("boardSound")!=="off";
-function draw(){td.textContent=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0")}
-function soundLabel(){sound.textContent=soundOn?"🔔 Til":"🔕 Fra";sound.classList.toggle("on",soundOn)}
-function alarm(){if(!soundOn)return;try{const C=window.AudioContext||window.webkitAudioContext,ctx=new C();[0,.35,.7].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.18,ctx.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+d+.22);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+.23)})}catch(e){}}
-function setTimer(m,s=0){clearInterval(interval);interval=null;seconds=Math.max(0,Math.round((+m||0)*60+(+s||0)));initialSeconds=seconds;tm.value=Math.floor(seconds/60);ts.value=seconds%60;start.textContent="Start";draw()}
-document.getElementById("set").onclick=()=>setTimer(tm.value,ts.value);
-start.onclick=()=>{if(interval){clearInterval(interval);interval=null;start.textContent="Start";return}if(seconds<=0)setTimer(tm.value,ts.value);if(seconds<=0)return;start.textContent="Pause";interval=setInterval(()=>{if(seconds>0)seconds--;draw();if(seconds<=0){clearInterval(interval);interval=null;start.textContent="Start";alarm()}},1000)};
-document.getElementById("reset").onclick=()=>{clearInterval(interval);interval=null;seconds=initialSeconds;start.textContent="Start";draw()};
-sound.onclick=()=>{soundOn=!soundOn;localStorage.setItem("boardSound",soundOn?"on":"off");soundLabel()};soundLabel();
-const view=document.getElementById("view");view.onclick=()=>{document.body.classList.toggle("view");view.textContent=document.body.classList.contains("view")?"✎ Redigering":"👁 Visning";render()};
-const full=document.getElementById("full");full.onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){alert("Browseren tillader ikke fuld skærm her.")}};
-document.addEventListener("fullscreenchange",()=>full.textContent=document.fullscreenElement?"⛶ Afslut fuld skærm":"⛶ Fuld skærm");
-back.onclick=e=>{if(e.target===back)back.style.display="none"};render();
+classForm.onsubmit=e=>{e.preventDefault();let names=classStudents.value.split(/\n/).map(x=>x.trim()).filter(Boolean);if(editingClass){let c=state.classes.find(x=>x.id===editingClass),oldMap={};c.students.forEach(x=>{let n=typeof x==="string"?x:x.name;oldMap[n]=typeof x==="string"?"":(x.birthday||"")});c.name=className.value.trim();c.students=names.map(n=>({name:n,birthday:oldMap[n]||""}))}else state.classes.push({id:uid(),name:className.value.trim(),students:names.map(n=>({name:n,birthday:""}))});save();hide(classEditBack);renderSchedule()}
+deleteClass.onclick=()=>{if(confirm("Slet klassen? Tavlerne slettes ikke, men mister koblingen til klasselisten.")){state.classes=state.classes.filter(x=>x.id!==editingClass);state.boards.forEach(b=>{if(b.classId===editingClass){b.classId="";b.excluded=[]}});save();hide(classEditBack)}}
+participantsBtn.onclick=()=>{if(!cls()){alert("Knyt først en klasse til tavlen via ✎ Tavle.");return}renderParticipants();show(participantsBack)}
+function renderParticipants(){participantPills.innerHTML="";let b=board(),ex=b.excluded||[];cls().students.map(z=>typeof z==="string"?z:z.name).forEach(n=>{let x=document.createElement("button");x.className="pill "+(ex.includes(n)?"off":"");x.textContent=n;x.onclick=()=>{b.excluded=b.excluded||[];if(b.excluded.includes(n))b.excluded=b.excluded.filter(z=>z!==n);else b.excluded.push(n);save();renderParticipants();renderWidgets()};participantPills.append(x)})}
+allParticipants.onclick=()=>{board().excluded=[];save();renderParticipants();renderWidgets()}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function makeGroups(w){let a=shuffle(activeStudents());if(!a.length){w.groups=[];return}let count=w.mode==="count"?Math.max(1,Math.min(+w.number||1,a.length)):Math.ceil(a.length/Math.max(1,+w.number||2));w.groups=Array.from({length:count},()=>[]);a.forEach((n,i)=>w.groups[i%count].push(n));save()}
+function groupsUI(w){let wrap=document.createElement("div");if(!cls()){wrap.innerHTML='<div class="sub">Knyt en klasse til tavlen for at bruge grupper.</div>';return wrap}
+ let controls=document.createElement("div");controls.className="toolrow";controls.innerHTML=`<select class="btn gm"><option value="size">Elever pr. gruppe</option><option value="count">Antal grupper</option></select><input class="btn gn" type="number" min="1" value="${w.number||2}" style="width:75px"><button class="btn primary gg">🔀 ${w.groups?.length?"Bland igen":"Lav grupper"}</button>`;controls.querySelector(".gm").value=w.mode||"size";controls.querySelector(".gm").onchange=e=>{w.mode=e.target.value;save()};controls.querySelector(".gn").onchange=e=>{w.number=Math.max(1,+e.target.value||1);save()};controls.querySelector(".gg").onclick=()=>{makeGroups(w);renderWidgets()};wrap.append(controls);
+ let info=document.createElement("div");info.className="sub";info.style.marginTop="7px";info.textContent=activeStudents().length+" elever med i dag";wrap.append(info);let gs=document.createElement("div");gs.className="groups";(w.groups||[]).forEach((g,gi)=>{let box=document.createElement("div");box.className="group";box.innerHTML=`<h4>Gruppe ${gi+1}</h4>`;box.ondragover=e=>e.preventDefault();box.ondrop=e=>{e.preventDefault();let data=JSON.parse(e.dataTransfer.getData("text/plain"));let name=w.groups[data.g].splice(data.i,1)[0];w.groups[gi].push(name);save();renderWidgets()};g.forEach((n,ni)=>{let st=document.createElement("div");st.className="student";st.draggable=true;st.textContent=n;st.ondragstart=e=>e.dataTransfer.setData("text/plain",JSON.stringify({g:gi,i:ni}));box.append(st)});gs.append(box)});wrap.append(gs);
+ let row=document.createElement("div");row.className="toolrow editonly";let add=document.createElement("button");add.className="btn";add.textContent="+ Gruppe";add.onclick=()=>{w.groups=w.groups||[];w.groups.push([]);save();renderWidgets()};row.append(add);if((w.groups||[]).length){let del=document.createElement("button");del.className="btn";del.textContent="− Sidste gruppe";del.onclick=()=>{let gone=w.groups.pop()||[];if(gone.length){if(!w.groups.length)w.groups=[[]];gone.forEach((n,i)=>w.groups[i%w.groups.length].push(n))}save();renderWidgets()};row.append(del)}wrap.append(row);return wrap}
+function pickerUI(w){let wrap=document.createElement("div");if(!cls()){wrap.innerHTML='<div class="sub">Knyt en klasse til tavlen for at bruge Én elev.</div>';return wrap}w.picked=w.picked||[];let active=activeStudents(),remaining=active.filter(n=>!w.picked.includes(n));let big=document.createElement("div");big.className="bigpick";big.textContent=w.current||"Klar?";wrap.append(big);let stat=document.createElement("div");stat.className="sub";stat.style.textAlign="center";stat.textContent=`${remaining.length} tilbage · ${active.filter(n=>w.picked.includes(n)).length} valgt`;wrap.append(stat);let row=document.createElement("div");row.className="toolrow";row.style.justifyContent="center";let pick=document.createElement("button");pick.className="btn primary";pick.textContent="🎲 Vælg elev";pick.disabled=!remaining.length;pick.onclick=()=>{let rem=activeStudents().filter(n=>!w.picked.includes(n));if(!rem.length)return;let n=rem[Math.floor(Math.random()*rem.length)];w.current=n;w.picked.push(n);save();renderWidgets()};row.append(pick);let reset=document.createElement("button");reset.className="btn";reset.textContent="↻ Nulstil runde";reset.onclick=()=>{w.picked=[];w.current="";save();renderWidgets()};row.append(reset);wrap.append(row);return wrap}
+
+addWidget.onclick=()=>show(widgetPick);document.querySelectorAll("[data-wtype]").forEach(x=>x.onclick=()=>{let t=x.dataset.wtype;if(t==="timer"){if(!board().widgets.some(w=>w.type==="timer"))board().widgets.push({id:uid(),type:"timer",title:"⏱ Timer",text:""});save();hide(widgetPick);renderWidgets()}else if(t==="groups"){board().widgets.push({id:uid(),type:"groups",title:"👥 Grupper / makkere",mode:"size",number:2,groups:[]});save();hide(widgetPick);renderWidgets()}else if(t==="picker"){board().widgets.push({id:uid(),type:"picker",title:"🎯 Én elev",picked:[],current:""});save();hide(widgetPick);renderWidgets()}else{hide(widgetPick);editWidget({id:null,type:t,title:t==="notes"?"✏️ Tavlenoter":t==="youtube"?"▶️ YouTube-video":"📌 Besked",text:"",url:""})}})
+function editWidget(w){editingWidget=w.id;widgetHead.textContent=w.id?"Redigér element":"Tilføj element";wTitle.value=w.title||wname(w.type);wText.innerHTML=w.text||"";wYoutubeUrl.value=w.url||"";let isYoutube=w.type==="youtube";wTextField.classList.toggle("hidden",isYoutube);wYoutubeField.classList.toggle("hidden",!isYoutube);widgetForm.dataset.type=w.type;deleteWidget.style.display=w.id?"block":"none";show(widgetEdit);if(isYoutube)wYoutubeUrl.focus()}
+widgetForm.onsubmit=e=>{e.preventDefault();let type=widgetForm.dataset.type,isYoutube=type==="youtube",url=wYoutubeUrl.value.trim();if(isYoutube&&!youtubeId(url)){alert("Indsæt et gyldigt YouTube-link.");return}let w=editingWidget?board().widgets.find(x=>x.id===editingWidget):null;if(w){w.title=wTitle.value.trim();w.text=isYoutube?"":cleanRich(wText.innerHTML);w.url=isYoutube?url:(w.url||"")}else board().widgets.push({id:uid(),type:type,title:wTitle.value.trim(),text:isYoutube?"":cleanRich(wText.innerHTML),url:isYoutube?url:""});save();hide(widgetEdit);renderWidgets()}
+deleteWidget.onclick=()=>{board().widgets=board().widgets.filter(x=>x.id!==editingWidget);save();hide(widgetEdit);renderWidgets()}
+renameBoard.onclick=()=>{editBoardName.value=board().name;classOptions(editBoardClass,board().classId);show(boardEdit)};boardForm.onsubmit=e=>{e.preventDefault();board().name=editBoardName.value.trim();board().classId=editBoardClass.value;board().birthdayDismissed=false;if(!board().classId)board().excluded=[];save();hide(boardEdit);renderBoard()}
+copyBoard.onclick=()=>{placeDate.value=board().date;placeSlot.innerHTML=state.times.map((t,i)=>`<option value="${i}">${t[0]}${t[1]?" · "+t[1]+"–"+t[2]:""}</option>`).join("");placeSlot.value=board().slot;placeMove.checked=false;resetStatus.checked=true;hide(boardEdit);show(placeBack)}
+confirmPlace.onclick=()=>{let targetDate=placeDate.value, targetSlot=+placeSlot.value;if(!targetDate)return;if(state.boards.some(x=>x.id!==currentId&&x.date===targetDate&&x.slot===targetSlot)){alert("Der ligger allerede en tavle i det felt.");return}let b=board();if(placeMove.checked){b.date=targetDate;b.slot=targetSlot;save();hide(placeBack);renderBoard()}else{let cp=JSON.parse(JSON.stringify(b));cp.id=uid();cp.date=targetDate;cp.slot=targetSlot;cp.name=b.name+" – kopi";if(resetStatus.checked)cp.items.forEach(x=>x.status="open");state.boards.push(cp);save();hide(placeBack);alert("Tavlen er kopieret.")}}
+deleteBoard.onclick=()=>{if(confirm("Vil du slette denne tavle? Det kan ikke fortrydes.")){let id=currentId;state.boards=state.boards.filter(x=>x.id!==id);save();hide(boardEdit);currentId=null;boardView.classList.add("hidden");scheduleView.classList.remove("hidden");renderSchedule()}}
+appearance.onclick=()=>{renderThemes();bgStrength.value=board().bgStrength||45;show(appearanceBack)}
+const themeDefs=[["light","Lys"],["white","Hvid"],["warm","Varm"],["dark","Kridttavle"],["grid","Tern"],["lines","Linjer"]];
+function renderThemes(){themes.innerHTML="";themeDefs.forEach(([id,n])=>{let x=document.createElement("button");x.className="theme t-"+id+(board().theme===id?" sel":"");x.title=n;x.onclick=()=>{board().theme=id;save();applyTheme();renderThemes()};themes.append(x)})}
+bgStrength.oninput=()=>{board().bgStrength=+bgStrength.value;save();applyTheme()};bgUpload.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{board().bgImage=r.result;save();applyTheme()};r.readAsDataURL(f)};removeBg.onclick=()=>{board().bgImage="";save();applyTheme()}
+viewBtn.onclick=()=>{document.body.classList.toggle("viewing");viewBtn.textContent=document.body.classList.contains("viewing")?"✎ Redigering":"👁 Visning";renderAgenda();renderWidgets()}
+fullBtn.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(e){}};document.addEventListener("fullscreenchange",()=>fullBtn.textContent=document.fullscreenElement?"⛶ Afslut fuld skærm":"⛶ Fuld skærm")
+function show(x){x.style.display="flex"}function hide(x){x.style.display="none"}document.querySelectorAll("[data-close]").forEach(x=>x.onclick=()=>hide(x.closest(".modalback")));document.querySelectorAll(".modalback").forEach(x=>x.onclick=e=>{if(e.target===x)hide(x)})
+const FILE_DB="undervisningstavle_materialer_v1";function fileDB(){return new Promise((ok,no)=>{let r=indexedDB.open(FILE_DB,1);r.onupgradeneeded=()=>r.result.createObjectStore("files");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}async function putFile(id,file){let db=await fileDB();return new Promise((ok,no)=>{let tx=db.transaction("files","readwrite");tx.objectStore("files").put(file,id);tx.oncomplete=()=>ok();tx.onerror=()=>no(tx.error)})}async function getFile(id){let db=await fileDB();return new Promise((ok,no)=>{let r=db.transaction("files").objectStore("files").get(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function directDomain(u){try{let h=new URL(u).hostname.toLowerCase();return h.includes("drive.google.com")||h.includes("docs.google.com")||h.includes("blooket.com")}catch(e){return false}}async function smartOpenMaterial(item){if(item.material?.fileId){let f=await getFile(item.material.fileId);if(!f){alert("Filen kunne ikke findes i denne browser.");return}let isPdf=f.type==="application/pdf"||/\.pdf$/i.test(f.name||item.material.name||"");if(isPdf){openPdfSlideshow(f,item.material.startPage||1);return}let u=URL.createObjectURL(f);openMaterial(u,item.material.name||item.title,true);return}if(!item.link)return;if(directDomain(item.link)){window.open(item.link,"_blank","noopener");return}openMaterial(item.link,item.title,false)}let materialUrl="",materialBlob=false;function openMaterial(u,t,isBlob=false){materialUrl=u;materialBlob=isBlob;overlayTitle.textContent=t;frame.src=u;overlay.style.display="flex"}closeOverlay.onclick=()=>{overlay.style.display="none";frame.src="about:blank";if(materialBlob&&materialUrl)URL.revokeObjectURL(materialUrl);materialUrl="";materialBlob=false};openTab.onclick=()=>window.open(materialUrl,"_blank","noopener")
+
+scheduleSettings.onclick=()=>{renderTimeRows();show(settingsBack)}
+function renderTimeRows(){timeRows.innerHTML="";state.times.forEach((t,i)=>{let row=document.createElement("div");row.className="grid2";row.style.gridTemplateColumns="1.2fr 1fr 1fr auto";row.style.marginBottom="8px";row.innerHTML=`<input class="lessonName" value="${t[0]||""}" placeholder="${i+1}. lektion"><input class="lessonStart" type="time" value="${t[1]||""}"><input class="lessonEnd" type="time" value="${t[2]||""}"><button class="btn lessonDel" type="button">×</button>`;row.querySelector(".lessonDel").onclick=()=>{state.times.splice(i,1);renderTimeRows()};timeRows.append(row)})}
+addLesson.onclick=()=>{state.times.push([(state.times.length+1)+". lektion","",""]);renderTimeRows()}
+saveTimes.onclick=()=>{let rows=[...timeRows.children];state.times=rows.map((r,i)=>[r.querySelector(".lessonName").value.trim()||((i+1)+". lektion"),r.querySelector(".lessonStart").value,r.querySelector(".lessonEnd").value]);save();hide(settingsBack);renderSchedule()}
+
+prevWeek.onclick=()=>{weekStart.setDate(weekStart.getDate()-7);renderSchedule()};nextWeek.onclick=()=>{weekStart.setDate(weekStart.getDate()+7);renderSchedule()};todayWeek.onclick=()=>{weekStart=monday(new Date());renderSchedule()}
+
+function cleanRich(html){
+ let t=document.createElement("template");t.innerHTML=html;
+ t.content.querySelectorAll("script,style,iframe,object,embed,img,a").forEach(x=>x.remove());
+ t.content.querySelectorAll("*").forEach(el=>{[...el.attributes].forEach(a=>el.removeAttribute(a.name));});
+ return t.innerHTML.trim();
+}
+function richCmd(editor,cmd,val=null){editor.focus();document.execCommand(cmd,false,val)}
+function insertSymbol(editor,sym){editor.focus();document.execCommand("insertText",false,sym)}
+function makeToolbar(bar,editor){
+ bar.innerHTML="";
+ const specs=[
+  ["B","Fed",()=>richCmd(editor,"bold")],
+  ["I","Kursiv",()=>richCmd(editor,"italic")],
+  ["U","Understreg",()=>richCmd(editor,"underline")],
+  ["•","Punktliste",()=>richCmd(editor,"insertUnorderedList")],
+  ["→","Indsæt →",()=>insertSymbol(editor," → ")],
+  ["←","Indsæt ←",()=>insertSymbol(editor," ← ")],
+  ["↔","Indsæt ↔",()=>insertSymbol(editor," ↔ ")],
+  ["✓","Indsæt ✓",()=>insertSymbol(editor," ✓ ")],
+  ["★","Indsæt ★",()=>insertSymbol(editor," ★ ")],
+  ["?","Indsæt ?",()=>insertSymbol(editor," ? ")],
+  ["!","Indsæt !",()=>insertSymbol(editor," ! ")]
+ ];
+ specs.forEach(([txt,title,fn])=>{let b=document.createElement("button");b.type="button";b.innerHTML=txt==="I"?"<i>I</i>":txt==="U"?"<u>U</u>":txt==="B"?"<b>B</b>":txt;b.title=title;b.onmousedown=e=>{e.preventDefault();fn()};bar.append(b)});
+}
+makeToolbar(itDescBar,itDesc);makeToolbar(wTextBar,wText);
+
+function clockNow(){clock.textContent=new Date().toLocaleTimeString("da-DK",{hour:"2-digit",minute:"2-digit"})}clockNow();setInterval(clockNow,1000);renderSchedule();
+</script>
+<div id="pdfSlideOverlay" aria-hidden="true">
+<button id="pdfSlideClose" title="Luk slideshow (Esc)">✕ Luk</button>
+<div id="pdfSlideStage"><div id="pdfSlidePageWrap"><canvas id="pdfSlideCanvas"></canvas><div id="pdfSlideLinks"></div></div></div>
+<div id="pdfSlideBar"><button id="pdfSlidePrev" title="Forrige slide (←)">‹</button><span id="pdfSlideCount">1 / 1</span><button id="pdfSlideNext" title="Næste slide (→)">›</button><button id="pdfSlideFullscreen" title="Fuld skærm">⛶</button></div>
+<div id="pdfSlideHint">← → skifter slide · Esc lukker</div>
+</div>
+<div id="ytVideoOverlay" aria-hidden="true">
+<button id="ytVideoClose" title="Luk video (Esc)">✕ Luk video</button>
+<div id="ytVideoBox"><iframe id="ytVideoFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+</div>
+<script id="pdfSlideLogic">
+let pdfSlideDoc=null,pdfSlidePage=1,pdfSlideUrl=null,pdfSlideRendering=false;
+function ensurePdfJs(){return new Promise((ok,no)=>{if(window.pdfjsLib){ok();return}let x=document.createElement("script");x.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";x.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";ok()};x.onerror=()=>no(new Error("PDF.js kunne ikke indlæses"));document.head.appendChild(x)})}
+function youtubeId(u){
+ try{
+  let x=new URL(u),h=x.hostname.toLowerCase().replace(/^www\./,"");
+  if(h==="youtu.be")return x.pathname.split("/").filter(Boolean)[0]||null;
+  if(h==="youtube.com"||h.endsWith(".youtube.com")){
+   if(x.pathname==="/watch")return x.searchParams.get("v");
+   let p=x.pathname.split("/").filter(Boolean);
+   if(["embed","shorts","live"].includes(p[0]))return p[1]||null
+  }
+ }catch(e){}
+ return null
+}
+function openYouTubeVideo(url){
+ let id=youtubeId(url);if(!id)return false;
+ ytVideoFrame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&rel=0";
+ ytVideoOverlay.classList.add("open");ytVideoOverlay.setAttribute("aria-hidden","false");return true
+}
+function closeYouTubeVideo(){
+ ytVideoOverlay.classList.remove("open");ytVideoOverlay.setAttribute("aria-hidden","true");ytVideoFrame.src="about:blank"
+}
+ytVideoClose.onclick=closeYouTubeVideo;
+
+async function openPdfSlideshow(file,startPage=1){
+ try{await ensurePdfJs();if(pdfSlideUrl)URL.revokeObjectURL(pdfSlideUrl);pdfSlideUrl=URL.createObjectURL(file);pdfSlideDoc=await pdfjsLib.getDocument(pdfSlideUrl).promise;pdfSlidePage=Math.max(1,Math.min(pdfSlideDoc.numPages,+startPage||1));pdfSlideOverlay.classList.add("open");pdfSlideOverlay.setAttribute("aria-hidden","false");await renderPdfSlide()}
+ catch(e){console.error(e);alert("PDF-slideshowet kunne ikke åbnes. Internetforbindelse kræves første gang PDF-visningen indlæses.")}
+}
+async function renderPdfLinks(page,viewport,displayScale){
+ pdfSlideLinks.innerHTML="";
+ let annotations=await page.getAnnotations({intent:"display"});
+ for(let a of annotations){
+   if(a.subtype!=="Link"||!a.rect)continue;
+   let rect=viewport.convertToViewportRectangle(a.rect),left=Math.min(rect[0],rect[2]),top=Math.min(rect[1],rect[3]),width=Math.abs(rect[2]-rect[0]),height=Math.abs(rect[3]-rect[1]);
+   let href=a.url||a.unsafeUrl||"";
+   let internalDest=a.dest||null;
+   if(!href&&!internalDest)continue;
+   let hit=document.createElement("a");hit.className="pdfSlideLink";hit.style.left=left+"px";hit.style.top=top+"px";hit.style.width=Math.max(8,width)+"px";hit.style.height=Math.max(8,height)+"px";hit.title=href?"Åbn link":"Gå til slide";
+   hit.onclick=async e=>{e.preventDefault();e.stopPropagation();if(href){if(openYouTubeVideo(href))return;window.open(href,"_blank","noopener");return}try{let dest=typeof internalDest==="string"?await pdfSlideDoc.getDestination(internalDest):internalDest;if(dest&&dest[0]){let ref=dest[0],idx=await pdfSlideDoc.getPageIndex(ref);pdfSlidePage=idx+1;renderPdfSlide()}}catch(err){console.error(err)}};
+   pdfSlideLinks.append(hit)
+ }
+}
+async function renderPdfSlide(){
+ if(!pdfSlideDoc||pdfSlideRendering)return;pdfSlideRendering=true;
+ try{
+   let page=await pdfSlideDoc.getPage(pdfSlidePage),base=page.getViewport({scale:1}),ratio=window.devicePixelRatio||1,maxW=Math.max(240,pdfSlideStage.clientWidth-20),maxH=Math.max(180,pdfSlideStage.clientHeight-20),displayScale=Math.min(maxW/base.width,maxH/base.height),displayVp=page.getViewport({scale:displayScale}),renderVp=page.getViewport({scale:displayScale*ratio}),c=pdfSlideCanvas,ctx=c.getContext("2d");
+   c.width=Math.floor(renderVp.width);c.height=Math.floor(renderVp.height);c.style.width=displayVp.width+"px";c.style.height=displayVp.height+"px";pdfSlidePageWrap.style.width=displayVp.width+"px";pdfSlidePageWrap.style.height=displayVp.height+"px";
+   await page.render({canvasContext:ctx,viewport:renderVp}).promise;
+   await renderPdfLinks(page,displayVp,displayScale);
+   pdfSlideCount.textContent=pdfSlidePage+" / "+pdfSlideDoc.numPages;pdfSlidePrev.disabled=pdfSlidePage<=1;pdfSlideNext.disabled=pdfSlidePage>=pdfSlideDoc.numPages
+ }finally{pdfSlideRendering=false}
+}
+function pdfSlideMove(n){if(!pdfSlideDoc)return;let q=Math.max(1,Math.min(pdfSlideDoc.numPages,pdfSlidePage+n));if(q!==pdfSlidePage){pdfSlidePage=q;renderPdfSlide()}}
+function closePdfSlideshow(){pdfSlideOverlay.classList.remove("open");pdfSlideOverlay.setAttribute("aria-hidden","true");pdfSlideLinks.innerHTML="";pdfSlideDoc=null;pdfSlidePage=1;if(pdfSlideUrl){URL.revokeObjectURL(pdfSlideUrl);pdfSlideUrl=null}}
+pdfSlidePrev.onclick=()=>pdfSlideMove(-1);pdfSlideNext.onclick=()=>pdfSlideMove(1);pdfSlideClose.onclick=closePdfSlideshow;
+pdfSlideFullscreen.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await pdfSlideOverlay.requestFullscreen()}catch(e){}};
+window.addEventListener("resize",()=>{if(pdfSlideOverlay.classList.contains("open"))renderPdfSlide()});
+document.addEventListener("keydown",e=>{let videoOpen=ytVideoOverlay.classList.contains("open");if(videoOpen&&e.key==="Escape"){e.preventDefault();closeYouTubeVideo();return}if(videoOpen)return;let open=pdfSlideOverlay.classList.contains("open");if(open&&(e.key==="ArrowRight"||e.key==="PageDown"||e.key===" ")){e.preventDefault();pdfSlideMove(1)}else if(open&&(e.key==="ArrowLeft"||e.key==="PageUp")){e.preventDefault();pdfSlideMove(-1)}else if(e.key==="Escape"&&open&&!document.fullscreenElement){e.preventDefault();closePdfSlideshow()}});
 </script>
 </body></html>
