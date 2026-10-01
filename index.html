@@ -56,7 +56,7 @@ button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);backgrou
 #pdfSlideOverlay #pdfSlideClose{pointer-events:auto;cursor:pointer}
 #pdfSlideOverlay #pdfSlideStage{overflow:auto;min-height:0;min-width:0;justify-content:safe center;align-items:safe center}
 #pdfSlideOverlay #pdfSlideBar{flex-shrink:0;z-index:2}
-#pdfSlideOverlay #pdfSlideClose{z-index:6}
+#pdfSlideOverlay #pdfSlideClose{z-index:200;position:absolute;pointer-events:auto}
 #pdfSlideLoading{pointer-events:none}
 .withSide{display:none;background:#edf0ea;color:#24352b;overflow-y:auto;min-width:0;padding:14px;gap:12px;flex-direction:column;box-sizing:border-box}
 .withLayout .withSide{display:flex;flex:1}
@@ -69,7 +69,7 @@ button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);backgrou
 #pdfSlideOverlay.withLayout #pdfSlideStage{flex:1;min-height:0;overflow:auto;justify-content:safe center;align-items:safe center;padding:12px}
 #pdfSlideOverlay.withLayout #pdfSlideBar{flex-shrink:0;flex-wrap:wrap;height:auto;min-height:64px}
 #pdfSlideOverlay.withLayout #pdfSlideHint{display:none}
-#pdfSlideOverlay.withLayout #pdfSlideClose{position:absolute;z-index:3;top:6px;left:8px}
+#pdfSlideOverlay.withLayout #pdfSlideClose{position:absolute;z-index:200;top:6px;left:8px}
 #pdfSlideStage.zoomed{overflow:auto;justify-content:safe center;align-items:safe center}
 #pdfSlideStage.zoomed #pdfSlideCanvas{max-width:none;max-height:none}
 #pdfSlideStage.zoomed #pdfSlidePageWrap{flex-shrink:0}
@@ -426,7 +426,21 @@ async function openPdfSlideshow(file,startPage=1){try{pdfZoom=1;pdfSlideZoomLabe
 function pdfSlideMove(n){if(!pdfSlideDoc)return;let q=Math.max(1,Math.min(pdfSlideDoc.numPages,pdfSlidePage+n));if(q!==pdfSlidePage)showPdfSlide(q)}
 function closePdfSlideshow(){withChoice.classList.remove("open");pdfSlideGeneration++;pdfSlidePrewarmToken++;pdfSlideNavToken++;pdfSlideOverlay.classList.remove("open");pdfSlideOverlay.setAttribute("aria-hidden","true");pdfSlideLoading.classList.remove("show");pdfSlideLinks.innerHTML="";pdfSlideCache.clear();pdfSlideRenderJobs.clear();pdfSlideDoc=null;pdfSlidePage=1;if(pdfSlideUrl){URL.revokeObjectURL(pdfSlideUrl);pdfSlideUrl=null}}
 pdfSlidePrev.onclick=()=>pdfSlideMove(-1);pdfSlideNext.onclick=()=>pdfSlideMove(1);
-document.getElementById("pdfSlideClose").addEventListener("click",function(e){e.preventDefault();e.stopPropagation();closePdfSlideshow()});
+// 2.8: central lukning via capture, også hvis andre lag opfanger klik.
+function forceClosePdf(){
+  closePdfSlideshow();
+  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+}
+document.addEventListener("click",function(e){
+  if(e.target.closest("#pdfSlideClose")){
+    e.preventDefault();e.stopImmediatePropagation();forceClosePdf();
+  }
+},true);
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape" && document.getElementById("pdfSlideOverlay").classList.contains("open")){
+    e.preventDefault();e.stopImmediatePropagation();forceClosePdf();
+  }
+},true);
 pdfSlideFullscreen.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await pdfSlideOverlay.requestFullscreen()}catch(e){}};
 let pdfResizeTimer=null;window.addEventListener("resize",()=>{if(!pdfSlideOverlay.classList.contains("open")||!pdfSlideDoc)return;clearTimeout(pdfResizeTimer);pdfResizeTimer=setTimeout(()=>{let p=pdfSlidePage;pdfSlideGeneration++;pdfSlidePrewarmToken++;pdfSlideCache.clear();pdfSlideRenderJobs.clear();showPdfSlide(p,{initial:true}).then(()=>prewarmWholePdf(p,pdfSlideGeneration))},220)});
 window.addEventListener("keydown",e=>{
