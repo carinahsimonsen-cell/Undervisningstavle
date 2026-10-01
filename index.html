@@ -87,6 +87,8 @@ button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);backgrou
 <style id="pdfSlideStyles">
 #pdfSlideOverlay{position:fixed;inset:0;z-index:10000;background:#111;display:none;flex-direction:column}
 #pdfSlideOverlay.open{display:flex}
+/* 2.9: Et lukket PDF-overlay skal skjules, også når Vis med-layout er aktivt. */
+#pdfSlideOverlay.withLayout:not(.open){display:none!important}
 #pdfSlideStage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px 60px 8px;position:relative}
 #pdfSlideLoading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:800;background:#111;z-index:3}
 #pdfSlideLoading.show{display:flex}
