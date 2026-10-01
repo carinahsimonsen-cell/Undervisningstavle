@@ -40,6 +40,7 @@ button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);backgrou
 .birthrows{display:grid;gap:7px;margin-top:12px}.birthrow{display:grid;grid-template-columns:minmax(120px,1fr) minmax(210px,260px);gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:7px}
 .birthselects{display:grid;grid-template-columns:90px 1fr;gap:7px}.birthselects select{min-height:40px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:#fff;font:inherit}
 @media(max-width:600px){.birthrow{grid-template-columns:1fr}.birthselects{grid-template-columns:90px 1fr}}
+.visualClock{width:min(100%,230px);aspect-ratio:1;border-radius:50%;margin:10px auto;position:relative;background:conic-gradient(#df4949 0deg,#df4949 var(--sweep,360deg),#fff var(--sweep,360deg),#fff 360deg);border:5px solid #d7dce2;box-shadow:inset 0 0 0 1px #b8bec7}.visualClock:before{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(from -1deg,transparent 0deg 28deg,#374151 28deg 30deg);-webkit-mask:radial-gradient(transparent 0 84%,#000 85%);mask:radial-gradient(transparent 0 84%,#000 85%);pointer-events:none}.visualClock:after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;background:#374151;transform:translate(-50%,-50%)}.visualClock.small{width:min(100%,175px)}.timerMode{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}.timerMode select{max-width:100%;padding:6px;border:1px solid var(--line);border-radius:7px;background:#fff}.timerDigits{font-size:21px;font-weight:800;text-align:center;margin:5px 0}.timerDigits.hiddenDigits{display:none}
 </style>
 <style id="withStyles">
 .withLayout{display:flex!important;flex-direction:row!important;align-items:stretch;gap:0;min-height:0}
@@ -234,11 +235,74 @@ function renderWidgets(){widgets.innerHTML="";let b=board();workspace.classList.
  if(w.type==="groups"){box.append(groupsUI(w))}else if(w.type==="picker"){box.append(pickerUI(w))}else if(w.type==="notes"){let bar=document.createElement("div");bar.className="richbar";box.append(bar);let ta=document.createElement("div");ta.className="richedit notesrich";ta.contentEditable="true";ta.dataset.placeholder="Skriv på tavlen under undervisningen…";ta.innerHTML=w.text||"";ta.oninput=()=>{w.text=cleanRich(ta.innerHTML);save()};box.append(ta);makeToolbar(bar,ta)}else if(w.type==="message"){let tx=document.createElement("div");tx.className="wtext";tx.classList.add("richdisplay");tx.innerHTML=w.text||"";box.append(tx)}else if(w.type==="youtube"){let id=youtubeId(w.url||"");if(id){let wrap=document.createElement("div");wrap.style.cssText="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden";let fr=document.createElement("iframe");fr.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?rel=0";fr.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";fr.allowFullscreen=true;fr.style.cssText="width:100%;height:100%;border:0;display:block";wrap.append(fr);box.append(wrap);let tr=document.createElement("div");tr.className="toolrow";tr.style.marginTop="9px";let big=document.createElement("button");big.className="btn";big.type="button";big.textContent="⛶ Vis stort";big.onclick=()=>{withTarget=w;openYouTubeVideo(w.url)};tr.append(big);box.append(tr)}else{let p=document.createElement("div");p.className="sub";p.textContent="Indsæt et gyldigt YouTube-link via Redigér.";box.append(p)}}else if(w.type==="geogebra"){let host=document.createElement("div");host.style.cssText="width:100%;height:360px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden";box.append(host);let tr=document.createElement("div");tr.className="toolrow";tr.style.marginTop="9px";let big=document.createElement("button");big.className="btn";big.type="button";big.textContent="⛶ Vis stort";big.onclick=()=>openGeoGebraBig(w);tr.append(big);box.append(tr);loadGeoGebraInto(host,w)}else box.append(timerUI());
  box.draggable=!document.body.classList.contains("viewing");box.ondragstart=()=>{dragWidget=w.id};box.ondragover=e=>e.preventDefault();box.ondrop=e=>{e.preventDefault();let f=b.widgets.findIndex(z=>z.id===dragWidget),to=b.widgets.findIndex(z=>z.id===w.id);if(f>=0&&to>=0&&f!==to){b.widgets.splice(to,0,b.widgets.splice(f,1)[0]);save();renderWidgets()}};widgets.append(box)})}
 let tick=null;function stopTimer(){if(tick){clearInterval(tick);tick=null}}
-function setTimer(s){let b=board();if(!b.widgets.some(w=>w.type==="timer"))b.widgets.push({id:uid(),type:"timer",title:"⏱ Timer",text:""});stopTimer();b.timer={seconds:s,initial:s,running:false};save();renderWidgets()}
-function timerUI(){let b=board(),wrap=document.createElement("div"),d=document.createElement("div");d.className="timer";d.id="td";d.textContent=tf(b.timer.seconds);wrap.append(d);let set=document.createElement("div");set.className="timerrow editonly";set.innerHTML=`<input id="tm" type="number" min="0" value="${Math.floor(b.timer.initial/60)}">:<input id="ts" type="number" min="0" max="59" value="${b.timer.initial%60}"><button class="btn" id="tset">Indstil</button>`;wrap.append(set);let row=document.createElement("div");row.className="timerrow";
- let start=document.createElement("button");start.className="btn primary";start.textContent=tick?"Pause":"Start";start.onclick=()=>{if(tick){stopTimer();b.timer.running=false;save();renderWidgets();return}b.timer.running=true;tick=setInterval(()=>{if(b.timer.seconds>0)b.timer.seconds--;let q=document.getElementById("td");if(q)q.textContent=tf(b.timer.seconds);save();if(b.timer.seconds<=0){stopTimer();b.timer.running=false;alarm();renderWidgets()}},1000);renderWidgets()};row.append(start);
- let reset=document.createElement("button");reset.className="btn";reset.textContent="Nulstil";reset.onclick=()=>{stopTimer();b.timer.seconds=b.timer.initial;save();renderWidgets()};row.append(reset);let snd=document.createElement("button");snd.className="btn";snd.textContent=state.sound?"🔔 Til":"🔕 Fra";snd.onclick=()=>{state.sound=!state.sound;save();renderWidgets()};row.append(snd);wrap.append(row);setTimeout(()=>{let z=document.getElementById("tset");if(z)z.onclick=()=>setTimer((+tm.value||0)*60+Math.min(59,+ts.value||0))},0);return wrap}
-function tf(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}function alarm(){if(!state.sound)return;try{let a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.value=.12;o.start();setTimeout(()=>{o.stop();a.close()},900)}catch(e){}}
+function timerStyle(b){return b.timer?.style==="visual"?"visual":"digital"}
+function timerShowDigits(b){return b.timer?.showDigits!==false}
+function updateTimerDisplays(){
+ const b=board();if(!b)return;
+ document.querySelectorAll("[data-timer-digits]").forEach(el=>el.textContent=tf(b.timer.seconds));
+ const fraction=b.timer.initial>0?Math.max(0,Math.min(1,b.timer.seconds/b.timer.initial)):0;
+ document.querySelectorAll("[data-timer-clock]").forEach(el=>el.style.setProperty("--sweep",(fraction*360)+"deg"));
+}
+function timerFace(b,small=false){
+ const face=document.createElement("div");face.className="visualClock"+(small?" small":"");face.dataset.timerClock="1";
+ face.setAttribute("role","img");face.setAttribute("aria-label","Visuel nedtælling");
+ const fraction=b.timer.initial>0?Math.max(0,Math.min(1,b.timer.seconds/b.timer.initial)):0;
+ face.style.setProperty("--sweep",(fraction*360)+"deg");
+ return face;
+}
+function setTimer(s){let b=board();if(!b.widgets.some(w=>w.type==="timer"))b.widgets.push({id:uid(),type:"timer",title:"⏱ Timer",text:""});stopTimer();b.timer={...b.timer,seconds:s,initial:s,running:false};save();renderWidgets()}
+function timerUI(){
+ let b=board(),wrap=document.createElement("div");
+ const mode=document.createElement("div");mode.className="timerMode editonly";
+ const label=document.createElement("label");label.textContent="Visning: ";
+ const choice=document.createElement("select");choice.setAttribute("aria-label","Timervisning");
+ choice.innerHTML='<option value="digital">Digital nedtælling</option><option value="visual">Visuel timer</option>';
+ choice.value=timerStyle(b);choice.onchange=()=>{b.timer.style=choice.value;save();renderWidgets();refreshOpenTimerSides()};
+ label.append(choice);mode.append(label);
+ const digitsToggle=document.createElement("label");digitsToggle.style.cssText="display:flex;align-items:center;gap:5px";
+ const check=document.createElement("input");check.type="checkbox";check.checked=timerShowDigits(b);
+ check.onchange=()=>{b.timer.showDigits=check.checked;save();renderWidgets();refreshOpenTimerSides()};
+ digitsToggle.append(check,document.createTextNode("Vis også tal"));digitsToggle.style.display=timerStyle(b)==="visual"?"flex":"none";
+ mode.append(digitsToggle);wrap.append(mode);
+ if(timerStyle(b)==="visual")wrap.append(timerFace(b));
+ const d=document.createElement("div");d.className=timerStyle(b)==="visual"?"timerDigits":"timer";d.id="td";d.dataset.timerDigits="1";
+ d.textContent=tf(b.timer.seconds);if(timerStyle(b)==="visual"&&!timerShowDigits(b))d.classList.add("hiddenDigits");wrap.append(d);
+ let set=document.createElement("div");set.className="timerrow editonly";
+ set.innerHTML=`<input id="tm" type="number" min="0" value="${Math.floor(b.timer.initial/60)}">:<input id="ts" type="number" min="0" max="59" value="${b.timer.initial%60}"><button class="btn" id="tset">Indstil</button>`;wrap.append(set);
+ let row=document.createElement("div");row.className="timerrow";
+ let start=document.createElement("button");start.className="btn primary";start.textContent=tick?"Pause":"Start";
+ start.onclick=()=>{if(tick){stopTimer();b.timer.running=false;save();renderWidgets();refreshOpenTimerSides();return}
+ if(b.timer.seconds<=0)return;
+ b.timer.running=true;tick=setInterval(()=>{if(b.timer.seconds>0)b.timer.seconds--;updateTimerDisplays();save();if(b.timer.seconds<=0){stopTimer();b.timer.running=false;alarm();renderWidgets();refreshOpenTimerSides()}},1000);
+ renderWidgets();refreshOpenTimerSides()};row.append(start);
+ let reset=document.createElement("button");reset.className="btn";reset.textContent="Nulstil";
+ reset.onclick=()=>{stopTimer();b.timer.seconds=b.timer.initial;b.timer.running=false;save();renderWidgets();refreshOpenTimerSides()};row.append(reset);
+ let snd=document.createElement("button");snd.className="btn";snd.textContent=state.sound?"🔔 Til":"🔕 Fra";
+ snd.onclick=()=>{state.sound=!state.sound;save();renderWidgets();refreshOpenTimerSides()};row.append(snd);wrap.append(row);
+ setTimeout(()=>{let z=document.getElementById("tset");if(z)z.onclick=()=>{const minutes=Math.max(0,+document.getElementById("tm").value||0),seconds=Math.max(0,Math.min(59,+document.getElementById("ts").value||0));setTimer(minutes*60+seconds);refreshOpenTimerSides()}},0);
+ return wrap;
+}
+function refreshOpenTimerSides(){for(const kind of Object.keys(withOverlays)){const root=withOverlays[kind];if(root?.classList.contains("withLayout")&&root.querySelector(".withSide"))renderWithSide(kind)}}
+function tf(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}function alarm(){
+ if(!state.sound)return;
+ try{
+  const a=new (window.AudioContext||window.webkitAudioContext)();
+  const start=a.currentTime+.04;
+  // Tre rolige, afrundede klokketoner; samlet ca. 2,6 sekunder.
+  [0,.85,1.7].forEach((offset)=>{
+   const t=start+offset;
+   const o=a.createOscillator(),g=a.createGain();
+   o.type="sine";o.frequency.setValueAtTime(660,t);
+   o.frequency.exponentialRampToValueAtTime(550,t+.65);
+   g.gain.setValueAtTime(.0001,t);
+   g.gain.exponentialRampToValueAtTime(.085,t+.035);
+   g.gain.exponentialRampToValueAtTime(.0001,t+.72);
+   o.connect(g);g.connect(a.destination);
+   o.start(t);o.stop(t+.74);
+  });
+  setTimeout(()=>a.close().catch(()=>{}),3000);
+ }catch(e){}
+}
 
 
 function renderBirthday(){
@@ -403,7 +467,9 @@ function sideButton(txt,fn){let x=document.createElement("button");x.type="butto
 function renderWithSide(kind){let root=withOverlays[kind];if(!root)return;let side=root.querySelector('.withSide');if(!side)return;side.innerHTML="";let cfg=withConfig(),ids=cfg.ids||[],b=board();if(!b)return;for(let opt of withAvailable().filter(x=>ids.includes(x.id))){let box=document.createElement("section");box.className="widget";let head=document.createElement("h3");head.textContent=opt.label;head.style.margin="0 0 10px";box.append(head);if(opt.id==="agenda"){
   for(let item of b.items){let r=document.createElement("div");r.className="item "+(item.status==="done"?"done":item.status==="skipped"?"skipped":"")+(b.items.find(x=>x.status==="open")===item?" current":"");let text=document.createElement("div");text.className="content";let title=document.createElement("div");title.className="title";title.textContent=(item.status==="done"?"✓ ":item.status==="skipped"?"↷ ":"")+item.title;text.append(title);if(item.need){let n=document.createElement("div");n.className="need";n.textContent="🎒 "+item.need;text.append(n)}r.append(text);let actions=document.createElement("div");actions.className="actions";if(item.status!=="open")actions.append(sideButton("↶",()=>{item.status="open";save();renderAgenda();renderWithSide(kind)}));else if(b.items.find(x=>x.status==="open")===item){actions.append(sideButton("✓",()=>{item.status="done";save();renderAgenda();renderWithSide(kind)}),sideButton("↷",()=>{item.status="skipped";save();renderAgenda();renderWithSide(kind)}))}r.append(actions);box.append(r)}
  }else if(opt.id==="birthday"){box.append(birthdayBanner.cloneNode(true));box.querySelector('.x')?.remove()}
- else if(opt.widget?.type==="timer"){let d=document.createElement("div");d.className="timer";d.textContent=tf(b.timer.seconds);d.dataset.sideTimer="1";box.append(d);let row=document.createElement("div");row.className="timerrow";row.append(sideButton(tick?"Pause":"Start",()=>{let btn=document.querySelector('#widgets #td')?.parentElement?.querySelector('.timerrow:not(.editonly) .btn');if(btn)btn.click();renderWithSide(kind)}),sideButton("Nulstil",()=>{stopTimer();b.timer.seconds=b.timer.initial;b.timer.running=false;save();renderWidgets();renderWithSide(kind)}));box.append(row)}
+ else if(opt.widget?.type==="timer"){if(timerStyle(b)==="visual")box.append(timerFace(b,true));
+ let d=document.createElement("div");d.className=timerStyle(b)==="visual"?"timerDigits":"timer";d.textContent=tf(b.timer.seconds);d.dataset.timerDigits="1";
+ if(timerStyle(b)==="visual"&&!timerShowDigits(b))d.classList.add("hiddenDigits");box.append(d);let row=document.createElement("div");row.className="timerrow";row.append(sideButton(tick?"Pause":"Start",()=>{let btn=document.querySelector('#widgets #td')?.parentElement?.querySelector('.timerrow:not(.editonly) .btn');if(btn)btn.click();renderWithSide(kind)}),sideButton("Nulstil",()=>{stopTimer();b.timer.seconds=b.timer.initial;b.timer.running=false;save();renderWidgets();renderWithSide(kind)}));box.append(row)}
  else if(opt.widget?.type==="notes"){let ta=document.createElement("div");ta.className="richedit notesrich";ta.contentEditable="true";ta.innerHTML=opt.widget.text||"";ta.oninput=()=>{opt.widget.text=cleanRich(ta.innerHTML);save()};box.append(ta)}
  else if(opt.widget?.type==="message"){let t=document.createElement("div");t.className="wtext richdisplay";t.innerHTML=opt.widget.text||"";box.append(t)}
  else if(opt.widget?.type==="youtube"){let id=youtubeId(opt.widget.url||"");if(id){let f=document.createElement("iframe");f.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id);f.style.cssText="width:100%;aspect-ratio:16/9;border:0";f.allowFullscreen=true;box.append(f)}}
@@ -413,7 +479,7 @@ function renderWithSide(kind){let root=withOverlays[kind];if(!root)return;let si
 function applyWith(kind){let root=withOverlays[kind];if(!root)return;let cfg=withConfig(),valid=new Set(withAvailable().map(x=>x.id)),ids=(cfg.ids||[]).filter(id=>valid.has(id));root.classList.toggle("withLayout",!!ids.length);root.classList.toggle("ratio60",!!ids.length&&Number(cfg.ratio)===60);root.classList.toggle("ratio70",!!ids.length&&Number(cfg.ratio)===70);root.classList.toggle("ratio80",!!ids.length&&Number(cfg.ratio)!==60&&Number(cfg.ratio)!==70);renderWithSide(kind);if(kind==="geo"&&geoOverlay.style.display==="flex"&&withTarget?.type==="geogebra"){loadGeoGebraInto(geoBig,withTarget,true)}if(kind==="pdf"&&pdfSlideDoc){let p=pdfSlidePage;pdfSlideGeneration++;pdfSlidePrewarmToken++;pdfSlideCache.clear();pdfSlideRenderJobs.clear();showPdfSlide(p,{initial:true}).then(()=>prewarmWholePdf(p,pdfSlideGeneration))}}
 function applyPdfZoom(){if(!pdfSlideDoc)return;let z=pdfZoom,c=pdfSlideCanvas,wrap=pdfSlidePageWrap;if(!c.style.width)return;let width=Number(c.dataset.baseWidth),height=Number(c.dataset.baseHeight);wrap.style.width=width*z+"px";wrap.style.height=height*z+"px";c.style.width=width*z+"px";c.style.height=height*z+"px";pdfSlideLinks.style.width=width+"px";pdfSlideLinks.style.height=height+"px";pdfSlideLinks.style.transform=`scale(${z})`;pdfSlideLinks.style.transformOrigin="top left";pdfSlideStage.classList.toggle("zoomed",z>1);pdfSlideZoomLabel.textContent=Math.round(z*100)+" %"}
 pdfZoomIn.onclick=()=>{pdfZoom=Math.min(3,Math.round((pdfZoom+.25)*100)/100);applyPdfZoom()};pdfZoomOut.onclick=()=>{pdfZoom=Math.max(.5,Math.round((pdfZoom-.25)*100)/100);applyPdfZoom()};pdfZoomFit.onclick=()=>{pdfZoom=1;applyPdfZoom()};
-setInterval(()=>{document.querySelectorAll('[data-side-timer]').forEach(x=>{if(board())x.textContent=tf(board().timer.seconds)})},400);
+setInterval(updateTimerDisplays,400);
 
 let pdfSlideDoc=null,pdfSlidePage=1,pdfSlideUrl=null;
 let pdfSlideCache=new Map(),pdfSlideRenderJobs=new Map(),pdfSlideGeneration=0,pdfSlideNavToken=0,pdfSlidePrewarmToken=0;
