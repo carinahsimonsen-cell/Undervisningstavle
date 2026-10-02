@@ -49,7 +49,7 @@
         <li>Søg efter et tag, tavlens navn eller indhold.</li>
         <li>Klik på et resultat for at åbne den gamle tavle.</li>
       </ol>
-      <p>Søgningen går på tværs af uger, men finder kun tavler, som er gemt i den aktuelle browser. Vil du have overblik over et helt skoleår, så brug <strong>📅 Årsoversigt</strong> (se næste afsnit).</p>
+      <p>Søgningen går på tværs af uger, men finder kun tavler, som er gemt i den aktuelle browser. Vil du have overblik over et helt skoleår, så brug <a href="#ut-help-chapter-3" data-ut-help-target="ut-help-chapter-3">📅 Årsoversigt</a> (se næste afsnit).</p>
     `],
 
     ['Brug årsoversigten', `
@@ -75,7 +75,7 @@
       <p class="ut-help-important"><strong>Vigtigt:</strong> Tallene er et overslag til planlægning, ikke en registrering af faktisk undervisningstid. Én tavle tæller som én lektion, selvom lektionen kan rumme flere emner. Hvis ringetider mangler, kan den samlede tid være ufuldstændig.</p>
       <h4>Genbrug et tidligere forløb</h4>
       <p>Åbn en gammel tavle fra oversigten for at se dagsordenen og materialerne. Du kan derefter bruge <strong>Kopiér/flyt…</strong> under <strong>✎ Tavle</strong> til at lave en selvstændig kopi til en ny lektion.</p>
-      <p>Du kan tilføje klasse, fag eller tags til gamle tavler med tilbagevirkende kraft. Årsoversigten opdateres derefter automatisk. Tavler og tags gemmes foreløbig lokalt i browseren; se afsnittet <strong>Hvor bliver dine tavler gemt?</strong>.</p>
+      <p>Du kan tilføje klasse, fag eller tags til gamle tavler med tilbagevirkende kraft. Årsoversigten opdateres derefter automatisk. Tavler og tags gemmes foreløbig lokalt i browseren; se afsnittet <a href="#ut-help-chapter-12" data-ut-help-target="ut-help-chapter-12">Hvor bliver dine tavler gemt?</a>.</p>
     `],
 
     ['Lav dagens program', `
@@ -120,7 +120,7 @@
         <li>Klik på <strong>Gem</strong>.</li>
       </ol>
 
-      <p><strong>Skal du vise en præsentation?</strong> Google Slides kan vises direkte på tavlen med et previewlink eller åbnes i en ny fane med et almindeligt link. PowerPoint og Google Slides kan også vises som PDF. Se afsnittet <strong>Sådan viser du en PowerPoint eller Google Slides-præsentation</strong>.</p>
+      <p><strong>Skal du vise en præsentation?</strong> Google Slides kan vises direkte på tavlen med et previewlink eller åbnes i en ny fane med et almindeligt link. PowerPoint og Google Slides kan også vises som PDF. Se afsnittet <a href="#ut-help-chapter-6" data-ut-help-target="ut-help-chapter-6">Sådan viser du en PowerPoint eller Google Slides-præsentation</a>.</p>
     `],
 
     ['Sådan viser du en PowerPoint eller Google Slides-præsentation', `
@@ -276,7 +276,7 @@
       </ol>
 
       <h4>👥 Grupper / makkere og 🎯 Én elev</h4>
-      <p>Disse funktioner bruger klassens elevliste. Se afsnittet <strong>Opret en klasse med elever</strong>.</p>
+      <p>Disse funktioner bruger klassens elevliste. Se afsnittet <a href="#ut-help-chapter-9" data-ut-help-target="ut-help-chapter-9">Opret en klasse med elever</a>.</p>
     `],
 
     ['Opret en klasse med elever', `
@@ -351,10 +351,10 @@
       <p>Nogle hjemmesider kan ikke vises inde i undervisningstavlen. Klik på <strong>↗ Ny fane</strong>. Tavlen husker valget for det konkrete link.</p>
 
       <h4>Mit Google Slides-link åbner ikke som slideshow</h4>
-      <p>Kontrollér, at linket slutter med <strong>/preview</strong> i stedet for <strong>/edit</strong>, og at du har adgang til præsentationen med den Google-konto, du bruger. Se afsnittet <strong>Sådan viser du en PowerPoint eller Google Slides-præsentation</strong>.</p>
+      <p>Kontrollér, at linket slutter med <strong>/preview</strong> i stedet for <strong>/edit</strong>, og at du har adgang til præsentationen med den Google-konto, du bruger. Se afsnittet <a href="#ut-help-chapter-6" data-ut-help-target="ut-help-chapter-6">Sådan viser du en PowerPoint eller Google Slides-præsentation</a>.</p>
 
       <h4>Min PowerPoint virker ikke som slideshow</h4>
-      <p>Gem eller download præsentationen som <strong>PDF (.pdf)</strong>, og tilføj <strong>PDF-filen</strong> til et programpunkt. Se afsnittet <strong>Sådan viser du en PowerPoint eller Google Slides-præsentation</strong>.</p>
+      <p>Gem eller download præsentationen som <strong>PDF (.pdf)</strong>, og tilføj <strong>PDF-filen</strong> til et programpunkt. Se afsnittet <a href="#ut-help-chapter-6" data-ut-help-target="ut-help-chapter-6">Sådan viser du en PowerPoint eller Google Slides-præsentation</a>.</p>
 
       <h4>Min YouTube-video starter ikke</h4>
       <p>Videoen starter ikke automatisk i stor visning. Klik selv på videoens <strong>▶</strong>-knap.</p>
@@ -363,7 +363,7 @@
       <p>Kontrollér, at eleven står under <strong>👥 Klasser</strong>, at den rigtige klasse er valgt under <strong>✎ Tavle</strong>, og at eleven ikke er slået fra under <strong>👥 Dagens elever</strong>.</p>
 
       <h4>Jeg kan ikke finde mine tavler på en anden computer</h4>
-      <p>Tavlerne gemmes lokalt i browseren og overføres ikke automatisk. Se afsnittet <strong>Hvor bliver dine tavler gemt?</strong>.</p>
+      <p>Tavlerne gemmes lokalt i browseren og overføres ikke automatisk. Se afsnittet <a href="#ut-help-chapter-12" data-ut-help-target="ut-help-chapter-12">Hvor bliver dine tavler gemt?</a>.</p>
 
       <h4>Jeg kan ikke finde et emne i årsoversigten</h4>
       <p>Kontrollér, at tavlerne har det rigtige tag, at skoleår og filtre passer, og at klasse og fag er angivet, hvis du filtrerer efter dem. Tavler uden tags vises under <strong>Kronologisk</strong>, men ikke under <strong>Efter emne</strong>.</p>
@@ -484,6 +484,18 @@
       border-top: 1px solid #dce2e9;
       padding: 28px 0 15px;
       scroll-margin-top: 14px;
+    }
+
+    #ut-help-panel .ut-help-chapter a[data-ut-help-target] {
+      color: #1e4969;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    #ut-help-panel .ut-help-chapter a[data-ut-help-target]:hover,
+    #ut-help-panel .ut-help-chapter a[data-ut-help-target]:focus {
+      color: #0f3450;
     }
 
     #ut-help-panel .ut-help-return {
