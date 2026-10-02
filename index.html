@@ -519,4 +519,5 @@ window.addEventListener("keydown",e=>{
 document.addEventListener("keydown",e=>{let videoOpen=ytVideoOverlay.classList.contains("open");if(videoOpen&&e.key==="Escape"){e.preventDefault();closeYouTubeVideo();return}if(videoOpen)return;let open=pdfSlideOverlay.classList.contains("open");if(open&&e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();if(document.fullscreenElement){document.exitFullscreen().catch(()=>{});}closePdfSlideshow();return}if(open&&(e.key==="ArrowRight"||e.key==="PageDown"||e.key===" ")){e.preventDefault();pdfSlideMove(1)}else if(open&&(e.key==="ArrowLeft"||e.key==="PageUp")){e.preventDefault();pdfSlideMove(-1)}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&geoOverlay.style.display==="flex"){closeGeoOverlay.click()}});
 </script>
+<script src="hjaelp.js"></script>
 </body></html>
