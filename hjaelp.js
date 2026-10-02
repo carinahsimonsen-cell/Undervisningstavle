@@ -12,10 +12,10 @@
       <ol>
         <li>Find den dag og lektion, hvor du vil bruge tavlen.</li>
         <li>Klik på den ledige plads i skemaet.</li>
-        <li>Skriv et navn, fx <strong>7.B – Dansk</strong>.</li>
+        <li>Skriv et navn, fx <strong>7.B – Dansk</strong>, og vælg eventuelt klasse og fag.</li>
         <li>Klik på <strong>Opret tavle</strong>.</li>
       </ol>
-      <p>Du behøver ikke vælge en klasse endnu. Det kan du gøre senere.</p>
+      <p>Klasse og fag er valgfrie ved oprettelsen. Du kan også vælge eller ændre dem senere under <strong>✎ Tavle</strong>. De bruges til at sortere tavlerne i årsoversigten.</p>
 
       <h4>Find tavlen igen</h4>
       <ol>
@@ -30,6 +30,52 @@
         <li>Ret start- og sluttider. Brug eventuelt <strong>+ Lektion</strong>.</li>
         <li>Klik på <strong>Gem ringetider</strong>.</li>
       </ol>
+    `],
+
+    ['Tags og søgning efter gamle tavler', `
+      <p>Du kan give hver tavle et eller flere <strong>tags (emneord)</strong>, fx <em>Hitman</em>, <em>Gys</em> eller <em>Læseprøve</em>. Tags er kun et redskab for læreren: <strong>Hverken tagknappen eller tags vises i tavlens visningstilstand.</strong></p>
+      <h4>Tilføj tags</h4>
+      <ol>
+        <li>Åbn tavlen, og klik på den lille <strong>🏷️-knap</strong> ved tavlens overskrift.</li>
+        <li>Begynd at skrive et emneord. Hvis du har brugt tagget før, bliver det foreslået.</li>
+        <li>Vælg et eksisterende tag, eller opret et nyt. En tavle kan have flere tags.</li>
+        <li>Du kan altid gå tilbage og ændre eller fjerne tags – også på gamle tavler.</li>
+      </ol>
+      <p>Vælg gerne tidligere anvendte tags, så alle tavler i samme forløb kan findes samlet. Store og små bogstaver samt ekstra mellemrum giver ikke forskellige versioner af samme tag.</p>
+      <h4>Find tidligere tavler</h4>
+      <ol>
+        <li>Gå til <strong>← Skema</strong>.</li>
+        <li>Klik på <strong>⌕ Find tavler</strong>.</li>
+        <li>Søg efter et tag, tavlens navn eller indhold.</li>
+        <li>Klik på et resultat for at åbne den gamle tavle.</li>
+      </ol>
+      <p>Søgningen går på tværs af uger, men finder kun tavler, som er gemt i den aktuelle browser. Vil du have overblik over et helt skoleår, så brug <strong>📅 Årsoversigt</strong> (se næste afsnit).</p>
+    `],
+
+    ['Brug årsoversigten', `
+      <p><strong>📅 Årsoversigt</strong> giver dig et historisk overblik over din undervisning. Du skal ikke udfylde en ekstra årsplan: Oversigten bruger dato, klasse, fag og tags fra de tavler, du allerede har oprettet. Den er en lærerfunktion og vises ikke på elevtavlen.</p>
+      <h4>Åbn årsoversigten</h4>
+      <ol>
+        <li>Gå til <strong>← Skema</strong>, og klik på <strong>📅 Årsoversigt</strong>.</li>
+        <li>Vælg <strong>skoleår</strong>, <strong>årgang</strong> og <strong>fag</strong>.</li>
+        <li>Vælg mellem <strong>Kronologisk</strong> og <strong>Efter emne</strong>.</li>
+      </ol>
+      <p>Årgangen findes ud fra den tilknyttede klasses navn: Både <strong>7.B</strong> og <strong>7.C</strong> hører fx under <strong>7. årgang</strong>. Fagene kan filtreres hver for sig. Tavler, hvor klasse eller fag mangler, kan findes under <strong>Uden årgang</strong> eller <strong>Uden fag</strong>.</p>
+      <h4>Kronologisk – se undervisningen i datoorden</h4>
+      <p>Her ser du tavlerne i den rækkefølge, de ligger i skemaet – også tavler uden tags. Du kan fx se, at I arbejdede med <em>Hitman</em>, havde en læseprøve og derefter fortsatte med <em>Hitman</em>. Klik på en tavle for at åbne den.</p>
+      <h4>Efter emne – få overblik over et forløb</h4>
+      <p>Her samles tavler med samme tag. Klik på fx <strong>Hitman</strong> for at folde emnet ud. Her kan du se:</p>
+      <ul>
+        <li><strong>Periode:</strong> Hvor mange kalenderuger der gik fra første til sidste tavle med tagget.</li>
+        <li><strong>Lektioner:</strong> Antallet af tavler med tagget.</li>
+        <li><strong>Planlagt tid:</strong> Summen af de tilgængelige lektionstider beregnet ud fra ringetiderne.</li>
+        <li><strong>Ugefordeling:</strong> En graf, der viser, hvor mange tavler med tagget der ligger i hver uge.</li>
+        <li><strong>De enkelte tavler:</strong> En kronologisk liste, hvor du kan åbne den gamle planlægning.</li>
+      </ul>
+      <p class="ut-help-important"><strong>Vigtigt:</strong> Tallene er et overslag til planlægning, ikke en registrering af faktisk undervisningstid. Én tavle tæller som én lektion, selvom lektionen kan rumme flere emner. Hvis ringetider mangler, kan den samlede tid være ufuldstændig.</p>
+      <h4>Genbrug et tidligere forløb</h4>
+      <p>Åbn en gammel tavle fra oversigten for at se dagsordenen og materialerne. Du kan derefter bruge <strong>Kopiér/flyt…</strong> under <strong>✎ Tavle</strong> til at lave en selvstændig kopi til en ny lektion.</p>
+      <p>Du kan tilføje klasse, fag eller tags til gamle tavler med tilbagevirkende kraft. Årsoversigten opdateres derefter automatisk. Tavler og tags gemmes foreløbig lokalt i browseren; se afsnittet <strong>Hvor bliver dine tavler gemt?</strong>.</p>
     `],
 
     ['Lav dagens program', `
@@ -74,7 +120,7 @@
         <li>Klik på <strong>Gem</strong>.</li>
       </ol>
 
-      <p><strong>Skal du vise en præsentation?</strong> Google Slides kan vises direkte på tavlen med et previewlink eller åbnes i en ny fane med et almindeligt link. PowerPoint og Google Slides kan også vises som PDF. Se punkt 4.</p>
+      <p><strong>Skal du vise en præsentation?</strong> Google Slides kan vises direkte på tavlen med et previewlink eller åbnes i en ny fane med et almindeligt link. PowerPoint og Google Slides kan også vises som PDF. Se afsnittet <strong>Sådan viser du en PowerPoint eller Google Slides-præsentation</strong>.</p>
     `],
 
     ['Sådan viser du en PowerPoint eller Google Slides-præsentation', `
@@ -230,7 +276,7 @@
       </ol>
 
       <h4>👥 Grupper / makkere og 🎯 Én elev</h4>
-      <p>Disse funktioner bruger klassens elevliste. Se punkt 7.</p>
+      <p>Disse funktioner bruger klassens elevliste. Se afsnittet <strong>Opret en klasse med elever</strong>.</p>
     `],
 
     ['Opret en klasse med elever', `
@@ -250,7 +296,7 @@
       <ol>
         <li>Åbn tavlen.</li>
         <li>Klik på <strong>✎ Tavle</strong>.</li>
-        <li>Vælg klassen i <strong>Klasse (valgfri)</strong>.</li>
+        <li>Vælg klassen i <strong>Klasse (valgfri)</strong>, og vælg eventuelt <strong>Fag (valgfrit)</strong>.</li>
         <li>Klik på <strong>Gem</strong>.</li>
       </ol>
 
@@ -290,7 +336,8 @@
         <li>Vælg, om <strong>Nulstil ✓ / ↷ på kopien</strong> skal være markeret, så kopien begynder uden afsluttede eller oversprungne punkter.</li>
         <li>Klik på <strong>Kopiér til … lektioner</strong>.</li>
       </ol>
-      <p>Kopierne er selvstændige. Ændrer du en kopi, ændrer du ikke den oprindelige tavle.</p>
+      <p>Kopieringsvinduet viser hele ugen som et skema med fem hverdage. På en almindelig computerskærm er der bedre plads til at se alle lektionerne på én gang; på mindre skærme kan du scrolle efter behov.</p>
+      <p>Kopierne er selvstændige. Ændrer du en kopi, ændrer du ikke den oprindelige tavle. Tags følger med på kopien og kan ændres bagefter.</p>
     `],
 
     ['Hvor bliver dine tavler gemt?', `
@@ -304,10 +351,10 @@
       <p>Nogle hjemmesider kan ikke vises inde i undervisningstavlen. Klik på <strong>↗ Ny fane</strong>. Tavlen husker valget for det konkrete link.</p>
 
       <h4>Mit Google Slides-link åbner ikke som slideshow</h4>
-      <p>Kontrollér, at linket slutter med <strong>/preview</strong> i stedet for <strong>/edit</strong>, og at du har adgang til præsentationen med den Google-konto, du bruger. Se punkt 4.</p>
+      <p>Kontrollér, at linket slutter med <strong>/preview</strong> i stedet for <strong>/edit</strong>, og at du har adgang til præsentationen med den Google-konto, du bruger. Se afsnittet <strong>Sådan viser du en PowerPoint eller Google Slides-præsentation</strong>.</p>
 
       <h4>Min PowerPoint virker ikke som slideshow</h4>
-      <p>Gem eller download præsentationen som <strong>PDF (.pdf)</strong>, og tilføj <strong>PDF-filen</strong> til et programpunkt. Se punkt 4.</p>
+      <p>Gem eller download præsentationen som <strong>PDF (.pdf)</strong>, og tilføj <strong>PDF-filen</strong> til et programpunkt. Se afsnittet <strong>Sådan viser du en PowerPoint eller Google Slides-præsentation</strong>.</p>
 
       <h4>Min YouTube-video starter ikke</h4>
       <p>Videoen starter ikke automatisk i stor visning. Klik selv på videoens <strong>▶</strong>-knap.</p>
@@ -316,7 +363,10 @@
       <p>Kontrollér, at eleven står under <strong>👥 Klasser</strong>, at den rigtige klasse er valgt under <strong>✎ Tavle</strong>, og at eleven ikke er slået fra under <strong>👥 Dagens elever</strong>.</p>
 
       <h4>Jeg kan ikke finde mine tavler på en anden computer</h4>
-      <p>Tavlerne gemmes lokalt i browseren og overføres ikke automatisk. Se punkt 10.</p>
+      <p>Tavlerne gemmes lokalt i browseren og overføres ikke automatisk. Se afsnittet <strong>Hvor bliver dine tavler gemt?</strong>.</p>
+
+      <h4>Jeg kan ikke finde et emne i årsoversigten</h4>
+      <p>Kontrollér, at tavlerne har det rigtige tag, at skoleår og filtre passer, og at klasse og fag er angivet, hvis du filtrerer efter dem. Tavler uden tags vises under <strong>Kronologisk</strong>, men ikke under <strong>Efter emne</strong>.</p>
 
       <h4>Jeg har markeret et programpunkt forkert</h4>
       <p>Brug fortryd-funktionen ved programpunktet, og vælg derefter den rigtige markering.</p>
