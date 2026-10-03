@@ -212,12 +212,13 @@ function load(){try{let z=JSON.parse(localStorage.getItem(KEY))||{boards:[],time
 function save(){localStorage.setItem(KEY,JSON.stringify(state));let el=document.getElementById("saveIndicator");if(el){el.textContent="Gemmer…";el.classList.add("saveflash");clearTimeout(window.__saved);window.__saved=setTimeout(()=>{el.textContent="✓ Gemt";el.classList.remove("saveflash")},250)}}
 function monday(d){let x=new Date(d);x.setHours(12,0,0,0);let n=x.getDay()||7;x.setDate(x.getDate()-n+1);return x}
 function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function isoWeekNumber(d){const day=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));day.setUTCDate(day.getUTCDate()+4-(day.getUTCDay()||7));const yearStart=new Date(Date.UTC(day.getUTCFullYear(),0,1));return Math.ceil((((day-yearStart)/86400000)+1)/7)}
 function fmtDate(d){return d.toLocaleDateString("da-DK",{day:"numeric",month:"short"})}
 function niceDate(s){return new Date(s+"T12:00").toLocaleDateString("da-DK",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function board(){return state.boards.find(b=>b.id===currentId)}
 function renderSchedule(){
- schedule.innerHTML="";let end=new Date(weekStart);end.setDate(end.getDate()+4);weekTitle.textContent=fmtDate(weekStart)+" – "+fmtDate(end);
+ schedule.innerHTML="";let end=new Date(weekStart);end.setDate(end.getDate()+4);weekTitle.textContent="Uge "+isoWeekNumber(weekStart)+" · "+fmtDate(weekStart)+" – "+fmtDate(end);
  let c=document.createElement("div");c.className="cell corner";schedule.append(c);
  const names=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag"];
  for(let d=0;d<5;d++){let date=new Date(weekStart);date.setDate(date.getDate()+d);let h=document.createElement("div");h.className="cell dayhead";h.innerHTML=names[d]+"<small>"+fmtDate(date)+"</small>";schedule.append(h)}
