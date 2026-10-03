@@ -111,6 +111,7 @@
         <li>Klik på <strong>Gem</strong>.</li>
       </ol>
       <p>Hvis hjemmesiden ikke kan vises inde i tavlen, klik på <strong>↗ Ny fane</strong>. Tavlen husker dit valg for det pågældende link.</p>
+      <p><strong>Vil du gemme materialet til senere?</strong> Vælg et forløb under <strong>📁 Gem også i Mine forløb</strong>, før du klikker på <strong>Gem</strong>. Du kan vælge et andet forløb end tavlens tag eller vælge ikke at gemme materialet i ressourcebanken. Se <a href="#ut-help-chapter-14" data-ut-help-target="ut-help-chapter-14">Mine forløb</a>.</p>
 
       <h4>Tilføj en fil</h4>
       <ol>
@@ -163,7 +164,7 @@
         <li>Klik på <strong>✕ Luk</strong>, når du er færdig.</li>
       </ol>
 
-      <p><strong>Fordel:</strong> Animationer og indlejrede videoer fra den oprindelige Google Slides-præsentation virker fortsat.</p>
+      <p><strong>Fordel:</strong> Animationer og indlejrede videoer fra den oprindelige Google Slides-præsentation virker fortsat. En indlejret YouTube-video kan også sættes i <strong>fuld skærm med videoens egen fuldskærmsknap</strong>, uden at du behøver forlade tavlen.</p>
 
       <h4>B. Vis Google Slides i en ny fane med et almindeligt link</h4>
       <p>Hvis du ikke kan bruge et previewlink, kan du stadig tilføje et almindeligt link til præsentationen.</p>
@@ -266,6 +267,7 @@
         <li>Indsæt adressen i <strong>YouTube-link</strong>, og gem.</li>
         <li>Åbn videoen i stor visning, når du vil vise den. Tryk selv på afspil – videoen starter ikke automatisk.</li>
       </ol>
+      <p><strong>Videoen afspilles direkte på undervisningstavlen</strong>, ikke ved at sende dig til YouTubes hjemmeside. Videoens titel hentes automatisk, når det er muligt; ellers kan du angive den selv. Du kan også gemme videoen til genbrug i <strong>Mine forløb</strong>.</p>
 
       <h4>📐 GeoGebra</h4>
       <ol>
@@ -373,6 +375,40 @@
 
       <h4>Jeg kan ikke se redigeringsknapperne</h4>
       <p>Du kan være i visningstilstand. Klik på <strong>👁 Visning</strong> igen.</p>
+    `],
+
+    ['Mine forløb – gem og genbrug materialer', `
+      <p><strong>📁 Mine forløb</strong> er din ressourcebank til materialer, du vil bruge igen. Her kan du samle links, PDF-filer og understøttede tavleelementer under et undervisningsforløb, fx <em>Industrialiseringen</em> eller <em>Brainbreaks</em>.</p>
+
+      <h4>Opret et forløb</h4>
+      <ol>
+        <li>Åbn <strong>📁 Mine forløb</strong> fra ugeskemaet.</li>
+        <li>Klik på <strong>+ Opret forløb</strong>.</li>
+        <li>Giv forløbet et navn, og angiv eventuelt fag, klassetrin og planlægningsnoter.</li>
+        <li>Tilføj eventuelt et link eller en PDF direkte i forløbet.</li>
+      </ol>
+      <p>Hvis du tilføjer et nyt forløbstag på en tavle, kan der også oprettes et tilsvarende forløb i ressourcebanken.</p>
+
+      <h4>Gem et materiale fra dagsordenen</h4>
+      <ol>
+        <li>Opret eller redigér et programpunkt med <strong>✎</strong>.</li>
+        <li>Indsæt linket, eller vælg en fil under <strong>📎 Materiale (valgfrit)</strong>.</li>
+        <li>Find <strong>📁 Gem også i Mine forløb</strong> nederst i redigeringen, og kontrollér, hvilket forløb der er valgt.</li>
+        <li>Tryk på <strong>Gem</strong>. Et nyt link kan få sit eget materialenavn, så det er let at genkende senere.</li>
+      </ol>
+      <p><strong>Bemærk:</strong> Tavlens tag og materialets placering i <strong>Mine forløb</strong> er to forskellige ting. Du kan fx gemme en brainbreak i forløbet <em>Brainbreaks</em>, selvom tavlen har et helt andet tag. Vælg <strong>Gem ikke i Mine forløb</strong>, hvis materialet kun skal ligge på den aktuelle tavle.</p>
+
+      <h4>Gem og genbrug tavleelementer</h4>
+      <p>Du kan også gemme understøttede elementer, fx YouTube-videoer, i et forløb. Når du opretter et nyt programpunkt, kan du bruge <strong>📁 Hent fra Mine forløb</strong> til at finde et materiale, du allerede har gemt. Forslagene kan tage hensyn til tavlens tag, fag og klassetrin, men du kan også søge i andre forløb.</p>
+
+      <h4>Se et materiale, før du bruger det</h4>
+      <p>Klik på materialets <strong>navn</strong> i <strong>Mine forløb</strong> for at åbne eller forhåndsvise det. PDF-filer og YouTube-videoer vises i tavlen, mens almindelige hjemmesidelinks kan åbnes i en ny fane. Forhåndsvisning tilføjer ikke materialet til din aktuelle tavle. Brug den særskilte <strong>Fjern</strong>-knap, hvis du vil fjerne materialet fra forløbet.</p>
+
+      <h4>Undgå dubletter</h4>
+      <p>Hvis du gemmer præcis det samme materiale i det samme forløb igen, forsøger ressourcebanken at undgå dubletter. Kontroller altid, at du har valgt det ønskede forløb, når du gemmer.</p>
+
+      <h4>Hvor er materialerne gemt?</h4>
+      <p>Forløb og lokalt tilføjede filer er knyttet til browserens lokale data. De følger ikke automatisk med over på en anden computer. Se afsnittet <a href="#ut-help-chapter-12" data-ut-help-target="ut-help-chapter-12">Hvor bliver dine tavler gemt?</a>.</p>
     `]
   ];
 
