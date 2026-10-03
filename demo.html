@@ -536,7 +536,7 @@ function renderTagPicker(){
  const boardSubject=tagKey(b.subject);
  const gradeOf=value=>{let m=String(value||"").match(/\d{1,2}/);return m?String(Number(m[0])):""};
  let courses=[];
- try{let data=JSON.parse(localStorage.getItem("undervisningstavle.forloeb.v1")||"[]");if(Array.isArray(data))courses=data}catch(e){console.warn("Kunne ikke indlæse forløbsforslag",e)}
+ try{let data=JSON.parse(localStorage.getItem("undervisningstavle.demo.forloeb.v7")||"[]");if(Array.isArray(data))courses=data}catch(e){console.warn("Kunne ikke indlæse forløbsforslag",e)}
  const matches=courses.filter(c=>c&&typeof c.name==="string"&&c.name.trim()&&(!q||tagKey(c.name).includes(q))&&!selected.has(tagKey(c.name))).map(c=>{
    const subjectMatch=!!boardSubject&&tagKey(c.subject)===boardSubject;
    const gradeMatch=!!boardGrade&&gradeOf(c.grade)===boardGrade;
@@ -849,7 +849,7 @@ if(linkInput)linkInput.addEventListener('input',()=>{if(linkInput.value.trim())f
 /* Ressourcebank v1: separat udvidelse; eksisterende forløb og tavler bevares. */
 (()=>{
 'use strict';
-const KEY='undervisningstavle.forloeb.v1', norm=s=>String(s||'').trim().toLocaleLowerCase('da-DK');
+const KEY='undervisningstavle.demo.forloeb.v7', norm=s=>String(s||'').trim().toLocaleLowerCase('da-DK');
 const read=()=>{try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}};
 const write=a=>{try{localStorage.setItem(KEY,JSON.stringify(a));return true}catch(e){alert('Ressourcen kunne ikke gemmes. Browserens lagerplads kan være fyldt.');return false}};
 const courseGrade=b=>{const n=state.classes.find(c=>c.id===b.classId)?.name||'';return (n.match(/\d{1,2}/)||[])[0]||''};
