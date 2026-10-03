@@ -59,7 +59,7 @@ button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);backgrou
 @media(max-width:750px){.modal.copyModal{width:calc(100vw - 24px);padding:12px}.copyModal .copygrid{grid-template-columns:76px repeat(5,minmax(115px,1fr));grid-template-rows:none;grid-auto-rows:minmax(60px,auto);height:auto;max-height:calc(100dvh - 255px)}.copyModal .copycell{padding:5px}.copyModal .copychoice{white-space:normal}}
 
 /* Lærerens tags: helt skjult i elevvisning */
-.boardTagButton{border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 9px;cursor:pointer;font:inherit;white-space:nowrap}.boardTagButton.hasTags{color:#28543a;background:#e3eee6}.tagPicker{position:fixed;z-index:10020;width:min(380px,calc(100vw - 24px));max-height:min(440px,calc(100vh - 24px));overflow:auto;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 12px 35px #0003;padding:14px}.tagPicker.hidden,body.viewing .boardTagButton,body.viewing .tagPicker{display:none!important}.tagPicker h3{margin:0 0 8px;font-size:17px}.tagPicker input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}.tagPicker .tagChoices{display:grid;gap:5px;margin-top:8px;max-height:170px;overflow:auto}.tagPicker .tagChoices button{padding:8px;text-align:left;border:1px solid var(--line);border-radius:8px;background:#f9faf8;cursor:pointer}.tagPicker .tagSelected{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.tagPicker .tagSelected button{border:0;background:#e3eee6;color:#28543a;border-radius:20px;padding:6px 10px;cursor:pointer}.tagPicker .tagHint{font-size:12px;color:var(--muted);margin-top:8px}
+.boardTagButton{border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 9px;cursor:pointer;font:inherit;white-space:nowrap}.boardTagButton.hasTags{color:#28543a;background:#e3eee6}.tagPicker{position:fixed;z-index:10020;width:min(380px,calc(100vw - 24px));max-height:min(440px,calc(100vh - 24px));overflow:auto;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 12px 35px #0003;padding:14px}.tagPicker.hidden,body.viewing .boardTagButton,body.viewing .tagPicker{display:none!important}.tagPicker h3{margin:0 0 8px;font-size:17px}.tagPicker input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}.tagPicker .tagChoices{display:grid;gap:5px;margin-top:8px;max-height:240px;overflow:auto}.tagPicker .tagChoices button{padding:8px;text-align:left;border:1px solid var(--line);border-radius:8px;background:#f9faf8;cursor:pointer}.tagPicker .tagSelected{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.tagPicker .tagSelected button{border:0;background:#e3eee6;color:#28543a;border-radius:20px;padding:6px 10px;cursor:pointer}.tagPicker .tagHint{font-size:12px;color:var(--muted);margin-top:8px}
 </style>
 <style id="withStyles">
 .withLayout{display:flex!important;flex-direction:row!important;align-items:stretch;gap:0;min-height:0}
@@ -397,7 +397,36 @@ const boardTagButton=document.getElementById("boardTagButton"),boardTagPicker=do
 function refreshBoardTagButton(){let tags=board()?.tags||[];boardTagButton.textContent=tags.length?"🏷️ "+tags.length:"🏷️";boardTagButton.classList.toggle("hasTags",!!tags.length);boardTagButton.title=tags.length?"Emneord: "+tags.join(", "):"Tilføj emneord"}
 function closeTagPicker(){boardTagPicker.classList.add("hidden")}
 function addBoardTag(raw){let b=board();if(!b)return;let text=String(raw||"").trim();if(!text)return;let lib=new Map(tagLibrary().map(t=>[tagKey(t),t]));let existing=(b.tags||[]).some(t=>tagKey(t)===tagKey(text));if(!existing&&(b.tags||[]).length<20){b.tags=[...(b.tags||[]),lib.get(tagKey(text))||text];save()}tagPickerInput.value="";refreshBoardTagButton();renderTagPicker();tagPickerInput.focus()}
-function renderTagPicker(){let b=board();if(!b)return;tagSelected.replaceChildren();for(let tag of b.tags||[]){let bt=document.createElement("button");bt.type="button";bt.textContent=tag+" ×";bt.title="Fjern emneord";bt.onclick=()=>{b.tags=b.tags.filter(t=>tagKey(t)!==tagKey(tag));save();refreshBoardTagButton();renderTagPicker()};tagSelected.append(bt)}tagChoices.replaceChildren();let q=tagKey(tagPickerInput.value),matches=tagLibrary().filter(t=>(!q||tagKey(t).includes(q))&&!(b.tags||[]).some(x=>tagKey(x)===tagKey(t)));for(let tag of matches.slice(0,12)){let bt=document.createElement("button");bt.type="button";bt.textContent="🏷️ "+tag;bt.onclick=()=>addBoardTag(tag);tagChoices.append(bt)}if(q&&!tagLibrary().some(t=>tagKey(t)===q)&&!(b.tags||[]).some(t=>tagKey(t)===q)){let bt=document.createElement("button");bt.type="button";bt.textContent="＋ Opret ‘"+tagPickerInput.value.trim()+"’";bt.onclick=()=>addBoardTag(tagPickerInput.value);tagChoices.append(bt)}}
+function renderTagPicker(){
+ let b=board();if(!b)return;
+ tagSelected.replaceChildren();
+ for(let tag of b.tags||[]){let bt=document.createElement("button");bt.type="button";bt.textContent=tag+" ×";bt.title="Fjern emneord";bt.onclick=()=>{b.tags=b.tags.filter(t=>tagKey(t)!==tagKey(tag));save();refreshBoardTagButton();renderTagPicker()};tagSelected.append(bt)}
+ tagChoices.replaceChildren();
+ const q=tagKey(tagPickerInput.value), selected=new Set((b.tags||[]).map(tagKey));
+ const className=state.classes.find(c=>c.id===b.classId)?.name||"";
+ const gradeMatch=className.match(/(?:^|\D)([0-9]{1,2})\s*[.\- ]?\s*[A-Za-zÆØÅæøå]?(?:$|\W)/);
+ const boardGrade=gradeMatch?String(Number(gradeMatch[1])):"";
+ const boardSubject=tagKey(b.subject);
+ const gradeOf=value=>{let m=String(value||"").match(/\d{1,2}/);return m?String(Number(m[0])):""};
+ let courses=[];
+ try{let data=JSON.parse(localStorage.getItem("undervisningstavle.forloeb.v1")||"[]");if(Array.isArray(data))courses=data}catch(e){console.warn("Kunne ikke indlæse forløbsforslag",e)}
+ const matches=courses.filter(c=>c&&typeof c.name==="string"&&c.name.trim()&&(!q||tagKey(c.name).includes(q))&&!selected.has(tagKey(c.name))).map(c=>{
+   const subjectMatch=!!boardSubject&&tagKey(c.subject)===boardSubject;
+   const gradeMatch=!!boardGrade&&gradeOf(c.grade)===boardGrade;
+   return {name:c.name.trim(),subjectMatch,gradeMatch,score:(subjectMatch?2:0)+(gradeMatch?1:0)};
+ }).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name,"da"));
+ const seen=new Set();
+ for(let c of matches){let key=tagKey(c.name);if(seen.has(key))continue;seen.add(key);
+   let bt=document.createElement("button");bt.type="button";
+   bt.textContent="📁 "+c.name+(c.score===3?" · fag og klassetrin":c.subjectMatch?" · samme fag":c.gradeMatch?" · samme klassetrin":" · andet forløb");
+   bt.onclick=()=>addBoardTag(c.name);tagChoices.append(bt);
+ }
+ const otherTags=tagLibrary().filter(t=>(!q||tagKey(t).includes(q))&&!selected.has(tagKey(t))&&!seen.has(tagKey(t)));
+ for(let tag of otherTags.slice(0,12)){let bt=document.createElement("button");bt.type="button";bt.textContent="🏷️ "+tag;bt.onclick=()=>addBoardTag(tag);tagChoices.append(bt)}
+ if(q&&!tagLibrary().some(t=>tagKey(t)===q)&&!courses.some(c=>tagKey(c?.name)===q)&&!selected.has(q)){
+   let bt=document.createElement("button");bt.type="button";bt.textContent="＋ Opret ‘"+tagPickerInput.value.trim()+"’";bt.onclick=()=>addBoardTag(tagPickerInput.value);tagChoices.append(bt)
+ }
+}
 boardTagButton.onclick=()=>{if(document.body.classList.contains("viewing"))return;if(!boardTagPicker.classList.contains("hidden")){closeTagPicker();return}let r=boardTagButton.getBoundingClientRect();boardTagPicker.style.top=Math.min(r.bottom+7,window.innerHeight-460>8?window.innerHeight-460:8)+"px";boardTagPicker.style.left=Math.max(12,Math.min(r.left,window.innerWidth-392))+"px";tagPickerInput.value="";renderTagPicker();boardTagPicker.classList.remove("hidden");tagPickerInput.focus()};
 tagPickerInput.oninput=renderTagPicker;tagPickerInput.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addBoardTag(tagPickerInput.value)}if(e.key==="Escape")closeTagPicker()};document.addEventListener("pointerdown",e=>{if(!boardTagPicker.contains(e.target)&&!boardTagButton.contains(e.target))closeTagPicker()});
 function boardSearchText(b){return [b.name||"",...(b.tags||[]),b.agendaTitle||"",...(b.items||[]).flatMap(i=>[i.title||"",i.description||"",i.text||""])].join(" ").toLocaleLowerCase("da-DK")}
