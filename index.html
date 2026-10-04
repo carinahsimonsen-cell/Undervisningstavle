@@ -1016,7 +1016,7 @@ function openItemMaterialPicker(){
 }
 
 // Tilføj materialereference uden at gemme PDF'en igen.
-const form=document.getElementById('itemForm');if(form){const oldHandler=form.onsubmit;form.onsubmit=async e=>{if(fileState.picked){const m=fileState.picked;const oldPending=pendingMaterialFile;const existing=editingItem?board().items.find(x=>x.id===editingItem):null;const o={title:itTitle.value.trim(),desc:cleanRich(itDesc.innerHTML),need:itNeed.value.trim(),mode:itMode.value,mins:itMins.value?+itMins.value:null,link:'',linkOpenInTab:false,material:{fileId:m.fileId,name:m.fileName||m.name,type:m.mime||'application/pdf',startPage:Math.max(1,+pdfStartPage.value||1)}};e.preventDefault();if(existing)Object.assign(existing,o);else board().items.push({id:uid(),...o,status:'open'});save();await window.utResourceSaveItem?.(existing||board().items[board().items.length-1],board());hide(itemBack);renderAgenda();fileState.picked=null;pendingMaterialFile=oldPending;return}if(typeof oldHandler==='function')return oldHandler.call(form,e)};}
+const form=document.getElementById('itemForm');if(form){const oldHandler=form.onsubmit;form.onsubmit=async e=>{if(fileState.picked){const m=fileState.picked;const oldPending=pendingMaterialFile;const existing=editingItem?board().items.find(x=>x.id===editingItem):null;const o={title:itTitle.value.trim(),desc:cleanRich(itDesc.innerHTML),need:itNeed.value.trim(),mode:itMode.value,mins:itMins.value?+itMins.value:null,utGroup:utAgendaReadFields(),utGroupExtras:utAgendaReadExtras(),link:'',linkOpenInTab:false,material:{fileId:m.fileId,name:m.fileName||m.name,type:m.mime||'application/pdf',startPage:Math.max(1,+pdfStartPage.value||1)}};e.preventDefault();if(existing){Object.assign(existing,o);const gw=board().widgets?.find(w=>w.type==='groups');if(gw&&utAgendaActiveItem()?.id===existing.id)gw.utAgendaToken=null;}else board().items.push({id:uid(),...o,status:'open'});save();await window.utResourceSaveItem?.(existing||board().items[board().items.length-1],board());hide(itemBack);renderAgenda();fileState.picked=null;pendingMaterialFile=oldPending;return}if(typeof oldHandler==='function')return oldHandler.call(form,e)};}
 const originalEdit=editItem;editItem=function(x=null){originalEdit(x);suggest()};
 if(materialFile)materialFile.addEventListener('change',()=>{fileState.picked=null});
 if(linkInput)linkInput.addEventListener('input',()=>{if(linkInput.value.trim())fileState.picked=null});
@@ -1056,7 +1056,30 @@ wYoutubeUrl.addEventListener('change',()=>{void updateYoutubeTitle()});wYoutubeU
 const priorEditWidget=editWidget;editWidget=function(w){lastYtAutoTitle='';lastYtAutoUrl='';priorEditWidget(w);if(w.type==='youtube'&&(!w.title||w.title===defaultYtTitle()))void updateYoutubeTitle()};
 const originalEditItem=editItem;editItem=function(x=null){originalEditItem(x);if(itemSelect){selectOptions(itemSelect,board(),x?.utCourse||'');itemSelect.disabled=false}};
 const originalEditWidget=editWidget;editWidget=function(w){originalEditWidget(w);if(widgetSelect){const can=['youtube','geogebra','message','notes'].includes(w.type);widgetSelect.closest('.field').classList.toggle('hidden',!can);selectOptions(widgetSelect,board(),w.utCourse||'')}};
-window.utResourceSaveItem=(it,b)=>{if(itemSelect){saveResource(it,'item',itemSelect.value,b);save();itemSelect.value=it.utCourse||''}};
+window.utResourceSaveItem=(it,b)=>{
+ if(!itemSelect)return;
+ const chosen=itemSelect.value;
+ saveResource(it,'item',chosen,b);
+ save();
+ itemSelect.value=it.utCourse||'';
+ if(!chosen||!resourceOf(it,'item'))return;
+ // Kontroller den gemte URL/fil-id i den samme bank, som Mine forløb læser.
+ const expected=resourceOf(it,'item');
+ const stored=read().find(c=>norm(c.name)===norm(chosen));
+ const verified=stored?.materials?.some(m=>keyOf(m)===keyOf(expected));
+ if(!verified){
+   alert('Materialet er gemt på tavlen, men IKKE i Mine forløb. Prøv igen, eller giv besked om fejlen.');
+   return;
+ }
+ // Vis også resultatet, så det er tydeligt, at arkiveringen faktisk lykkedes.
+ const note=document.getElementById('utResourceSavedNote')||document.createElement('div');
+ note.id='utResourceSavedNote';
+ note.style.cssText='position:fixed;bottom:20px;right:20px;z-index:11000;background:#e4f4e9;border:1px solid #78a98a;border-radius:12px;padding:12px 18px;box-shadow:0 4px 16px #0002;font-weight:650';
+ note.textContent='✓ Materialet er gemt i Mine forløb → '+chosen;
+ document.body.append(note);
+ clearTimeout(window.utResourceNoteTimer);
+ window.utResourceNoteTimer=setTimeout(()=>note.remove(),4500);
+};
 window.utResourceSaveWidget=(w,b)=>{if(widgetSelect){saveResource(w,'widget',widgetSelect.value,b);save();widgetSelect.value=w.utCourse||''}};
 
 // Forhåndsvisning i Mine forløb. Ændrer aldrig den aktive tavle.
