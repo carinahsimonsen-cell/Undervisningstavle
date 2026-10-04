@@ -89,6 +89,7 @@
         <li>Klik på <strong>Gem</strong>.</li>
       </ol>
       <p>Du behøver ikke udfylde alle felterne. Gentag, til hele dagens program er oprettet.</p>
+      <p>Vælger du <strong>👥 Makker</strong> eller <strong>👥👥 Gruppe</strong> under Arbejdsform, kan du også vælge en bestemt inddeling til punktet. Se <a href="#ut-help-chapter-15" data-ut-help-target="ut-help-chapter-15">Grupper og makkere i dagsordenen</a>.</p>
 
       <h4>Ret eller flyt et punkt</h4>
       <p>Klik på <strong>✎</strong> ved punktet for at redigere. Træk i <strong>☰</strong> for at flytte det op eller ned.</p>
@@ -278,7 +279,7 @@
       </ol>
 
       <h4>👥 Grupper / makkere og 🎯 Én elev</h4>
-      <p>Disse funktioner bruger klassens elevliste. Se afsnittet <a href="#ut-help-chapter-9" data-ut-help-target="ut-help-chapter-9">Opret en klasse med elever</a>.</p>
+      <p>Begge funktioner bruger klassens elevliste. <strong>👥 Grupper / makkere</strong> kan bruges som et selvstændigt tavleelement, men du kan også knytte inddelinger direkte til dagsordenspunkter. <strong>🎯 Én elev</strong> trækker en tilfældig elev. Se <a href="#ut-help-chapter-9" data-ut-help-target="ut-help-chapter-9">Opret en klasse med elever</a> og <a href="#ut-help-chapter-15" data-ut-help-target="ut-help-chapter-15">Grupper og makkere i dagsordenen</a>.</p>
     `],
 
     ['Opret en klasse med elever', `
@@ -308,7 +309,7 @@
         <li>Slå elever fra, som ikke skal indgå i dagens grupper eller lodtrækning.</li>
         <li>Klik på <strong>Luk</strong>.</li>
       </ol>
-      <p>Nu kan du tilføje <strong>👥 Grupper / makkere</strong> eller <strong>🎯 Én elev</strong> med <strong>+ Tilføj element</strong>.</p>
+      <p>Nu kan du bruge eleverne i <strong>🎯 Én elev</strong>, i det selvstændige element <strong>👥 Grupper / makkere</strong> eller i en inddeling knyttet direkte til et dagsordenspunkt. Se <a href="#ut-help-chapter-15" data-ut-help-target="ut-help-chapter-15">Grupper og makkere i dagsordenen</a>.</p>
     `],
 
     ['Tilpas tavlens udseende', `
@@ -362,7 +363,7 @@
       <p>Videoen starter ikke automatisk i stor visning. Klik selv på videoens <strong>▶</strong>-knap.</p>
 
       <h4>En elev mangler i gruppeinddelingen</h4>
-      <p>Kontrollér, at eleven står under <strong>👥 Klasser</strong>, at den rigtige klasse er valgt under <strong>✎ Tavle</strong>, og at eleven ikke er slået fra under <strong>👥 Dagens elever</strong>.</p>
+      <p>Kontrollér, at eleven står under <strong>👥 Klasser</strong>, at den rigtige klasse er valgt under <strong>✎ Tavle</strong>, og at eleven ikke er slået fra under <strong>👥 Dagens elever</strong>. Elever, der er slået fra i dag, skjules midlertidigt fra inddelingen.</p>
 
       <h4>Jeg kan ikke finde mine tavler på en anden computer</h4>
       <p>Tavlerne gemmes lokalt i browseren og overføres ikke automatisk. Se afsnittet <a href="#ut-help-chapter-12" data-ut-help-target="ut-help-chapter-12">Hvor bliver dine tavler gemt?</a>.</p>
@@ -396,6 +397,7 @@
         <li>Find <strong>📁 Gem også i Mine forløb</strong> nederst i redigeringen, og kontrollér, hvilket forløb der er valgt.</li>
         <li>Tryk på <strong>Gem</strong>. Et nyt link kan få sit eget materialenavn, så det er let at genkende senere.</li>
       </ol>
+      <p>Når materialet er gemt i ressourcebanken, kontrollerer tavlen gemningen og viser en bekræftelse. Hvis den ikke kan bekræfte gemningen, får du besked. Et materiale, der hentes fra Mine forløb til et dagsordenspunkt, ændrer ikke punktets valgte gruppeinddeling.</p>
       <p><strong>Bemærk:</strong> Tavlens tag og materialets placering i <strong>Mine forløb</strong> er to forskellige ting. Du kan fx gemme en brainbreak i forløbet <em>Brainbreaks</em>, selvom tavlen har et helt andet tag. Vælg <strong>Gem ikke i Mine forløb</strong>, hvis materialet kun skal ligge på den aktuelle tavle.</p>
 
       <h4>Gem og genbrug tavleelementer</h4>
@@ -409,6 +411,45 @@
 
       <h4>Hvor er materialerne gemt?</h4>
       <p>Forløb og lokalt tilføjede filer er knyttet til browserens lokale data. De følger ikke automatisk med over på en anden computer. Se afsnittet <a href="#ut-help-chapter-12" data-ut-help-target="ut-help-chapter-12">Hvor bliver dine tavler gemt?</a>.</p>
+    `],
+
+    ['Grupper og makkere i dagsordenen', `
+      <p>Du kan vælge <strong>en inddeling til hvert dagsordenspunkt</strong>. Når punktet bliver det næste aktive punkt, skifter tavlen automatisk til den tilknyttede inddeling. Du kan også bruge <strong>👥 Grupper / makkere</strong> som et selvstændigt tavleelement.</p>
+
+      <h4>Vælg inddeling til et dagsordenspunkt</h4>
+      <ol>
+        <li>Åbn punktet med <strong>✎</strong>, eller klik på <strong>+ Nyt punkt</strong>.</li>
+        <li>Vælg <strong>👥 Makker</strong> eller <strong>👥👥 Gruppe</strong> under <strong>Arbejdsform</strong>.</li>
+        <li>Under <strong>👥 Inddeling til dette dagsordenspunkt</strong> vælger du <strong>Ingen kobling</strong>, <strong>🎲 Dan tilfældig inddeling</strong>, <strong>✏️ Opret inddeling selv</strong> eller en af klassens gemte inddelinger.</li>
+        <li>Klik på <strong>Gem</strong>. Inddelingen aktiveres, når punktet bliver det næste på dagsordenen.</li>
+      </ol>
+      <p>Ved en tilfældig inddeling angiver du <strong>Elever pr. gruppe</strong>. Skriv <strong>2</strong> for makkerpar. Den samme inddeling bevares, når du åbner gruppeoverblikket; du laver ikke nye tilfældige grupper blot ved at vise dem.</p>
+
+      <h4>Fordel eleverne selv</h4>
+      <ol>
+        <li>Vælg <strong>✏️ Opret inddeling selv</strong> og derefter <strong>✏️ Fordel eleverne</strong>.</li>
+        <li>Angiv, hvor mange tomme grupper du vil starte med, og klik på <strong>Opret tomme grupper</strong>.</li>
+        <li>Klik på den gruppe, du vil fylde, og klik derefter på elevernes navne i listen <strong>Ikke placeret</strong>. Du kan flytte en elev ved at vælge en anden gruppe og klikke på navnet.</li>
+        <li>Brug eventuelt <strong>+ Tilføj gruppe</strong> eller <strong>− Fjern tom gruppe</strong>. Når alle fremmødte elever er placeret, klikker du på <strong>✓ Brug inddeling</strong>.</li>
+        <li>Vil du genbruge fordelingen, kan du vælge <strong>💾 Gem som fast inddeling</strong> og give den et navn.</li>
+      </ol>
+
+      <h4>Gemte inddelinger</h4>
+      <p>Klik på <strong>👥 Administrér inddelinger</strong> under dagsordenen for at oprette, redigere eller administrere klassens faste inddelinger. Du kan gemme flere forskellige fordelinger for samme klasse og vælge dem direkte i et dagsordenspunkt. En fast inddeling er knyttet til klassen, ikke kun til den enkelte tavle.</p>
+      <p>Under <strong>👥 Dagens elever</strong> kan du slå fraværende elever fra. De skjules i dagens gruppevisning uden at blive slettet fra den gemte inddeling.</p>
+
+      <h4>Vis grupperne, og træk en gruppe</h4>
+      <p>Ved et punkt med tilknyttet inddeling kan du klikke på <strong>👥 Vis inddeling</strong> for at vise hele fordelingen. Knappen virker for det <strong>aktive</strong> punkt. Brug <strong>🎲 Træk gruppe / makkerpar</strong> til at vælge en gruppe tilfældigt uden gentagelser i samme runde. I gruppeoverblikket kan du flytte elever mellem grupper ved at trække navne eller bytte dem ved at klikke på to navne.</p>
+
+      <h4>↔️ Hvem skal mødes? (valgfrit)</h4>
+      <p>Fold <strong>Ekstra funktioner (valgfrit)</strong> ud, når du redigerer et punkt med en inddeling. Aktivér <strong>Hvem skal mødes?</strong>, og vælg de grupper, der skal mødes. Du kan vælge, om de <strong>udveksler</strong>, eller om den ene gruppe <strong>fremlægger for</strong> den anden. Grupper, der er koblet sammen, vises med samme farve i oversigten. En gruppe kan kun indgå i én af de planlagte forbindelser ad gangen.</p>
+
+      <h4>🚪 Hvem må arbejde udenfor? (valgfrit)</h4>
+      <p>Under <strong>Ekstra funktioner (valgfrit)</strong> kan du også aktivere <strong>Hvem må arbejde udenfor?</strong>. Vælg selv grupperne, eller få et forslag ud fra, hvor ofte eleverne tidligere har været ude. De valgte grupper får markeringen <strong>🚪 Ude</strong> i oversigten – ikke en særlig farve.</p>
+      <p><strong>Vigtigt:</strong> Forslaget registrerer ikke noget i sig selv. Klik først på <strong>🚪 Registrér udearbejde</strong> på det aktive dagsordenspunkt, <strong>når eleverne faktisk har arbejdet udenfor</strong>. Så opdateres historikken, som bruges ved senere forslag. Registreringen foretages med ét klik.</p>
+
+      <h4>Hvis en gruppe ikke vises</h4>
+      <p>Kontrollér, at dagsordenspunktet er aktivt, at tavlen er knyttet til den rigtige klasse, og at de relevante elever er med under <strong>👥 Dagens elever</strong>. Se også <a href="#ut-help-chapter-13" data-ut-help-target="ut-help-chapter-13">Hvis noget ikke virker</a>.</p>
     `]
   ];
 
