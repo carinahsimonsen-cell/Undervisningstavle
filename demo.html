@@ -413,7 +413,21 @@ body.viewing .ut-groups-student{display:flex;flex-direction:column;gap:8px}
    }
  }
 
- try{if(!localStorage.getItem(boardKey))localStorage.setItem(boardKey,JSON.stringify(demoState));if(!localStorage.getItem(courseKey))localStorage.setItem(courseKey,JSON.stringify(demoCourses))}catch(e){console.warn('Demo-data kunne ikke gemmes',e)}
+ try{
+   const existingRaw=localStorage.getItem(boardKey);
+   if(!existingRaw){localStorage.setItem(boardKey,JSON.stringify(demoState));}
+   else{
+     const existing=JSON.parse(existingRaw);
+     existing.savedGroupSets=existing.savedGroupSets||{};
+     existing.savedGroupSets.demo8a=existing.savedGroupSets.demo8a||[];
+     if(!existing.savedGroupSets.demo8a.some(s=>s.id==='demo8a_faste_grupper')){
+       existing.savedGroupSets.demo8a.push({id:'demo8a_faste_grupper',name:'Faste arbejdsgrupper',groups:[['Agnes','Albert','Amira'],['Andreas','Clara','Daniel'],['Ellen','Felix','Hannah'],['Hugo','Laura','Lucas'],['Mille','Nora','Oliver'],['Sara','Sebastian','Viggo']]});
+     }
+     for(const b of existing.boards||[])if(b.id==='demoboard4')for(const item of b.items||[])if(item.id==='demoitem13'||item.id==='demoitem14')item.utGroup=item.utGroup||{kind:'saved',setId:'demo8a_faste_grupper'};
+     localStorage.setItem(boardKey,JSON.stringify(existing));
+   }
+   if(!localStorage.getItem(courseKey))localStorage.setItem(courseKey,JSON.stringify(demoCourses));
+ }catch(e){console.warn('Demo-data kunne ikke gemmes',e)}
 })();
 
 </script>
