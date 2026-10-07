@@ -218,6 +218,19 @@ body.viewing .agenda .item .btn:disabled{opacity:.58}
 .widget.ut-widget-generic .btn{background:#dfe4ee;border-color:#c1cad9;color:#394557}
 .widget.ut-widget-generic .btn:hover{background:#d3dae7}
 
+
+/* Finpudsning 2026-10-07: rolige kortknapper, ren besked og ens gruppefelter. */
+body.viewing .agenda .item .btn,
+body.viewing .agenda .item .actions .icon{
+  background:color-mix(in srgb,var(--agenda-card-current) 72%,white)!important;
+  border-color:color-mix(in srgb,var(--agenda-card-border) 34%,white)!important;
+  color:#111!important;
+}
+body.viewing .agenda .item .btn:hover,
+body.viewing .agenda .item .actions .icon:hover{background:color-mix(in srgb,var(--agenda-card-current) 88%,white)!important}
+.widget.ut-widget-message .wtext{background:transparent!important;border:0!important;box-shadow:none!important;padding-left:0!important;padding-right:0!important}
+.widget.ut-widget-groups .groups{grid-auto-rows:1fr;align-items:stretch}
+.widget.ut-widget-groups .groups>.group{height:100%;box-sizing:border-box}
 </style>
 <style id="withStyles">
 .withLayout{display:flex!important;flex-direction:row!important;align-items:stretch;gap:0;min-height:0}
@@ -1198,7 +1211,7 @@ let lastYtAutoUrl='',lastYtAutoTitle='';
 async function updateYoutubeTitle(){const url=wYoutubeUrl.value.trim(),id=youtubeId(url);if(!id)return;const current=wTitle.value.trim(),canReplace=!current||current===defaultYtTitle()||current===lastYtAutoTitle;if(!canReplace)return;lastYtAutoUrl=url;const name=await youtubeTitle(url);if(name&&wYoutubeUrl.value.trim()===url&&(!wTitle.value.trim()||wTitle.value.trim()===defaultYtTitle()||wTitle.value.trim()===lastYtAutoTitle)){wTitle.value='▶️ '+name;lastYtAutoTitle=wTitle.value}}
 wYoutubeUrl.addEventListener('change',()=>{void updateYoutubeTitle()});wYoutubeUrl.addEventListener('blur',()=>{void updateYoutubeTitle()});
 const priorEditWidget=editWidget;editWidget=function(w){lastYtAutoTitle='';lastYtAutoUrl='';priorEditWidget(w);if(w.type==='youtube'&&(!w.title||w.title===defaultYtTitle()))void updateYoutubeTitle()};
-const originalEditItem=editItem;editItem=function(x=null){originalEditItem(x);if(itemSelect){selectOptions(itemSelect,board(),x?.utCourse||'');itemSelect.disabled=false}};
+const originalEditItem=editItem;editItem=function(x=null){originalEditItem(x);if(itemSelect){selectOptions(itemSelect,board(),x?.utCourse||'');if(x&&Object.prototype.hasOwnProperty.call(x,'utCourse'))itemSelect.value=x.utCourse||'';itemSelect.disabled=false}};
 const originalEditWidget=editWidget;editWidget=function(w){originalEditWidget(w);if(widgetSelect){const can=['youtube','geogebra','message','notes'].includes(w.type);widgetSelect.closest('.field').classList.toggle('hidden',!can);selectOptions(widgetSelect,board(),w.utCourse||'')}};
 window.utResourceSaveItem=(it,b)=>{
  if(!itemSelect)return;
