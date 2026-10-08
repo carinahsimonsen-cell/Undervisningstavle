@@ -408,7 +408,7 @@ const KEY="undervisningstavle.v07";
 const defaultTimes=[["1. lektion","08:00","08:45"],["2. lektion","08:45","09:30"],["3. lektion","09:50","10:35"],["4. lektion","10:35","11:20"],["5. lektion","11:50","12:35"],["6. lektion","12:35","13:20"],["7. lektion","13:30","14:15"]];
 let state=load(), weekStart=monday(new Date()), currentId=null, pendingSlot=null, editingItem=null, editingWidget=null, dragItem=null, dragWidget=null;
 let copySourceId=null, copyWeekStart=monday(new Date()), copyTargets=new Set();
-function load(){try{let z=JSON.parse(localStorage.getItem(KEY))||{boards:[],times:defaultTimes,sound:true,classes:[]};z.classes=z.classes||[];z.boards=z.boards||[];return z}catch(e){return{boards:[],times:defaultTimes,sound:true,classes:[]}}}
+function load(){try{let z=JSON.parse(localStorage.getItem(KEY))||{boards:[],times:defaultTimes,sound:true,classes:[]};z.classes=z.classes||[];z.boards=z.boards||[];z.birthdayShown=z.birthdayShown||{};z.birthdayLastView=z.birthdayLastView||{};return z}catch(e){return{boards:[],times:defaultTimes,sound:true,classes:[],birthdayShown:{},birthdayLastView:{}}}}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));let el=document.getElementById("saveIndicator");if(el){el.textContent="Gemmer…";el.classList.add("saveflash");clearTimeout(window.__saved);window.__saved=setTimeout(()=>{el.textContent="✓ Gemt";el.classList.remove("saveflash")},250)}}
 function monday(d){let x=new Date(d);x.setHours(12,0,0,0);let n=x.getDay()||7;x.setDate(x.getDate()-n+1);return x}
 function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -431,8 +431,9 @@ function renderSchedule(){
 function classOptions(sel,chosen=""){sel.innerHTML='<option value="">Ingen klasse</option>'+state.classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");sel.value=chosen||""}
 function newBoard(date,slot){pendingSlot={date,slot};createName.value="";createSubject.value="";classOptions(createClass);createInfo.textContent=niceDate(date)+(state.times[slot][1]||state.times[slot][2]?" · "+(state.times[slot][1]||"")+"–"+(state.times[slot][2]||""):"");show(createBack);createName.focus()}
 createForm.onsubmit=e=>{e.preventDefault();let b={id:uid(),name:createName.value.trim(),date:pendingSlot.date,slot:pendingSlot.slot,classId:createClass.value,subject:createSubject.value.trim(),excluded:[],birthdayDismissed:false,theme:"light",bgImage:"",bgStrength:45,agendaTitle:"",tags:[],items:[],widgets:[],timer:{seconds:600,initial:600,running:false}};state.boards.push(b);save();hide(createBack);openBoard(b.id)}
-function openBoard(id){currentId=id;let bb=state.boards.find(x=>x.id===id);bb.excluded=bb.excluded||[];bb.classId=bb.classId||"";scheduleView.classList.add("hidden");boardView.classList.remove("hidden");renderBoard()}
-backSchedule.onclick=()=>{closeTagPicker();stopTimer();currentId=null;boardView.classList.add("hidden");scheduleView.classList.remove("hidden");renderSchedule()}
+function setBoardEditMode(){document.body.classList.remove("viewing");viewBtn.textContent="👁 Visning"}
+function openBoard(id){setBoardEditMode();currentId=id;let bb=state.boards.find(x=>x.id===id);bb.excluded=bb.excluded||[];bb.classId=bb.classId||"";scheduleView.classList.add("hidden");boardView.classList.remove("hidden");renderBoard()}
+backSchedule.onclick=()=>{closeTagPicker();stopTimer();setBoardEditMode();currentId=null;boardView.classList.add("hidden");scheduleView.classList.remove("hidden");renderSchedule()}
 function renderBoard(){let b=board();if(!b)return;refreshBoardTagButton();boardName.textContent=b.name;agendaTitle.textContent=b.agendaTitle||"";agendaTitlePlaceholder.classList.toggle("hidden",!!b.agendaTitle);editAgendaTitleBtn.classList.toggle("hidden",!b.agendaTitle);let t=state.times[b.slot];boardWhen.textContent=niceDate(b.date)+(t[1]||t[2]?" · "+(t[1]||"")+"–"+(t[2]||""):"");applyTheme();renderAgenda();renderBirthday();renderWidgets()}
 function applyTheme(){let b=board(),v=document.getElementById("boardView");v.className=v.className.replace(/\btheme-\S+/g,"");v.classList.toggle("agenda-simple",b.agendaStyle==="simple");let colors={light:"#edf0ea",white:"#f7f7f7",warm:"#eee9df",dark:"#667a71",grid:"#f7f7f4",lines:"#f8f8f5",botanical:"#f4f0e6",forest:"#244b3b",organic:"#e9f0ed",colorful:"#f5efe7"};v.style.setProperty("--boardbg",colors[b.theme]||colors.light);let cardColors={light:["#eef7ff","#e1f1ff","#a9d3f1","#111111"],white:["#f5f0ff","#ece3ff","#c7b5ee","#111111"],warm:["#fff1e9","#ffe5d8","#f1b99f","#111111"],dark:["#e8f8f1","#d9f1e6","#9fd2bc","#111111"],grid:["#eef6ff","#e2efff","#aecded","#111111"],lines:["#fff8dc","#fff0b8","#efd681","#111111"],botanical:["#edf8ee","#e1f3e3","#add7b3","#111111"],forest:["#e6f8f4","#d6f1ea","#9ed5c8","#111111"],organic:["#edf5ff","#deecff","#a9c9ed","#111111"],colorful:["#fff0f5","#ffe1eb","#efb1c7","#111111"]};let cc=cardColors[b.theme]||cardColors.light;v.style.setProperty("--agenda-card",cc[0]);v.style.setProperty("--agenda-card-current",cc[1]);v.style.setProperty("--agenda-card-border",cc[2]);v.style.setProperty("--agenda-card-ink",cc[3]);v.style.backgroundSize="cover";v.style.backgroundPosition="center";
  if(b.theme==="grid")v.style.backgroundImage="linear-gradient(#dfe4df 1px,transparent 1px),linear-gradient(90deg,#dfe4df 1px,transparent 1px)",v.style.backgroundSize="24px 24px";
@@ -631,18 +632,45 @@ function alarm(){
 }
 
 
+function birthdayDateForBoard(md,boardDate){
+ const parts=String(md||"").split("-").map(Number);if(parts.length!==2||!parts[0]||!parts[1])return null;
+ const base=new Date(boardDate+"T12:00"),year=base.getFullYear(),month=parts[0],day=parts[1];
+ const make=y=>{let d=new Date(y,month-1,day,12);if(month===2&&day===29&&d.getMonth()!==1)d=new Date(y,1,28,12);return d};
+ let d=make(year);if(d>base)d=make(year-1);return d
+}
+function birthdayPreviousBoardDate(b){
+ const prev=state.boards.filter(x=>x.id!==b.id&&x.classId===b.classId&&(x.date<b.date||(x.date===b.date&&(+x.slot||0)<(+b.slot||0)))).sort((a,z)=>z.date.localeCompare(a.date)||(+z.slot||0)-(+a.slot||0))[0];
+ return prev?.date||""
+}
+function birthdayCandidates(b){
+ if(!b?.classId)return[];const c=state.classes.find(x=>x.id===b.classId);if(!c)return[];
+ state.birthdayShown=state.birthdayShown||{};state.birthdayLastView=state.birthdayLastView||{};
+ const boardDate=new Date(b.date+"T12:00"),last=state.birthdayLastView[b.classId]||birthdayPreviousBoardDate(b),lastDate=last?new Date(last+"T12:00"):null;
+ const out=[];for(const st of c.students||[]){if(typeof st==="string"||!st.birthday||!st.name)continue;const bd=birthdayDateForBoard(st.birthday,b.date);if(!bd)continue;const date=iso(bd),same=date===b.date;
+  if(!same&&(!lastDate||bd<=lastDate||bd>boardDate))continue;const key=b.classId+"|"+date+"|"+st.name;if(state.birthdayShown[key])continue;out.push({name:st.name,date,key,diff:Math.round((boardDate-bd)/86400000)})}
+ return out.sort((a,z)=>a.date.localeCompare(z.date)||a.name.localeCompare(z.name,"da"))
+}
+function birthdayNames(names){return names.length===1?names[0]:names.length===2?names[0]+" og "+names[1]:names.slice(0,-1).join(", ")+" og "+names[names.length-1]}
+function birthdayMessage(date,names,boardDate){
+ const bd=new Date(date+"T12:00"),now=new Date(boardDate+"T12:00"),diff=Math.round((now-bd)/86400000),who=birthdayNames(names);
+ if(diff===0)return "Tillykke med fødselsdagen, "+who+"!";
+ if(diff===1)return "Tillykke med fødselsdagen i går, "+who+"!";
+ if(diff>1&&diff<7){const days=["i søndags","i mandags","i tirsdags","i onsdags","i torsdags","i fredags","i lørdags"];return "Tillykke med fødselsdagen "+days[bd.getDay()]+", "+who+"!"}
+ const when=bd.toLocaleDateString("da-DK",{day:"numeric",month:"long"});return "Tillykke med fødselsdagen den "+when+", "+who+"!"
+}
+function birthdayCommitView(b,candidates){
+ if(!b?.classId||!document.body.classList.contains("viewing"))return;state.birthdayShown=state.birthdayShown||{};state.birthdayLastView=state.birthdayLastView||{};
+ candidates.forEach(x=>state.birthdayShown[x.key]=true);const old=state.birthdayLastView[b.classId]||"";if(!old||b.date>old)state.birthdayLastView[b.classId]=b.date;save()
+}
 function renderBirthday(){
- let el=birthdayBanner,b=board();el.classList.add("hidden");el.innerHTML="";
- if(!b||!b.classId)return;
- let c=state.classes.find(x=>x.id===b.classId);if(!c)return;
- let md=b.date.slice(5),names=c.students.filter(x=>typeof x!=="string"&&x.birthday===md).map(x=>x.name).sort();
- if(!names.length)return;
- let sig=b.date+"|"+names.join("|");
- if(b.birthdayDismissed===true){b.birthdayDismissed=false;save()}
- if(b.birthdayDismissedSignature===sig)return;
- let joined=names.length===1?names[0]:names.slice(0,-1).join(", ")+" & "+names[names.length-1];
- el.innerHTML=`<button class="x" title="Skjul">×</button><div class="birthtitle"><span class="dkflag" aria-hidden="true"></span><span>TILLYKKE!</span><span class="dkflag" aria-hidden="true"></span></div><strong>${joined}</strong><div class="confetti">• ◆ • ◆ •</div>`;
- el.querySelector(".x").onclick=()=>{b.birthdayDismissedSignature=sig;save();el.classList.add("hidden")};el.classList.remove("hidden")
+ let el=birthdayBanner,b=board();el.classList.add("hidden");el.innerHTML="";if(!b||!b.classId)return;
+ const candidates=birthdayCandidates(b);if(!candidates.length){birthdayCommitView(b,[]);return}
+ const sig=candidates.map(x=>x.key).join("|");if(b.birthdayDismissed===true){b.birthdayDismissed=false;save()}if(b.birthdayDismissedSignature===sig){birthdayCommitView(b,candidates);return}
+ const close=document.createElement("button");close.className="x";close.title="Skjul";close.textContent="×";
+ const title=document.createElement("div");title.className="birthtitle";title.innerHTML='<span class="dkflag" aria-hidden="true"></span><span>TILLYKKE!</span><span class="dkflag" aria-hidden="true"></span>';el.append(close,title);
+ const byDate=new Map();candidates.forEach(x=>{if(!byDate.has(x.date))byDate.set(x.date,[]);byDate.get(x.date).push(x.name)});for(const [date,names] of byDate){const msg=document.createElement("strong");msg.textContent=birthdayMessage(date,names,b.date);el.append(msg)}
+ const conf=document.createElement("div");conf.className="confetti";conf.textContent="• ◆ • ◆ •";el.append(conf);
+ close.onclick=()=>{state.birthdayShown=state.birthdayShown||{};candidates.forEach(x=>state.birthdayShown[x.key]=true);b.birthdayDismissedSignature=sig;save();el.classList.add("hidden");renderWidgets()};el.classList.remove("hidden");birthdayCommitView(b,candidates)
 }
 
 function cls(){return state.classes.find(c=>c.id===board()?.classId)}
@@ -960,7 +988,7 @@ const themeDefs=[["light","Lys"],["white","Hvid"],["warm","Varm"],["dark","Kridt
 function renderThemes(){themes.innerHTML="";themeDefs.forEach(([id,n])=>{let x=document.createElement("button");x.className="theme t-"+id+(board().theme===id?" sel":"");x.title=n;x.onclick=()=>{board().theme=id;save();applyTheme();renderThemes()};themes.append(x)})}
 const agendaStyle=document.getElementById("agendaStyle");if(agendaStyle)agendaStyle.onchange=()=>{board().agendaStyle=agendaStyle.value;save();applyTheme()};
 bgStrength.oninput=()=>{board().bgStrength=+bgStrength.value;save();applyTheme()};bgUpload.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{board().bgImage=r.result;save();applyTheme()};r.readAsDataURL(f)};removeBg.onclick=()=>{board().bgImage="";save();applyTheme()}
-viewBtn.onclick=()=>{closeTagPicker();document.body.classList.toggle("viewing");viewBtn.textContent=document.body.classList.contains("viewing")?"✎ Redigering":"👁 Visning";renderAgenda();renderWidgets()}
+viewBtn.onclick=()=>{closeTagPicker();document.body.classList.toggle("viewing");viewBtn.textContent=document.body.classList.contains("viewing")?"✎ Redigering":"👁 Visning";renderAgenda();renderBirthday();renderWidgets()}
 fullBtn.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(e){}};document.addEventListener("fullscreenchange",()=>fullBtn.textContent=document.fullscreenElement?"⛶ Afslut fuld skærm":"⛶ Fuld skærm")
 function show(x){x.style.display="flex"}function hide(x){x.style.display="none"}document.querySelectorAll("[data-close]").forEach(x=>x.onclick=()=>hide(x.closest(".modalback")));document.querySelectorAll(".modalback").forEach(x=>x.onclick=e=>{if(e.target===x)hide(x)})
 const FILE_DB="undervisningstavle_materialer_v1";function fileDB(){return new Promise((ok,no)=>{let r=indexedDB.open(FILE_DB,1);r.onupgradeneeded=()=>r.result.createObjectStore("files");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}async function putFile(id,file){let db=await fileDB();return new Promise((ok,no)=>{let tx=db.transaction("files","readwrite");tx.objectStore("files").put(file,id);tx.oncomplete=()=>ok();tx.onerror=()=>no(tx.error)})}async function getFile(id){let db=await fileDB();return new Promise((ok,no)=>{let r=db.transaction("files").objectStore("files").get(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function directDomain(u){try{let parsed=new URL(u),h=parsed.hostname.toLowerCase();if(h==="docs.google.com"&&/^\/presentation\/d\/[^/]+\/preview\/?$/.test(parsed.pathname))return false;return h.includes("drive.google.com")||h.includes("docs.google.com")||h.includes("blooket.com")}catch(e){return false}}async function smartOpenMaterial(item){utCurrentAttachment=null;withTarget=item;if(item.material?.fileId){let f=await getFile(item.material.fileId);if(!f){alert("Filen kunne ikke findes i denne browser.");return}let isPdf=f.type==="application/pdf"||/\.pdf$/i.test(f.name||item.material.name||"");if(isPdf){openPdfSlideshow(f,item.material.startPage||1);return}let u=URL.createObjectURL(f);openMaterial(u,item.material.name||item.title,true);return}if(!item.link)return;if(item.linkOpenInTab===true||directDomain(item.link)){window.open(item.link,"_blank","noopener");return}openMaterial(item.link,item.title,false)}let materialUrl="",materialBlob=false;function openMaterial(u,t,isBlob=false){materialUrl=u;materialBlob=isBlob;overlayTitle.textContent=t;frame.src=u;overlay.style.display="flex";applyWith("material")}function closeMaterialOverlay(){overlay.classList.remove("withLayout","ratio60","ratio70","ratio80");overlay.style.display="none";frame.src="about:blank";if(materialBlob&&materialUrl)URL.revokeObjectURL(materialUrl);materialUrl="";materialBlob=false;utCurrentAttachment=null;withChoice.classList.remove("open")}closeOverlay.onclick=closeMaterialOverlay;openTab.onclick=()=>{
