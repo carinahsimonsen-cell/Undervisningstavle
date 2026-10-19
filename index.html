@@ -358,8 +358,11 @@ body.viewing #classesBtn + button.btn{display:none!important}
   </div>
   <label style="display:flex;align-items:center;gap:8px;margin:12px 0 8px"><input type="checkbox" id="utAgendaMeetingEnabled" style="width:auto"> ↔️ Grupper skal mødes bagefter</label>
   <div id="utAgendaMeetingControls" style="display:none">
-    <div class="toolrow"><select id="utAgendaMeetingFrom" class="btn" aria-label="Første gruppe"></select><select id="utAgendaMeetingDir" class="btn" aria-label="Mødets retning"><option value="both">↔ Udveksler</option><option value="one">→ Fremlægger for</option></select><select id="utAgendaMeetingTo" class="btn" aria-label="Anden gruppe"></select><button id="utAgendaMeetingAdd" type="button" class="btn">+ Forbind</button></div>
-    <div id="utAgendaMeetingList" class="sub" style="margin-top:7px"></div>
+    <div class="sub" style="margin:4px 0 7px">Fordel alle automatisk i mødegrupper. Ved et ulige antal bliver den sidste mødegruppe på tre.</div>
+    <div class="toolrow" style="margin-bottom:9px"><button id="utAgendaMeetingAuto" type="button" class="btn">🎲 Fordel alle i mødegrupper</button><button id="utAgendaMeetingClear" type="button" class="btn">Ryd mødegrupper</button></div>
+    <div class="sub" style="margin:3px 0 7px">Eller opret dem manuelt. Du kan bagefter føje flere grupper til samme mødegruppe.</div>
+    <div class="toolrow"><select id="utAgendaMeetingFrom" class="btn" aria-label="Første gruppe"></select><select id="utAgendaMeetingDir" class="btn" aria-label="Mødets retning"><option value="both">↔ Udveksler</option><option value="one">→ Første gruppe fremlægger</option></select><select id="utAgendaMeetingTo" class="btn" aria-label="Anden gruppe"></select><button id="utAgendaMeetingAdd" type="button" class="btn">+ Opret mødegruppe</button></div>
+    <div id="utAgendaMeetingList" class="sub" style="margin-top:9px"></div>
   </div>
 </div></div>
 <div class="field"><label>📎 Materialer <span style="font-weight:400">(valgfrit)</span></label><div class="sub" style="margin-bottom:7px">Du kan tilføje flere links og filer. Giv hvert materiale et navn, så det er tydeligt i visningstilstand.</div><div id="utItemAttachments" style="display:grid;gap:7px;margin:8px 0"></div><input id="utMaterialDisplayName" type="text" placeholder="Navn på materialet, fx Opgaveark" style="margin-bottom:7px"><input id="itLink" type="url" placeholder="Indsæt link…"><div class="toolrow"><button class="btn" id="utAddLink" type="button">+ Tilføj link</button><button class="btn" id="chooseMaterialFile" type="button">📎 Tilføj fil</button><span id="materialFileName" class="sub"></span></div><input id="materialFile" type="file" hidden>
@@ -446,11 +449,43 @@ function applyTheme(){let b=board(),v=document.getElementById("boardView");v.cla
  if(b.bgImage){let strength=(100-b.bgStrength)/100;v.style.backgroundImage=`linear-gradient(rgba(255,255,255,${strength}),rgba(255,255,255,${strength})),url("${b.bgImage}")`;v.style.backgroundSize="cover";v.style.backgroundPosition="center"}
 }
 function utAgendaActiveItem(){const b=board();return b?.items?.find(x=>x.status==='open')||null}
+// Mødegrupper gemmes som {members:[gruppeindekser...],dir}. Gamle parvise {a,b,dir}-data
+// normaliseres automatisk, så eksisterende tavler fortsat virker.
+function utNormalizeMeetings(list,maxCount=Infinity){
+ const limit=Number.isFinite(maxCount)?Math.max(0,maxCount):Infinity,result=[];
+ for(const raw of list||[]){
+  const source=Array.isArray(raw?.members)?raw.members:[raw?.a,raw?.b];
+  const members=[...new Set(source.map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<limit))];
+  if(members.length>=2)result.push({members,dir:raw?.dir==='one'?'one':'both'});
+ }
+ return result;
+}
+function utBuildMeetingGroups(indices){
+ const pool=shuffle((indices||[]).filter(Number.isInteger)),result=[];
+ while(pool.length>3)result.push({members:pool.splice(0,2),dir:'both'});
+ if(pool.length>=2)result.push({members:pool.splice(0),dir:'both'});
+ return result;
+}
+function utMeetingSummary(m,noun='Gruppe'){
+ const members=m?.members||[];if(!members.length)return '';
+ const names=members.map(i=>noun+' '+(i+1));
+ return m.dir==='one'?names[0]+' → '+names.slice(1).join(' + '):names.join(' ↔ ');
+}
+function utMeetingNote(index,meetings,noun='Gruppe'){
+ const m=(meetings||[]).find(x=>x.members?.includes(index));if(!m)return '';
+ const others=m.members.filter(i=>i!==index);if(!others.length)return '';
+ const lower=noun.toLocaleLowerCase('da-DK'),names=others.map(i=>lower+' '+(i+1));
+ if(m.dir==='one'){
+  if(m.members[0]===index)return 'Fremlægger for '+names.join(' og ');
+  return 'Hører fremlæggelse fra '+lower+' '+(m.members[0]+1);
+ }
+ return 'Mødes med '+names.join(' og ');
+}
 // Indstillingerne hører til dagsordenspunktet, ikke den gemte masterinddeling.
-function utAgendaSettings(item){if(!item)return null;item.utGroupExtras=item.utGroupExtras||{outdoorEnabled:false,meetingEnabled:false,outdoor:[],meetings:[],registered:false};return item.utGroupExtras}
+function utAgendaSettings(item){if(!item)return null;item.utGroupExtras=item.utGroupExtras||{outdoorEnabled:false,meetingEnabled:false,outdoor:[],meetings:[],registered:false};item.utGroupExtras.meetings=utNormalizeMeetings(item.utGroupExtras.meetings);return item.utGroupExtras}
 function utAgendaGroupCount(item){const cfg=item?.utGroup||{};if(cfg.dayGroups?.length)return cfg.dayGroups.filter(g=>g.length).length;if(cfg.kind==='saved'){const set=groupSetsForClass().find(x=>x.id===cfg.setId);if(!set)return 0;const active=new Set(activeStudents());return set.groups.filter(g=>g.some(n=>active.has(n))).length}if(cfg.kind==='random')return cfg.groups?.length||Math.ceil(activeStudents().length/Math.max(2,+cfg.size||2));if(cfg.kind==='manual')return (cfg.groups||[]).filter(g=>g.length).length;return 0}
-function utAgendaApplyExtras(w,item){const cfg=utAgendaSettings(item);w.utOutdoor=cfg?.outdoorEnabled?[...(cfg.outdoor||[])]:[];w.utMeetings=cfg?.meetingEnabled?(cfg.meetings||[]).map(m=>({...m})):[]}
-function utAgendaCaptureExtras(w){const item=utAgendaActiveItem();if(!item||item.utGroup?.kind==='none'||!item.utGroup)return;const cfg=utAgendaSettings(item);if(cfg.outdoorEnabled)cfg.outdoor=[...(w.utOutdoor||[])];if(cfg.meetingEnabled)cfg.meetings=(w.utMeetings||[]).map(m=>({...m}));}
+function utAgendaApplyExtras(w,item){const cfg=utAgendaSettings(item);w.utOutdoor=cfg?.outdoorEnabled?[...(cfg.outdoor||[])]:[];w.utMeetings=cfg?.meetingEnabled?utNormalizeMeetings(cfg.meetings).map(m=>({members:[...m.members],dir:m.dir})):[]}
+function utAgendaCaptureExtras(w){const item=utAgendaActiveItem();if(!item||item.utGroup?.kind==='none'||!item.utGroup)return;const cfg=utAgendaSettings(item);if(cfg.outdoorEnabled)cfg.outdoor=[...(w.utOutdoor||[])];if(cfg.meetingEnabled)cfg.meetings=utNormalizeMeetings(w.utMeetings).map(m=>({members:[...m.members],dir:m.dir}));}
 
 function utAgendaGroupSync(){const b=board(),item=utAgendaActiveItem();if(!b||!item||!item.utGroup||item.utGroup.kind==='none')return;
  let w=(b.widgets||[]).find(x=>x.type==='groups');if(!w){w={id:uid(),type:'groups',title:'👥 Grupper / makkere',mode:'size',number:2,groups:[]};b.widgets=b.widgets||[];b.widgets.push(w)}
@@ -488,7 +523,9 @@ function utAgendaEditorInit(item){
   utAgendaDraft.outdoor=ranking.slice(0,limit).map(x=>x.i);utAgendaEditorRefresh();
  };
  ids('utAgendaOutdoorClear').onclick=()=>{utAgendaDraft.outdoor=[];utAgendaEditorRefresh()};
- ids('utAgendaMeetingAdd').onclick=()=>{const a=+ids('utAgendaMeetingFrom').value,b=+ids('utAgendaMeetingTo').value,used=new Set(utAgendaDraft.meetings.flatMap(m=>[m.a,m.b]));if(!Number.isInteger(a)||!Number.isInteger(b)||a===b||used.has(a)||used.has(b))return;utAgendaDraft.meetings.push({a,b,dir:ids('utAgendaMeetingDir').value});utAgendaEditorRefresh()};
+ ids('utAgendaMeetingAuto').onclick=()=>{const count=utAgendaGroupCount({utGroup:utAgendaReadFields()});if(count<2)return alert('Der skal være mindst to grupper for at lave mødegrupper.');utAgendaDraft.meetings=utBuildMeetingGroups(Array.from({length:count},(_,i)=>i));utAgendaEditorRefresh()};
+ ids('utAgendaMeetingClear').onclick=()=>{utAgendaDraft.meetings=[];utAgendaEditorRefresh()};
+ ids('utAgendaMeetingAdd').onclick=()=>{const a=+ids('utAgendaMeetingFrom').value,b=+ids('utAgendaMeetingTo').value,used=new Set(utNormalizeMeetings(utAgendaDraft.meetings).flatMap(m=>m.members));if(!Number.isInteger(a)||!Number.isInteger(b)||a===b||used.has(a)||used.has(b))return;utAgendaDraft.meetings.push({members:[a,b],dir:ids('utAgendaMeetingDir').value});utAgendaEditorRefresh()};
  utAgendaEditorRefresh();
 }
 function utAgendaEditorRefresh(){
@@ -498,11 +535,19 @@ function utAgendaEditorRefresh(){
  ids('utAgendaOutdoorControls').style.display=utAgendaDraft.outdoorEnabled?'block':'none';ids('utAgendaMeetingControls').style.display=utAgendaDraft.meetingEnabled?'block':'none';
  const grid=ids('utAgendaOutdoorGrid');grid.replaceChildren();utAgendaDraft.outdoor=(utAgendaDraft.outdoor||[]).filter(i=>i<count);
  for(let i=0;i<count;i++){const btn=document.createElement('button');btn.type='button';btn.className='btn';const selected=utAgendaDraft.outdoor.includes(i);btn.textContent=(groupCfg.kind==='saved'&&groupSetsForClass().find(x=>x.id===groupCfg.setId)?.groups.every(g=>g.length<=2)?'Par ':'Gruppe ')+(i+1)+(selected?' 🚪 Ude':'');if(selected)btn.style.cssText='background:#e6eee9;border:2px solid #648572';btn.onclick=()=>{utAgendaDraft.outdoor=selected?utAgendaDraft.outdoor.filter(n=>n!==i):[...utAgendaDraft.outdoor,i];utAgendaEditorRefresh()};grid.append(btn)}
- const from=ids('utAgendaMeetingFrom'),to=ids('utAgendaMeetingTo'),add=ids('utAgendaMeetingAdd');utAgendaDraft.meetings=(utAgendaDraft.meetings||[]).filter(m=>m.a<count&&m.b<count);
- const used=new Set(utAgendaDraft.meetings.flatMap(m=>[m.a,m.b])),free=Array.from({length:count},(_,i)=>i).filter(i=>!used.has(i));
- const oldFrom=from.value,oldTo=to.value;from.replaceChildren();free.forEach(i=>from.add(new Option('Gruppe '+(i+1),String(i))));if(free.some(i=>String(i)===oldFrom))from.value=oldFrom;
- const fillTo=()=>{const prior=to.value||oldTo;to.replaceChildren();free.filter(i=>String(i)!==from.value).forEach(i=>to.add(new Option('Gruppe '+(i+1),String(i))));if([...to.options].some(o=>o.value===prior))to.value=prior};fillTo();from.onchange=fillTo;add.disabled=free.length<2;
- const list=ids('utAgendaMeetingList');list.replaceChildren();utAgendaDraft.meetings.forEach((m,i)=>{const line=document.createElement('div');line.style.cssText='display:flex;align-items:center;gap:8px;margin:5px 0';const label=document.createElement('span');label.textContent='Gruppe '+(m.a+1)+(m.dir==='one'?' → ':' ↔ ')+'gruppe '+(m.b+1);const del=document.createElement('button');del.type='button';del.className='btn';del.textContent='✕';del.title='Fjern forbindelse';del.onclick=()=>{utAgendaDraft.meetings.splice(i,1);utAgendaEditorRefresh()};line.append(label,del);list.append(line)});
+ const from=ids('utAgendaMeetingFrom'),to=ids('utAgendaMeetingTo'),add=ids('utAgendaMeetingAdd'),auto=ids('utAgendaMeetingAuto'),clearMeet=ids('utAgendaMeetingClear');
+ utAgendaDraft.meetings=utNormalizeMeetings(utAgendaDraft.meetings,count);
+ const pairMode=/Makker/i.test(itMode.value)||(groupCfg.kind==='random'&&+groupCfg.size===2)||(groupCfg.kind==='manual'&&(utManualDraft||[]).length&&(utManualDraft||[]).every(g=>g.length<=2))||(groupCfg.kind==='saved'&&groupSetsForClass().find(x=>x.id===groupCfg.setId)?.groups.every(g=>g.length<=2));
+ const noun=pairMode?'Par':'Gruppe',used=new Set(utAgendaDraft.meetings.flatMap(m=>m.members)),free=Array.from({length:count},(_,i)=>i).filter(i=>!used.has(i));
+ const oldFrom=from.value,oldTo=to.value;from.replaceChildren();free.forEach(i=>from.add(new Option(noun+' '+(i+1),String(i))));if(free.some(i=>String(i)===oldFrom))from.value=oldFrom;
+ const fillTo=()=>{const prior=to.value||oldTo;to.replaceChildren();free.filter(i=>String(i)!==from.value).forEach(i=>to.add(new Option(noun+' '+(i+1),String(i))));if([...to.options].some(o=>o.value===prior))to.value=prior};fillTo();from.onchange=fillTo;add.disabled=free.length<2;auto.disabled=count<2;clearMeet.disabled=!utAgendaDraft.meetings.length;
+ const list=ids('utAgendaMeetingList');list.replaceChildren();utAgendaDraft.meetings.forEach((m,i)=>{
+  const line=document.createElement('div');line.style.cssText='display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:7px 0;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:#fff';
+  const label=document.createElement('span');label.style.cssText='font-weight:650;flex:1;min-width:210px';label.textContent='Mødegruppe '+(i+1)+': '+utMeetingSummary(m,noun);line.append(label);
+  const remaining=Array.from({length:count},(_,n)=>n).filter(n=>!used.has(n));
+  if(remaining.length){const extra=document.createElement('select');extra.className='btn';extra.style.maxWidth='150px';remaining.forEach(n=>extra.add(new Option(noun+' '+(n+1),String(n))));const addOne=document.createElement('button');addOne.type='button';addOne.className='btn';addOne.textContent='+ Tilføj';addOne.title='Føj endnu en '+noun.toLocaleLowerCase('da-DK')+' til denne mødegruppe';addOne.onclick=()=>{const n=+extra.value;if(!Number.isInteger(n)||used.has(n))return;m.members.push(n);utAgendaEditorRefresh()};line.append(extra,addOne)}
+  const del=document.createElement('button');del.type='button';del.className='btn';del.textContent='✕';del.title='Fjern hele mødegruppen';del.onclick=()=>{utAgendaDraft.meetings.splice(i,1);utAgendaEditorRefresh()};line.append(del);list.append(line)
+ });
 }
 function utAgendaReadExtras(){return utAgendaDraft?JSON.parse(JSON.stringify(utAgendaDraft)):{outdoorEnabled:false,meetingEnabled:false,outdoor:[],meetings:[],registered:false}}
 function utAgendaReadFields(){const wrap=document.getElementById('utAgendaGroupFields');if(!wrap||wrap.style.display==='none')return {kind:'none'};const value=document.getElementById('utAgendaGroupKind').value,old=editingItem?board()?.items?.find(x=>x.id===editingItem)?.utGroup:null;let next=value==='manual'?{kind:'manual',groups:(utManualDraft||[]).map(g=>[...g])}:value.startsWith('set:')?{kind:'saved',setId:value.slice(4)}:value==='random'?{kind:'random',size:Math.max(2,+document.getElementById('utAgendaGroupSize').value||2)}:{kind:'none'};const same=old&&old.kind===next.kind&&(next.kind!=='saved'||old.setId===next.setId)&&(next.kind!=='random'||+old.size===+next.size);if(same&&old.dayGroups?.length)next.dayGroups=old.dayGroups.map(g=>[...g]);if(same&&next.kind==='random'&&old.groups?.length)next.groups=old.groups.map(g=>[...g]);return next}
@@ -543,7 +588,7 @@ function openAgendaItemGroups(item){
  const groups=utAgendaGroupsForItem(item,true);if(!groups.length)return alert('Der er ingen elever at vise i inddelingen.');
  document.querySelector('.ut-group-overlay')?.remove();const overlay=document.createElement('div');overlay.className='ut-group-overlay';const panel=document.createElement('div');panel.className='ut-group-panel';
  const head=document.createElement('div');head.className='ut-group-head';const h=document.createElement('h2');const set=item.utGroup.kind==='saved'?groupSetsForClass().find(x=>x.id===item.utGroup.setId):null;h.textContent='👥 '+(set?.name||(item.utGroup.kind==='random'?'Dagens inddeling':item.title||'Inddeling'));const close=document.createElement('button');close.className='btn';close.textContent='✕ Luk';head.append(h,close);
- const scroll=document.createElement('div');scroll.className='ut-group-scroll';const grid=document.createElement('div');grid.className='ut-group-grid';const extras=utAgendaSettings(item)||{};groups.forEach((g,i)=>{const card=document.createElement('div');card.className='ut-group-card';const title=document.createElement('h3');title.textContent=(groups.every(x=>x.length<=2)?'Par ':'Gruppe ')+(i+1);if(extras.outdoorEnabled&&(extras.outdoor||[]).includes(i)){const marker=document.createElement('span');marker.textContent=' 🚪 Ude';marker.style.cssText='font-size:.75em;color:#20578b';title.append(marker)}card.append(title);if(extras.meetingEnabled){const partners=(extras.meetings||[]).filter(m=>m.a===i||m.b===i).map(m=>m.a===i?(m.dir==='one'?' → ':' ↔ ')+(m.b+1):(m.dir==='one'?' ← ':' ↔ ')+(m.a+1));if(partners.length){const note=document.createElement('div');note.className='sub';note.textContent='Mødes med gruppe'+partners.join(', gruppe');card.append(note)}}g.forEach(n=>{const person=document.createElement('div');person.className='ut-group-person';person.textContent=n;card.append(person)});grid.append(card)});scroll.append(grid);panel.append(head,scroll);
+ const scroll=document.createElement('div');scroll.className='ut-group-scroll';const grid=document.createElement('div');grid.className='ut-group-grid';const extras=utAgendaSettings(item)||{},pairMode=groups.every(x=>x.length<=2),meetingGroups=utNormalizeMeetings(extras.meetings,groups.length),meetingNoun=pairMode?'Par':'Gruppe';groups.forEach((g,i)=>{const card=document.createElement('div');card.className='ut-group-card';const title=document.createElement('h3');title.textContent=(pairMode?'Par ':'Gruppe ')+(i+1);if(extras.outdoorEnabled&&(extras.outdoor||[]).includes(i)){const marker=document.createElement('span');marker.textContent=' 🚪 Ude';marker.style.cssText='font-size:.75em;color:#20578b';title.append(marker)}card.append(title);if(extras.meetingEnabled){const meetingNote=utMeetingNote(i,meetingGroups,meetingNoun);if(meetingNote){const note=document.createElement('div');note.className='sub';note.textContent=meetingNote;card.append(note)}}g.forEach(n=>{const person=document.createElement('div');person.className='ut-group-person';person.textContent=n;card.append(person)});grid.append(card)});scroll.append(grid);panel.append(head,scroll);
  if(!document.body.classList.contains('viewing')){const bar=document.createElement('div');bar.className='ut-group-editbar';const hint=document.createElement('span');hint.className='sub';hint.textContent='Tilpasningen gælder denne time og bruges på alle dagsordenspunkter med samme faste inddeling. Den faste gemte inddeling ændres ikke.';const edit=document.createElement('button');edit.className='btn primary';edit.textContent='✏️ Tilpas til denne time';edit.onclick=()=>{overlay.remove();openManualGroups({groups:[]},newGroups=>{const dayGroups=newGroups.map(g=>[...g]);if(item.utGroup.kind==='saved'&&item.utGroup.setId){board().items.forEach(x=>{if(x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId)x.utGroup.dayGroups=dayGroups.map(g=>[...g])})}else item.utGroup.dayGroups=dayGroups;const gw=board()?.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;save();renderAgenda();renderWidgets();openAgendaItemGroups(item)},groups)};bar.append(hint,edit);const hasSharedDay=item.utGroup.kind==='saved'&&item.utGroup.setId?board()?.items?.some(x=>x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId&&x.utGroup.dayGroups?.length):item.utGroup.dayGroups?.length;if(hasSharedDay){const reset=document.createElement('button');reset.className='btn';reset.textContent='↺ Nulstil dagens tilpasning';reset.onclick=()=>{if(item.utGroup.kind==='saved'&&item.utGroup.setId){board().items.forEach(x=>{if(x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId)delete x.utGroup.dayGroups})}else delete item.utGroup.dayGroups;const gw=board()?.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;save();overlay.remove();renderAgenda();renderWidgets();openAgendaItemGroups(item)};bar.append(reset)}panel.append(bar)}
  overlay.append(panel);document.body.append(overlay);close.onclick=()=>overlay.remove();
 }
@@ -658,19 +703,32 @@ function birthdayMessage(date,names,boardDate){
  if(diff>1&&diff<7){const days=["i søndags","i mandags","i tirsdags","i onsdags","i torsdags","i fredags","i lørdags"];return "Tillykke med fødselsdagen "+days[bd.getDay()]+", "+who+"!"}
  const when=bd.toLocaleDateString("da-DK",{day:"numeric",month:"long"});return "Tillykke med fødselsdagen den "+when+", "+who+"!"
 }
-function birthdayCommitView(b,candidates){
- if(!b?.classId||!document.body.classList.contains("viewing"))return;state.birthdayShown=state.birthdayShown||{};state.birthdayLastView=state.birthdayLastView||{};
+function birthdayRecoverLegacyAutoCommit(b){
+ if(!b?.classId)return;state.birthdayAutoCommitRecovered=state.birthdayAutoCommitRecovered||{};const token=b.classId+"|"+b.date;if(state.birthdayAutoCommitRecovered[token])return;
+ state.birthdayAutoCommitRecovered[token]=true;state.birthdayShown=state.birthdayShown||{};state.birthdayLastView=state.birthdayLastView||{};
+ // Tidligere versioner markerede hilsenen som vist blot ved at åbne Visning.
+ // Hvis ingen tavle for klassen i dag er blevet lukket aktivt, genskabes dagens ventende hilsner én gang.
+ const explicitlyDismissedToday=state.boards.some(x=>x.classId===b.classId&&x.date===b.date&&x.birthdayDismissedSignature);
+ if(state.birthdayLastView[b.classId]===b.date&&!explicitlyDismissedToday){
+  const prev=state.boards.filter(x=>x.classId===b.classId&&x.date<b.date).sort((a,z)=>z.date.localeCompare(a.date)||(+z.slot||0)-(+a.slot||0))[0]?.date||"";
+  for(const key of Object.keys(state.birthdayShown)){const parts=key.split("|");const date=parts[1]||"";if(parts[0]===b.classId&&date<=b.date&&(!prev||date>prev))delete state.birthdayShown[key]}
+  if(prev)state.birthdayLastView[b.classId]=prev;else delete state.birthdayLastView[b.classId];
+ }
+ save()
+}
+function birthdayCommitDismissed(b,candidates){
+ if(!b?.classId)return;state.birthdayShown=state.birthdayShown||{};state.birthdayLastView=state.birthdayLastView||{};
  candidates.forEach(x=>state.birthdayShown[x.key]=true);const old=state.birthdayLastView[b.classId]||"";if(!old||b.date>old)state.birthdayLastView[b.classId]=b.date;save()
 }
 function renderBirthday(){
  let el=birthdayBanner,b=board();el.classList.add("hidden");el.innerHTML="";if(!b||!b.classId)return;
- const candidates=birthdayCandidates(b);if(!candidates.length){birthdayCommitView(b,[]);return}
- const sig=candidates.map(x=>x.key).join("|");if(b.birthdayDismissed===true){b.birthdayDismissed=false;save()}if(b.birthdayDismissedSignature===sig){birthdayCommitView(b,candidates);return}
- const close=document.createElement("button");close.className="x";close.title="Skjul";close.textContent="×";
+ birthdayRecoverLegacyAutoCommit(b);const candidates=birthdayCandidates(b);if(!candidates.length)return;
+ const sig=candidates.map(x=>x.key).join("|");if(b.birthdayDismissed===true){b.birthdayDismissed=false;save()}if(b.birthdayDismissedSignature===sig)return;
+ const close=document.createElement("button");close.className="x";close.title="Skjul, når eleverne har set hilsenen";close.textContent="×";
  const title=document.createElement("div");title.className="birthtitle";title.innerHTML='<span class="dkflag" aria-hidden="true"></span><span>TILLYKKE!</span><span class="dkflag" aria-hidden="true"></span>';el.append(close,title);
  const byDate=new Map();candidates.forEach(x=>{if(!byDate.has(x.date))byDate.set(x.date,[]);byDate.get(x.date).push(x.name)});for(const [date,names] of byDate){const msg=document.createElement("strong");msg.textContent=birthdayMessage(date,names,b.date);el.append(msg)}
  const conf=document.createElement("div");conf.className="confetti";conf.textContent="• ◆ • ◆ •";el.append(conf);
- close.onclick=()=>{state.birthdayShown=state.birthdayShown||{};candidates.forEach(x=>state.birthdayShown[x.key]=true);b.birthdayDismissedSignature=sig;save();el.classList.add("hidden");renderWidgets()};el.classList.remove("hidden");birthdayCommitView(b,candidates)
+ close.onclick=()=>{birthdayCommitDismissed(b,candidates);b.birthdayDismissedSignature=sig;save();el.classList.add("hidden");renderWidgets()};el.classList.remove("hidden")
 }
 
 function cls(){return state.classes.find(c=>c.id===board()?.classId)}
@@ -808,30 +866,40 @@ function openGroupOverview(w,readOnly=false){
  const extraSummary=document.createElement('summary');extraSummary.textContent='⚙️ Ekstra funktioner (valgfrit)';extraSummary.style.cssText='cursor:pointer;font-weight:650';extras.append(extraSummary);
  const extraBody=document.createElement('div');extraBody.style.cssText='display:grid;gap:12px;margin-top:12px';extras.append(extraBody);if(!readOnly&&!(utAgendaActiveItem()?.utGroup?.kind&&utAgendaActiveItem().utGroup.kind!=='none'))scroll.insertBefore(extras,grid);scroll.style.display='block';scroll.style.overflowY='auto';scroll.style.minHeight='0';grid.style.minHeight=readOnly?'min(75vh,760px)':'min(55vh,600px)';
  const meetings=document.createElement('section');const meetingTitle=document.createElement('strong');meetingTitle.textContent='↔️ Hvem skal mødes?';meetings.append(meetingTitle);
- const meetingInfo=document.createElement('p');meetingInfo.className='sub';meetingInfo.textContent='Vælg to grupper og forbind dem. Forbindelserne gemmes på dagens tavle.';meetings.append(meetingInfo);
- const meetingRow=document.createElement('div');meetingRow.className='toolrow';const from=document.createElement('select');from.className='btn';const to=document.createElement('select');to.className='btn';const direction=document.createElement('select');direction.className='btn';[['both','↔ Udveksler'],['one','→ Fremlægger for']].forEach(([v,t])=>direction.add(new Option(t,v)));const connect=document.createElement('button');connect.className='btn';connect.textContent='+ Forbind';meetingRow.append(from,direction,to,connect);meetings.append(meetingRow);
+ const meetingInfo=document.createElement('p');meetingInfo.className='sub';meetingInfo.textContent='Fordel alle automatisk i mødegrupper, eller sammensæt dem selv. Ved et ulige antal bliver én mødegruppe på tre.';meetings.append(meetingInfo);
+ const meetingAutoRow=document.createElement('div');meetingAutoRow.className='toolrow';const autoMeet=document.createElement('button');autoMeet.className='btn';autoMeet.textContent='🎲 Fordel alle i mødegrupper';const clearMeet=document.createElement('button');clearMeet.className='btn';clearMeet.textContent='Ryd mødegrupper';meetingAutoRow.append(autoMeet,clearMeet);meetings.append(meetingAutoRow);
+ const meetingRow=document.createElement('div');meetingRow.className='toolrow';meetingRow.style.marginTop='7px';const from=document.createElement('select');from.className='btn';const to=document.createElement('select');to.className='btn';const direction=document.createElement('select');direction.className='btn';[['both','↔ Udveksler'],['one','→ Første gruppe fremlægger']].forEach(([v,t])=>direction.add(new Option(t,v)));const connect=document.createElement('button');connect.className='btn';connect.textContent='+ Opret mødegruppe';meetingRow.append(from,direction,to,connect);meetings.append(meetingRow);
  const meetingList=document.createElement('div');meetingList.className='sub';meetings.append(meetingList);
  const outdoor=document.createElement('section');outdoor.style.cssText='border-top:1px solid var(--line);padding-top:12px';const outTitle=document.createElement('strong');outTitle.textContent='🚪 Hvem må arbejde udenfor?';outdoor.append(outTitle);
  const outInfo=document.createElement('p');outInfo.className='sub';outInfo.textContent='Vælg selv, eller foreslå grupper ud fra hvor ofte eleverne tidligere har været ude.';outdoor.append(outInfo);
  const outRow=document.createElement('div');outRow.className='toolrow';const outCount=document.createElement('input');outCount.className='btn';outCount.type='number';outCount.min='1';outCount.value='4';outCount.style.width='70px';outCount.setAttribute('aria-label','Antal grupper udenfor');const suggest=document.createElement('button');suggest.className='btn';suggest.textContent='🎲 Foreslå';const clearOut=document.createElement('button');clearOut.className='btn';clearOut.textContent='Ryd markering';const record=document.createElement('button');record.className='btn primary';record.textContent='✓ Registrér udearbejde';outRow.append('Antal grupper:',outCount,suggest,clearOut,record);outdoor.append(outRow);
  const outStatus=document.createElement('p');outStatus.className='sub';outdoor.append(outStatus);extraBody.append(meetings,outdoor);
- w.utMeetings=w.utMeetings||[];w.utOutdoor=w.utOutdoor||[];
+ w.utMeetings=utNormalizeMeetings(w.utMeetings,w.groups?.length||0);w.utOutdoor=w.utOutdoor||[];
  function validIndices(){return (w.groups||[]).map((g,i)=>g.length?i:null).filter(i=>i!==null)}
  function refreshExtras(){
- const valid=validIndices();
- const used=new Set((w.utMeetings||[]).flatMap(m=>[m.a,m.b]));
+ const valid=validIndices(),validSet=new Set(valid);
+ w.utMeetings=utNormalizeMeetings(w.utMeetings,w.groups?.length||0).map(m=>({...m,members:m.members.filter(i=>validSet.has(i))})).filter(m=>m.members.length>=2);
+ const isPairs=currentGroupLabel(w)==='makkerpar',noun=isPairs?'Makkerpar':'Gruppe',used=new Set(w.utMeetings.flatMap(m=>m.members));
  const available=valid.filter(i=>!used.has(i));
  const prevFrom=from.value,prevTo=to.value;
  from.replaceChildren();to.replaceChildren();
- available.forEach(i=>from.add(new Option('Gruppe '+(i+1),String(i))));
+ available.forEach(i=>from.add(new Option(noun+' '+(i+1),String(i))));
  if(available.some(i=>String(i)===prevFrom))from.value=prevFrom;
- const fillTo=()=>{const prior=to.value||prevTo;to.replaceChildren();available.filter(i=>String(i)!==from.value).forEach(i=>to.add(new Option('Gruppe '+(i+1),String(i))));if([...to.options].some(o=>o.value===prior))to.value=prior};
+ const fillTo=()=>{const prior=to.value||prevTo;to.replaceChildren();available.filter(i=>String(i)!==from.value).forEach(i=>to.add(new Option(noun+' '+(i+1),String(i))));if([...to.options].some(o=>o.value===prior))to.value=prior};
  fillTo();from.onchange=fillTo;
- connect.disabled=available.length<2;
- connect.title=connect.disabled?'Alle grupper er allerede forbundet, eller der mangler to ledige grupper.':'';
+ connect.disabled=available.length<2;autoMeet.disabled=valid.length<2;clearMeet.disabled=!w.utMeetings.length;
+ connect.title=connect.disabled?'Der mangler to ledige grupper til en ny mødegruppe.':'';
  meetingList.replaceChildren();
-(w.utMeetings||[]).filter(m=>valid.includes(m.a)&&valid.includes(m.b)).forEach(m=>{const line=document.createElement('div');line.style.margin='5px 0';const label=document.createElement('span');label.textContent='Gruppe '+(m.a+1)+(m.dir==='one'?' → ':' ↔ ')+'gruppe '+(m.b+1)+'  ';const remove=document.createElement('button');remove.className='btn';remove.textContent='✕';remove.title='Fjern forbindelse';remove.onclick=()=>{w.utMeetings=w.utMeetings.filter(x=>x!==m);save();update()};line.append(label,remove);meetingList.append(line)});outStatus.textContent='Markeret til udearbejde: '+(w.utOutdoor||[]).filter(i=>valid.includes(i)).map(i=>i+1).join(', ')+(w.utOutdoor?.length?'':' (ingen)')+'. Klik på en gruppes 🚪-knap for at ændre.';record.disabled=!(w.utOutdoor||[]).some(i=>valid.includes(i))}
- connect.onclick=()=>{const a=+from.value,b=+to.value;if(a===b||!validIndices().includes(a)||!validIndices().includes(b))return alert('Vælg to forskellige grupper.');if((w.utMeetings||[]).some(m=>m.a===a||m.b===a||m.a===b||m.b===b))return alert('En af grupperne er allerede forbundet. Fjern den eksisterende forbindelse først.');w.utMeetings.push({a,b,dir:direction.value});save();update()};
+ w.utMeetings.forEach((m,meetingIndex)=>{
+  const line=document.createElement('div');line.style.cssText='display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:7px 0;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:#fff';
+  const label=document.createElement('span');label.style.cssText='font-weight:650;flex:1;min-width:210px';label.textContent='Mødegruppe '+(meetingIndex+1)+': '+utMeetingSummary(m,noun);line.append(label);
+  const remaining=valid.filter(i=>!used.has(i));if(remaining.length){const extra=document.createElement('select');extra.className='btn';extra.style.maxWidth='160px';remaining.forEach(i=>extra.add(new Option(noun+' '+(i+1),String(i))));const addOne=document.createElement('button');addOne.className='btn';addOne.textContent='+ Tilføj';addOne.onclick=()=>{const n=+extra.value;if(!Number.isInteger(n)||used.has(n))return;m.members.push(n);utAgendaCaptureExtras(w);save();update()};line.append(extra,addOne)}
+  const remove=document.createElement('button');remove.className='btn';remove.textContent='✕';remove.title='Fjern hele mødegruppen';remove.onclick=()=>{w.utMeetings=w.utMeetings.filter(x=>x!==m);utAgendaCaptureExtras(w);save();update()};line.append(remove);meetingList.append(line)
+ });
+ outStatus.textContent='Markeret til udearbejde: '+(w.utOutdoor||[]).filter(i=>valid.includes(i)).map(i=>i+1).join(', ')+(w.utOutdoor?.length?'':' (ingen)')+'. Klik på en gruppes 🚪-knap for at ændre.';record.disabled=!(w.utOutdoor||[]).some(i=>valid.includes(i))}
+ autoMeet.onclick=()=>{const valid=validIndices();if(valid.length<2)return alert('Der skal være mindst to grupper for at lave mødegrupper.');w.utMeetings=utBuildMeetingGroups(valid);utAgendaCaptureExtras(w);save();update()};
+ clearMeet.onclick=()=>{w.utMeetings=[];utAgendaCaptureExtras(w);save();update()};
+ connect.onclick=()=>{const a=+from.value,b=+to.value,valid=validIndices(),used=new Set(utNormalizeMeetings(w.utMeetings,w.groups?.length||0).flatMap(m=>m.members));if(a===b||!valid.includes(a)||!valid.includes(b))return alert('Vælg to forskellige grupper.');if(used.has(a)||used.has(b))return alert('En af grupperne er allerede med i en mødegruppe.');w.utMeetings.push({members:[a,b],dir:direction.value});utAgendaCaptureExtras(w);save();update()};
  function rotationCounts(){state.utOutdoorHistory=state.utOutdoorHistory||{};const id=cls()?.id||'unknown';return state.utOutdoorHistory[id]||(state.utOutdoorHistory[id]={})}
  suggest.onclick=()=>{const valid=validIndices(),n=Math.max(1,Math.min(valid.length,Math.floor(+outCount.value||1))),history=rotationCounts();const ranked=valid.map(i=>({i,score:w.groups[i].reduce((a,name)=>a+(history[name]||0),0)/w.groups[i].length,random:Math.random()})).sort((a,b)=>a.score-b.score||a.random-b.random);w.utOutdoor=ranked.slice(0,n).map(x=>x.i);save();update()};
  clearOut.onclick=()=>{w.utOutdoor=[];save();update()};
@@ -845,9 +913,9 @@ function openGroupOverview(w,readOnly=false){
  document.addEventListener('keydown',onKey,true);document.addEventListener('fullscreenchange',onFullscreenChange);close.onclick=dismiss;overlay.onclick=e=>{if(e.target===overlay)dismiss()};
  let selected=null;
  function resize(){const count=(w.groups||[]).filter(g=>g.length).length;if(!count)return;const width=grid.clientWidth||window.innerWidth;const height=grid.clientHeight||window.innerHeight;let best=1,score=-Infinity;for(let cols=1;cols<=Math.min(count,Math.max(1,Math.floor(width/150)));cols++){const rows=Math.ceil(count/cols),cardW=(width-(cols-1)*10)/cols,cardH=(height-(rows-1)*10)/rows,maxNames=Math.max(1,...(w.groups||[]).map(g=>g.length));const minHeight=42+maxNames*35;const fit=Math.min(cardW/185,cardH/minHeight);const value=Math.min(1.5,fit)*100-cols*.3;if(value>score){score=value;best=cols}}grid.style.setProperty('--group-cols',best);grid.style.setProperty('--group-rows',Math.ceil(count/best))}
- function update(){selected=null;grid.replaceChildren();const groups=w.groups||[];const isPairs=currentGroupLabel(w)==='makkerpar';groups.forEach((g,i)=>{const card=document.createElement('div');card.className='ut-group-card';const heading=document.createElement('h3');heading.textContent=(isPairs?'Makkerpar ':'Gruppe ')+(i+1);card.append(heading);if((w.utOutdoor||[]).includes(i)){const marker=document.createElement('span');marker.textContent=' 🚪 Ude';marker.style.cssText='font-size:.75em;color:#20578b';heading.append(marker)}const meetingIndex=(w.utMeetings||[]).findIndex(m=>m.a===i||m.b===i);
- if(meetingIndex>=0){const palette=[['#e0f2fe','#0369a1'],['#fce7f3','#9d174d'],['#dcfce7','#166534'],['#fef3c7','#92400e'],['#ede9fe','#6d28d9'],['#ffedd5','#9a3412'],['#ccfbf1','#115e59'],['#f3e8ff','#7e22ce']];const [bg,fg]=palette[meetingIndex%palette.length];card.style.background=bg;card.style.border='2px solid '+fg;const marker=document.createElement('span');marker.textContent=' ●';marker.style.color=fg;marker.title='Samme farve som gruppen, der skal mødes';heading.append(marker)}
- const partners=(w.utMeetings||[]).filter(m=>m.a===i||m.b===i).map(m=>m.a===i?(m.dir==='one'?' → ':' ↔ ')+(m.b+1):(m.dir==='one'?' ← ':' ↔ ')+(m.a+1));if(partners.length){const note=document.createElement('div');note.className='sub';note.textContent='Mødes med gruppe'+partners.join(', gruppe');card.append(note)}const outdoorToggle=document.createElement('button');outdoorToggle.className='btn';outdoorToggle.style.cssText='font-size:.78em;padding:3px 8px;margin-bottom:4px';outdoorToggle.textContent=(w.utOutdoor||[]).includes(i)?'✓ 🚪 Ude':'🚪 Markér ude';outdoorToggle.onclick=()=>{w.utOutdoor=(w.utOutdoor||[]).includes(i)?w.utOutdoor.filter(x=>x!==i):[...w.utOutdoor,i];utAgendaCaptureExtras(w);save();update()};if(extras.open&&!readOnly)card.append(outdoorToggle);card.ondragover=e=>e.preventDefault();card.ondrop=e=>{e.preventDefault();if(readOnly)return;try{const data=JSON.parse(e.dataTransfer.getData('text/plain'));if(!groups[data.g]||!groups[i]||!Number.isInteger(data.i)||data.i<0||data.i>=groups[data.g].length)return;const name=groups[data.g].splice(data.i,1)[0];groups[i].push(name);compactGroups(w);rememberGroupArrangement(w);resetGroupDraw(w);save();update()}catch(err){}};g.forEach((n,j)=>{const item=document.createElement('div');item.className='ut-group-person';item.textContent=n;item.draggable=!readOnly;item.ondragstart=e=>e.dataTransfer.setData('text/plain',JSON.stringify({g:i,i:j}));item.onclick=()=>{if(readOnly)return;if(!selected){selected={g:i,i:j,el:item};item.classList.add('ut-picked-person');return}if(selected.g===i&&selected.i===j){item.classList.remove('ut-picked-person');selected=null;return}const old=groups[selected.g][selected.i];groups[selected.g][selected.i]=groups[i][j];groups[i][j]=old;rememberGroupArrangement(w);resetGroupDraw(w);save();update()};card.append(item)});grid.append(card)});if(!readOnly)refreshExtras();requestAnimationFrame(resize)}
+ function update(){selected=null;grid.replaceChildren();const groups=w.groups||[];const isPairs=currentGroupLabel(w)==='makkerpar',meetingNoun=isPairs?'Makkerpar':'Gruppe';w.utMeetings=utNormalizeMeetings(w.utMeetings,groups.length);groups.forEach((g,i)=>{const card=document.createElement('div');card.className='ut-group-card';const heading=document.createElement('h3');heading.textContent=(isPairs?'Makkerpar ':'Gruppe ')+(i+1);card.append(heading);if((w.utOutdoor||[]).includes(i)){const marker=document.createElement('span');marker.textContent=' 🚪 Ude';marker.style.cssText='font-size:.75em;color:#20578b';heading.append(marker)}const meetingIndex=w.utMeetings.findIndex(m=>m.members.includes(i));
+ if(meetingIndex>=0){const palette=[['#e0f2fe','#0369a1'],['#fce7f3','#9d174d'],['#dcfce7','#166534'],['#fef3c7','#92400e'],['#ede9fe','#6d28d9'],['#ffedd5','#9a3412'],['#ccfbf1','#115e59'],['#f3e8ff','#7e22ce']];const [bg,fg]=palette[meetingIndex%palette.length];card.style.background=bg;card.style.border='2px solid '+fg;const marker=document.createElement('span');marker.textContent=' ●';marker.style.color=fg;marker.title='Samme farve som de øvrige i mødegruppen';heading.append(marker)}
+ const meetingNote=utMeetingNote(i,w.utMeetings,meetingNoun);if(meetingNote){const note=document.createElement('div');note.className='sub';note.textContent=meetingNote;card.append(note)}const outdoorToggle=document.createElement('button');outdoorToggle.className='btn';outdoorToggle.style.cssText='font-size:.78em;padding:3px 8px;margin-bottom:4px';outdoorToggle.textContent=(w.utOutdoor||[]).includes(i)?'✓ 🚪 Ude':'🚪 Markér ude';outdoorToggle.onclick=()=>{w.utOutdoor=(w.utOutdoor||[]).includes(i)?w.utOutdoor.filter(x=>x!==i):[...w.utOutdoor,i];utAgendaCaptureExtras(w);save();update()};if(extras.open&&!readOnly)card.append(outdoorToggle);card.ondragover=e=>e.preventDefault();card.ondrop=e=>{e.preventDefault();if(readOnly)return;try{const data=JSON.parse(e.dataTransfer.getData('text/plain'));if(!groups[data.g]||!groups[i]||!Number.isInteger(data.i)||data.i<0||data.i>=groups[data.g].length)return;const name=groups[data.g].splice(data.i,1)[0];groups[i].push(name);compactGroups(w);rememberGroupArrangement(w);resetGroupDraw(w);save();update()}catch(err){}};g.forEach((n,j)=>{const item=document.createElement('div');item.className='ut-group-person';item.textContent=n;item.draggable=!readOnly;item.ondragstart=e=>e.dataTransfer.setData('text/plain',JSON.stringify({g:i,i:j}));item.onclick=()=>{if(readOnly)return;if(!selected){selected={g:i,i:j,el:item};item.classList.add('ut-picked-person');return}if(selected.g===i&&selected.i===j){item.classList.remove('ut-picked-person');selected=null;return}const old=groups[selected.g][selected.i];groups[selected.g][selected.i]=groups[i][j];groups[i][j]=old;rememberGroupArrangement(w);resetGroupDraw(w);save();update()};card.append(item)});grid.append(card)});if(!readOnly)refreshExtras();requestAnimationFrame(resize)}
  extras.ontoggle=()=>{grid.style.minHeight=extras.open?'min(48vh,500px)':'min(65vh,700px)';update()};
  add.onclick=()=>{w.groups=w.groups||[];w.groups.push([]);rememberGroupArrangement(w);resetGroupDraw(w);save();update()};del.onclick=()=>{if(!(w.groups||[]).length)return;const gone=w.groups.pop()||[];if(gone.length){if(!w.groups.length)w.groups=[[]];gone.forEach((n,i)=>w.groups[i%w.groups.length].push(n))}rememberGroupArrangement(w);resetGroupDraw(w);save();update()};store.onclick=()=>saveGroupSet(w);window.addEventListener('resize',resize);update();close.focus()
 }
