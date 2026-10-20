@@ -345,6 +345,16 @@ body.viewing .withSide .widget:not(.ut-with-agenda) .wtext,
 body.viewing .withSide .widget:not(.ut-with-agenda) .richdisplay,
 body.viewing .withSide .widget:not(.ut-with-agenda) .richedit{font-size:clamp(21px,1.55vw,28px)!important;line-height:1.45!important}
 body.viewing .withSide .widget:not(.ut-with-agenda) .sub{font-size:clamp(17px,1.2vw,22px)!important;line-height:1.35!important}
+/* Hovedtavlens almindelige højre sidepanel: læsbart på klassens whiteboard. */
+body.viewing .workspace:not(.noWidgets){grid-template-columns:minmax(0,1fr) clamp(350px,28vw,440px)}
+body.viewing #widgets{gap:14px}
+body.viewing #widgets .widget{padding:18px 20px}
+body.viewing #widgets .whead h3{font-size:clamp(22px,1.55vw,30px);line-height:1.18}
+body.viewing #widgets .wtext,
+body.viewing #widgets .richdisplay,
+body.viewing #widgets .richedit{font-size:clamp(20px,1.4vw,27px);line-height:1.48}
+body.viewing #widgets .sub{font-size:clamp(17px,1.15vw,22px);line-height:1.4}
+body.viewing #widgets .widget.ut-widget-message .wtext{margin-top:12px}
 @media(max-width:820px){.ut-slot-choice-list{grid-template-columns:1fr}}
 </style>
 </head>
