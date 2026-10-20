@@ -357,6 +357,19 @@ body.viewing #widgets .sub{font-size:clamp(17px,1.15vw,22px);line-height:1.4}
 body.viewing #widgets .widget.ut-widget-message .wtext{margin-top:12px}
 @media(max-width:820px){.ut-slot-choice-list{grid-template-columns:1fr}}
 </style>
+
+<style id="ut-linked-subpoint-typography-fix">
+/* Koblede underpunkter til det aktive punkt skal stadig være tydeligt læsbare på klassens tavle. */
+body.viewing .agenda .item.ut-linked-active{padding:13px 15px;opacity:1}
+body.viewing .agenda .item.ut-linked-active .title{font-size:clamp(26px,2.45vw,34px)!important;line-height:1.18;font-weight:850}
+body.viewing .agenda .item.ut-linked-active .desc{font-size:clamp(17px,1.55vw,22px)!important;line-height:1.38;margin-top:8px}
+body.viewing .agenda .item.ut-linked-active .need{font-size:clamp(16px,1.45vw,21px)!important;line-height:1.35;margin-top:8px}
+body.viewing .agenda .item.ut-linked-active .meta{font-size:clamp(16px,1.35vw,20px)!important;margin-top:9px;gap:8px}
+body.viewing .agenda .item.ut-linked-active .meta .btn,
+body.viewing .agenda .item.ut-linked-active .meta .ut-mode-chip,
+body.viewing .agenda .item.ut-linked-active .meta .ut-groupmode-chip,
+body.viewing .agenda .item.ut-linked-active .meta .ut-time-chip{font-size:clamp(16px,1.3vw,19px)!important;min-height:36px;padding:7px 11px}
+</style>
 </head>
 <body>
 <section id="scheduleView">
@@ -808,7 +821,7 @@ function syncAgendaTimer(){const b=board();if(!b||!document.body.classList.conta
 function renderAgenda(){syncAgendaTimer();const before=board()?.widgets?.find(w=>w.type==='groups')?.utAgendaToken;utAgendaGroupSync();const after=board()?.widgets?.find(w=>w.type==='groups')?.utAgendaToken;if(before!==after)queueMicrotask(()=>{renderWidgets();refreshOpenTimerSides()});agenda.innerHTML="";let b=board();if(!b.items.length){let empty=document.createElement("div");empty.className="sub editonly";empty.textContent="Ingen programpunkter endnu. Tavlen kan sagtens bruges med fx Tavlenoter, Besked eller Timer.";agenda.append(empty)}let ci=cur(),viewing=document.body.classList.contains("viewing"),agendaNumbers=utAgendaNumbering(b.items);
  b.items.forEach((x,i)=>{const linkedFromActive=viewing&&ci>=0&&x.status==='open'&&utAgendaLinkedFrom(b.items,ci,i);const upcoming=viewing&&x.status==='open'&&i>ci&&!linkedFromActive;
   if(x.type==='pause'){let r=document.createElement('div');r.className='item ut-pause-item '+(i===ci?'current ':'')+(x.status==='done'?'done ':x.status==='skipped'?'skipped ':'');let h=document.createElement('span');h.className='handle editonly';h.textContent='☰';r.append(h);let st=document.createElement('span');st.className='status';st.textContent=x.status==='done'?'✓':x.status==='skipped'?'↷':'';r.append(st);let co=document.createElement('div');co.className='content';let ti=document.createElement('div');ti.className='title ut-pause-time';ti.textContent=pauseLabel(x,b);co.append(ti);if(i===ci&&x.pauseEnd){let sub=document.createElement('div');sub.className='ut-pause-continue';sub.textContent=boardText('Vi fortsætter kl. ','We continue at ','Wir machen weiter um ',b)+x.pauseEnd;co.append(sub)}r.append(co);let ac=document.createElement('div');ac.className='actions';ac.append(ib('✎','Redigér pause',()=>openPauseEditor(x),'editonly'));ac.append(ib('⧉','Kopiér eller flyt til en anden tavle',()=>utAgendaTransferItem(x),'editonly'));if(i===ci){ac.append(ib('✓',boardText('Fortsæt','Continue','Weiter',b),()=>utSetAgendaGroupStatus(i,'done')))}else if(x.status!=='open')ac.append(ib('↶',boardText('Fortryd','Undo','Rückgängig',b),()=>utReopenAgendaGroup(i)));r.append(ac);r.draggable=!viewing;r.ondragstart=()=>{dragItem=x.id;r.classList.add('dragging')};r.ondragend=()=>dragItem=null;r.ondragover=e=>{if(dragItem&&dragItem!==x.id){e.preventDefault();r.classList.add('over')}};r.ondragleave=()=>r.classList.remove('over');r.ondrop=e=>{e.preventDefault();let f=b.items.findIndex(z=>z.id===dragItem),to=b.items.findIndex(z=>z.id===x.id);if(f>=0&&to>=0&&f!==to){b.items.splice(to,0,b.items.splice(f,1)[0]);save();renderAgenda()}};agenda.append(r);return}
-  let r=document.createElement("div");r.className="item "+(i===ci?"current ":"")+(x.status==="done"?"done ":"")+(x.status==="skipped"?"skipped ":"")+(upcoming?"ut-upcoming ":"");
+  let r=document.createElement("div");r.className="item "+(i===ci?"current ":"")+(x.status==="done"?"done ":"")+(x.status==="skipped"?"skipped ":"")+(linkedFromActive&&i!==ci?"ut-linked-active ":"")+(upcoming?"ut-upcoming ":"");
   let h=document.createElement("span");h.className="handle editonly";h.textContent="☰";r.append(h);let st=document.createElement("span");st.className="status";st.textContent=x.status==="done"?"✓":x.status==="skipped"?"↷":"";r.append(st);
   let co=document.createElement("div");co.className="content";let ti=document.createElement("div");ti.className="title";ti.textContent=agendaNumbers[i]+". "+x.title;co.append(ti);
   if(!upcoming){if(x.desc){let d=document.createElement("div");d.className="desc";d.classList.add("richdisplay");d.innerHTML=x.desc;co.append(d)}if(x.need){let n=document.createElement("div");n.className="need";n.textContent=boardText("🎒 Du skal bruge: ","🎒 You need: ","🎒 Du brauchst: ")+x.need;co.append(n)}
