@@ -370,6 +370,33 @@ body.viewing .agenda .item.ut-linked-active .meta .ut-mode-chip,
 body.viewing .agenda .item.ut-linked-active .meta .ut-groupmode-chip,
 body.viewing .agenda .item.ut-linked-active .meta .ut-time-chip{font-size:clamp(16px,1.3vw,19px)!important;min-height:36px;padding:7px 11px}
 </style>
+
+<style id="ut-group-draw-layout-v2">
+/* Tilfældig gruppe/par: stor, frit flytbar og manuelt skalerbar klassevisning */
+.ut-group-float{
+  width:min(620px,calc(100vw - 32px));
+  height:min(390px,calc(100dvh - 32px));
+  min-width:min(360px,calc(100vw - 20px));
+  min-height:260px;
+  max-width:calc(100vw - 8px);
+  max-height:calc(100dvh - 8px);
+  resize:both;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.ut-group-float-head{flex:0 0 auto;padding:14px 17px;font-size:clamp(16px,1.45vw,21px)}
+.ut-group-float-body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:20px 22px;overflow:auto}
+.ut-group-float-result{font-size:clamp(25px,2.5vw,38px);line-height:1.25;margin:8px 0 12px}
+.ut-group-drawn-title{font-size:clamp(28px,3vw,46px);margin-bottom:10px}
+.ut-group-drawn-names{gap:9px;margin:12px 0 18px}
+.ut-group-drawn-names span{padding:8px 15px;font-size:clamp(25px,2.7vw,42px);border-radius:12px}
+.ut-group-float .sub{font-size:clamp(15px,1.3vw,20px)}
+.ut-group-float .toolrow{gap:10px;margin-top:14px}
+.ut-group-float .btn{font-size:clamp(15px,1.25vw,19px);padding:10px 14px}
+.ut-group-resize-handle{position:absolute;right:3px;bottom:3px;width:28px;height:28px;display:grid;place-items:center;border-radius:8px 0 12px 0;background:#e4ece7;border:1px solid #c9d7cf;color:#355c4d;font-size:18px;line-height:1;cursor:nwse-resize;touch-action:none;user-select:none;z-index:3;opacity:.88}.ut-group-resize-handle:hover{opacity:1}
+@media(max-width:700px){.ut-group-float{width:min(94vw,620px);height:min(54vh,390px);min-width:300px;min-height:240px}}
+</style>
 </head>
 <body>
 <section id="scheduleView">
@@ -1132,36 +1159,51 @@ function openGroupOverview(w,readOnly=false){
 }
 function openGroupDraw(w){
  document.querySelector('.ut-group-float')?.remove();
+ const LAYOUT_KEY='undervisningstavle.groupDrawLayout.v1';
+ const readLayout=()=>{try{return JSON.parse(localStorage.getItem(LAYOUT_KEY)||'{}')||{}}catch(e){return {}}};
+ const writeLayout=value=>{try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(value))}catch(e){}};
  const panel=document.createElement('div');panel.className='ut-group-float';
  const head=document.createElement('div');head.className='ut-group-float-head';
- const name=document.createElement('strong');name.textContent=boardText('🎲 Tilfældig gruppe / makkerpar','🎲 Random group / pair');
- const close=document.createElement('button');close.className='btn';close.textContent='✕';close.setAttribute('aria-label',boardText('Luk udtrækning','Close draw'));head.append(name,close);
+ const name=document.createElement('strong');name.textContent=boardText('🎲 Tilfældig gruppe / makkerpar','🎲 Random group / pair','🎲 Zufällige Gruppe / Paar');
+ const close=document.createElement('button');close.className='btn';close.textContent='✕';close.setAttribute('aria-label',boardText('Luk udtrækning','Close draw','Ziehung schließen'));head.append(name,close);
  const body=document.createElement('div');body.className='ut-group-float-body';
+ const resizeHandle=document.createElement('div');resizeHandle.className='ut-group-resize-handle';resizeHandle.textContent='↘';resizeHandle.title=boardText('Træk for at ændre størrelse','Drag to resize','Ziehen zum Vergrößern oder Verkleinern');resizeHandle.setAttribute('aria-label',resizeHandle.title);
  const result=document.createElement('div');result.className='ut-group-float-result';result.setAttribute('aria-live','polite');
  const stat=document.createElement('div');stat.className='sub';
  const row=document.createElement('div');row.className='toolrow';
  const pick=document.createElement('button');pick.className='btn primary';
- const reset=document.createElement('button');reset.className='btn';reset.textContent=boardText('↻ Nulstil','↻ Reset');
- row.append(pick,reset);body.append(result,stat,row);panel.append(head,body);document.body.append(panel);close.onclick=()=>panel.remove();
+ const reset=document.createElement('button');reset.className='btn';reset.textContent=boardText('↻ Nulstil','↻ Reset','↻ Zurücksetzen');
+ row.append(pick,reset);body.append(result,stat,row);panel.append(head,body,resizeHandle);document.body.append(panel);
+ const clampLayout=()=>{const r=panel.getBoundingClientRect(),maxLeft=Math.max(0,window.innerWidth-r.width),maxTop=Math.max(0,window.innerHeight-r.height);let left=parseFloat(panel.style.left),top=parseFloat(panel.style.top);if(!Number.isFinite(left))left=Math.max(8,maxLeft-18);if(!Number.isFinite(top))top=Math.max(8,maxTop-18);panel.style.right='auto';panel.style.bottom='auto';panel.style.left=Math.max(0,Math.min(maxLeft,left))+'px';panel.style.top=Math.max(0,Math.min(maxTop,top))+'px'};
+ const saveLayout=()=>{const r=panel.getBoundingClientRect(),maxLeft=Math.max(1,window.innerWidth-r.width),maxTop=Math.max(1,window.innerHeight-r.height);writeLayout({width:Math.round(r.width),height:Math.round(r.height),x:Math.max(0,Math.min(1,r.left/maxLeft)),y:Math.max(0,Math.min(1,r.top/maxTop))})};
+ const restoreLayout=()=>{const layout=readLayout();const maxW=Math.max(300,window.innerWidth-8),maxH=Math.max(240,window.innerHeight-8);if(Number.isFinite(+layout.width))panel.style.width=Math.max(300,Math.min(maxW,+layout.width))+'px';if(Number.isFinite(+layout.height))panel.style.height=Math.max(240,Math.min(maxH,+layout.height))+'px';requestAnimationFrame(()=>{const r=panel.getBoundingClientRect(),maxLeft=Math.max(0,window.innerWidth-r.width),maxTop=Math.max(0,window.innerHeight-r.height);const x=Number.isFinite(+layout.x)?Math.max(0,Math.min(1,+layout.x)):1,y=Number.isFinite(+layout.y)?Math.max(0,Math.min(1,+layout.y)):1;panel.style.right='auto';panel.style.bottom='auto';panel.style.left=Math.round(maxLeft*x)+'px';panel.style.top=Math.round(maxTop*y)+'px';clampLayout()})};
+ let resizeSaveTimer=null;const resizeObserver=typeof ResizeObserver!=='undefined'?new ResizeObserver(()=>{clearTimeout(resizeSaveTimer);resizeSaveTimer=setTimeout(()=>{clampLayout();saveLayout()},120)}):null;resizeObserver?.observe(panel);
+ const onWindowResize=()=>{clampLayout();saveLayout()};window.addEventListener('resize',onWindowResize);
+ const dismiss=()=>{saveLayout();resizeObserver?.disconnect();window.removeEventListener('resize',onWindowResize);panel.remove()};close.onclick=dismiss;
  function draw(){
   const groups=groupDrawState(w),pair=currentGroupLabel(w)==='makkerpar';
   const left=groups.filter(x=>!w.groupDrawn.includes(x.i));
-  pick.textContent=pair?boardText('🎲 Træk makkerpar','🎲 Draw pair'):boardText('🎲 Træk gruppe','🎲 Draw group');pick.disabled=!left.length;
+  pick.textContent=pair?boardText('🎲 Træk makkerpar','🎲 Draw pair','🎲 Paar ziehen'):boardText('🎲 Træk gruppe','🎲 Draw group','🎲 Gruppe ziehen');pick.disabled=!left.length;
   const selected=groups.find(x=>x.i===w.groupCurrent);result.replaceChildren();
   if(selected){
-   const title=document.createElement('div');title.className='ut-group-drawn-title';title.textContent=(pair?boardText('Makkerpar ','Pair '):boardText('Gruppe ','Group '))+(selected.i+1);
+   const title=document.createElement('div');title.className='ut-group-drawn-title';title.textContent=(pair?boardText('Makkerpar ','Pair ','Paar '):boardText('Gruppe ','Group ','Gruppe '))+(selected.i+1);
    const names=document.createElement('div');names.className='ut-group-drawn-names';
    selected.g.forEach(n=>{const chip=document.createElement('span');chip.textContent=n;names.append(chip)});
    result.append(title,names)
-  }else{result.textContent=boardText('Klar til udtrækning','Ready to draw')}
+  }else{result.textContent=boardText('Klar til udtrækning','Ready to draw','Bereit zum Ziehen')}
   {const lang=boardLanguage();stat.textContent=lang==='en'?left.length+' left · '+(groups.length-left.length)+' chosen':lang==='de'?left.length+' übrig · '+(groups.length-left.length)+' gewählt':left.length+' tilbage · '+(groups.length-left.length)+' valgt';}
  }
  pick.onclick=()=>{const options=groupDrawState(w).filter(x=>!w.groupDrawn.includes(x.i));if(!options.length)return;const chosen=options[Math.floor(Math.random()*options.length)];w.groupCurrent=chosen.i;w.groupDrawn.push(chosen.i);save();draw()};
  reset.onclick=()=>{resetGroupDraw(w);save();draw()};
  let dragging=false,sx=0,sy=0,left=0,top=0;
- head.onpointerdown=e=>{if(e.target.closest('button'))return;dragging=true;sx=e.clientX;sy=e.clientY;const r=panel.getBoundingClientRect();left=r.left;top=r.top;head.setPointerCapture(e.pointerId)};
+ head.onpointerdown=e=>{if(e.target.closest('button'))return;dragging=true;sx=e.clientX;sy=e.clientY;const r=panel.getBoundingClientRect();left=r.left;top=r.top;head.setPointerCapture(e.pointerId);e.preventDefault()};
  head.onpointermove=e=>{if(!dragging)return;panel.style.right='auto';panel.style.bottom='auto';panel.style.left=Math.max(0,Math.min(window.innerWidth-panel.offsetWidth,left+e.clientX-sx))+'px';panel.style.top=Math.max(0,Math.min(window.innerHeight-panel.offsetHeight,top+e.clientY-sy))+'px'};
- head.onpointerup=()=>dragging=false;draw()
+ head.onpointerup=e=>{if(!dragging)return;dragging=false;try{head.releasePointerCapture(e.pointerId)}catch(err){}saveLayout()};
+ let resizing=false,rsx=0,rsy=0,rsw=0,rsh=0;
+ resizeHandle.onpointerdown=e=>{resizing=true;rsx=e.clientX;rsy=e.clientY;const r=panel.getBoundingClientRect();rsw=r.width;rsh=r.height;resizeHandle.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation()};
+ resizeHandle.onpointermove=e=>{if(!resizing)return;const r=panel.getBoundingClientRect(),maxW=Math.max(300,window.innerWidth-r.left-4),maxH=Math.max(240,window.innerHeight-r.top-4);panel.style.width=Math.max(300,Math.min(maxW,rsw+e.clientX-rsx))+'px';panel.style.height=Math.max(240,Math.min(maxH,rsh+e.clientY-rsy))+'px'};
+ resizeHandle.onpointerup=e=>{if(!resizing)return;resizing=false;try{resizeHandle.releasePointerCapture(e.pointerId)}catch(err){}clampLayout();saveLayout()};
+ restoreLayout();draw()
 }
 function groupsUI(w){let wrap=document.createElement('div');if(!cls()){wrap.innerHTML='<div class="sub">Knyt en klasse til tavlen for at bruge grupper.</div>';return wrap}
  const student=document.createElement('div');student.className='ut-groups-student';
@@ -1433,20 +1475,27 @@ const style=el('style');style.textContent=`
 #utCourseBack .ut-course-material{display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #e9eee9;min-width:0}#utCourseBack .ut-course-material span{flex:1;overflow-wrap:anywhere}
 #utCourseBack .ut-course-preview-link{flex:1;min-width:0;overflow-wrap:anywhere;text-align:left;background:none;border:0;color:var(--ink,#234c3d);font:inherit;cursor:pointer;padding:7px 5px;border-radius:6px;text-decoration:underline;text-underline-offset:3px}#utCourseBack .ut-course-preview-link:hover{background:#edf4ee}#utCourseBack .ut-course-empty{padding:24px 8px;color:var(--muted,#6b746d);text-align:center}
 #utCourseSuggest{border:1px solid #cbd9ce;border-radius:11px;background:#f3f8f3;padding:12px;margin-top:12px}#utCourseSuggest .ut-course-suggestion{display:flex;align-items:center;gap:8px;padding:5px 0}#utCourseSuggest .ut-course-suggestion button{flex:1;text-align:left;white-space:normal;min-height:36px}#utCourseSuggest .ut-course-suggestion small{color:#607166}
-@media(max-width:700px){#utCourseBack .ut-course-columns{grid-template-columns:1fr}#utCourseBack .ut-course-modal{padding:14px}}
+#utCourseBack .ut-course-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}#utCourseBack .ut-course-filters select{width:100%;min-width:0;border:1px solid var(--line,#d5dbd5);border-radius:9px;padding:9px;background:#fff;color:#202621}#utCourseBack .ut-course-filter-note{font-size:12px;color:var(--muted,#6b746d);margin:-2px 0 10px}
+@media(max-width:700px){#utCourseBack .ut-course-columns{grid-template-columns:1fr}#utCourseBack .ut-course-modal{padding:14px}#utCourseBack .ut-course-filters{grid-template-columns:1fr}}
 `;document.head.append(style);
 const openButton=btn('📁 Mine forløb',()=>{try{const latest=JSON.parse(localStorage.getItem(LIBKEY)||'[]');if(Array.isArray(latest))courses=latest}catch(e){console.warn(e)}selected=courses[0]?.id||null;draw();back.style.display='flex'});openButton.id='utCoursesBtn';const anchor=document.getElementById('yearOverviewBtn');if(anchor)anchor.after(openButton);
 const back=el('div','modalback');back.id='utCourseBack';back.style.display='none';back.setAttribute('role','dialog');back.setAttribute('aria-modal','true');back.setAttribute('aria-label','Mine forløb');const modal=el('div','ut-course-modal');back.append(modal);document.body.append(back);back.onclick=e=>{if(e.target===back)close()};
-let selected=null;const close=()=>{back.style.display='none'};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&back.style.display==='flex'){e.preventDefault();close()}});
+let selected=null,courseFilterSubject='',courseFilterGrade='',courseSearchValue='';const close=()=>{back.style.display='none'};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&back.style.display==='flex'){e.preventDefault();close()}});
 function draw(){modal.replaceChildren();const top=el('div','ut-course-top');top.append(el('h2','','📁 Mine forløb'),btn('✕ Luk',close));modal.append(top);
 const columns=el('div','ut-course-columns'),left=el('section','ut-course-pane'),right=el('section','ut-course-pane');columns.append(left,right);modal.append(columns);
-const courseSearch=el('input');courseSearch.type='search';courseSearch.placeholder='Søg i forløb og materialer…';courseSearch.setAttribute('aria-label','Søg i forløb og materialer');courseSearch.style.cssText='width:100%;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:9px';left.append(courseSearch);courseSearch.oninput=()=>{const q=norm(courseSearch.value);for(const row of left.querySelectorAll('.ut-course-row')){const course=courses.find(c=>c.id===row.dataset.courseId);row.style.display=!q||norm(course?.name).includes(q)||course?.materials?.some(m=>norm(m.name).includes(q))?'':'none'}};
-left.append(btn('＋ Opret forløb',()=>{const c={id:uid(),name:'',subject:'',grade:'',note:'',materials:[]};courses.push(c);selected=c.id;store();draw();setTimeout(()=>document.getElementById('utCourseName')?.focus(),0)},'btn primary'));
+const uniqueValues=key=>[...new Set(courses.map(c=>String(c?.[key]||'').trim()).filter(Boolean))].sort((a,b)=>key==='grade'?(Number.parseFloat(a)-Number.parseFloat(b)||a.localeCompare(b,'da')):a.localeCompare(b,'da'));
+const gradeLabel=v=>/klasse/i.test(String(v||''))?String(v):String(v)+'. klasse';
+const courseSearch=el('input');courseSearch.type='search';courseSearch.placeholder='Søg i forløb og materialer…';courseSearch.setAttribute('aria-label','Søg i forløb og materialer');courseSearch.style.cssText='width:100%;margin:10px 0 8px;padding:10px;border:1px solid var(--line);border-radius:9px';courseSearch.value=courseSearchValue;left.append(courseSearch);
+const filters=el('div','ut-course-filters'),subjectFilter=el('select'),gradeFilter=el('select');subjectFilter.setAttribute('aria-label','Filtrér efter fag');gradeFilter.setAttribute('aria-label','Filtrér efter klassetrin');subjectFilter.add(new Option('Alle fag',''));for(const v of uniqueValues('subject'))subjectFilter.add(new Option(v,v));gradeFilter.add(new Option('Alle klassetrin',''));for(const v of uniqueValues('grade'))gradeFilter.add(new Option(gradeLabel(v),v));subjectFilter.value=[...subjectFilter.options].some(o=>o.value===courseFilterSubject)?courseFilterSubject:'';gradeFilter.value=[...gradeFilter.options].some(o=>o.value===courseFilterGrade)?courseFilterGrade:'';courseFilterSubject=subjectFilter.value;courseFilterGrade=gradeFilter.value;filters.append(subjectFilter,gradeFilter);left.append(filters,el('div','ut-course-filter-note','Filtrene laves automatisk ud fra fag og klassetrin i dine forløb.'));
+const applyCourseFilters=()=>{const q=norm(courseSearch.value);courseSearchValue=courseSearch.value;courseFilterSubject=subjectFilter.value;courseFilterGrade=gradeFilter.value;for(const row of left.querySelectorAll('.ut-course-row')){const course=courses.find(c=>c.id===row.dataset.courseId);const searchOk=!q||norm(course?.name).includes(q)||norm(course?.subject).includes(q)||norm(course?.grade).includes(q)||course?.materials?.some(m=>norm(m.name).includes(q));const subjectOk=!courseFilterSubject||String(course?.subject||'').trim()===courseFilterSubject;const gradeOk=!courseFilterGrade||String(course?.grade||'').trim()===courseFilterGrade;row.style.display=searchOk&&subjectOk&&gradeOk?'':'none'}};
+courseSearch.oninput=applyCourseFilters;subjectFilter.onchange=applyCourseFilters;gradeFilter.onchange=applyCourseFilters;
+left.append(btn('＋ Opret forløb',()=>{const c={id:uid(),name:'',subject:courseFilterSubject||'',grade:courseFilterGrade||'',note:'',materials:[]};courses.push(c);selected=c.id;store();draw();setTimeout(()=>document.getElementById('utCourseName')?.focus(),0)},'btn primary'));
 if(!courses.length)left.append(el('div','ut-course-empty','Du har endnu ingen forløb. Opret fx Hitman og saml materialerne her.'));
-for(const c of [...courses].sort((a,b)=>a.name.localeCompare(b.name,'da'))){const row=el('div','ut-course-row'),pick=btn('',()=>{selected=c.id;draw()},'ut-course-pick');row.dataset.courseId=c.id;if(selected===c.id)row.classList.add('ut-course-selected');pick.append(el('strong','',c.name||'Nyt forløb'),el('small','',[c.subject,c.grade?c.grade+'. klasse':'',c.materials.length+' materialer'].filter(Boolean).join(' · ')));row.append(pick);left.append(row)}
+for(const c of [...courses].sort((a,b)=>a.name.localeCompare(b.name,'da'))){const row=el('div','ut-course-row'),pick=btn('',()=>{selected=c.id;draw()},'ut-course-pick');row.dataset.courseId=c.id;if(selected===c.id)row.classList.add('ut-course-selected');pick.append(el('strong','',c.name||'Nyt forløb'),el('small','',[c.subject,c.grade?(/klasse/i.test(String(c.grade))?c.grade:c.grade+'. klasse'):'',c.materials.length+' materialer'].filter(Boolean).join(' · ')));row.append(pick);left.append(row)}
+applyCourseFilters();
 const c=courses.find(x=>x.id===selected);if(!c){right.append(el('div','ut-course-empty','Vælg et forløb i listen.'));return}
-const field=(title,value,onchange,id)=>{const wrap=el('div','ut-course-field'),lab=el('label','',title),input=el('input');if(id)input.id=id;input.value=value||'';input.onchange=()=>{onchange(input.value);store();const active=left.querySelector('.ut-course-selected');if(active){const title=active.querySelector('strong'),detail=active.querySelector('small');if(title)title.textContent=c.name||'Nyt forløb';if(detail)detail.textContent=[c.subject,c.grade?c.grade+'. klasse':'',c.materials.length+' materialer'].filter(Boolean).join(' · ')}};wrap.append(lab,input);right.append(wrap);return input};
-field('Forløbets navn',c.name,v=>c.name=v,'utCourseName');field('Fag',c.subject,v=>c.subject=v);field('Klassetrin (fx 7)',c.grade,v=>c.grade=v);
+const field=(title,value,onchange,id,suggestions=[])=>{const wrap=el('div','ut-course-field'),lab=el('label','',title),input=el('input');if(id)input.id=id;input.value=value||'';if(suggestions.length){const listId='utCourseList_'+Math.random().toString(36).slice(2),list=el('datalist');list.id=listId;for(const v of suggestions)list.append(new Option(v));input.setAttribute('list',listId);wrap.append(list)}input.onchange=()=>{onchange(input.value.trim());store();const active=left.querySelector('.ut-course-selected');if(active){const title=active.querySelector('strong'),detail=active.querySelector('small');if(title)title.textContent=c.name||'Nyt forløb';if(detail)detail.textContent=[c.subject,c.grade?(/klasse/i.test(String(c.grade))?c.grade:c.grade+'. klasse'):'',c.materials.length+' materialer'].filter(Boolean).join(' · ')}};wrap.prepend(lab,input);right.append(wrap);return input};
+field('Forløbets navn',c.name,v=>c.name=v,'utCourseName');field('Fag',c.subject,v=>c.subject=v,null,uniqueValues('subject'));field('Klassetrin (fx 7)',c.grade,v=>c.grade=v,null,uniqueValues('grade'));
 const note=el('div','ut-course-field'),noteLabel=el('label','','Noter til planlægningen (valgfrit)'),noteText=el('textarea');noteText.rows=3;noteText.value=c.note||'';noteText.onchange=()=>{c.note=noteText.value;store()};note.append(noteLabel,noteText);right.append(note);
 right.append(el('h3','','Materialer og elementer til forløbet'),el('p','ut-course-muted','Gem links og PDF’er én gang. Materialerne kan foreslås på lektionstavler, der har samme tag som forløbets navn.'));
 const actions=el('div','ut-course-actions');actions.append(btn('🔗 Tilføj link',()=>addLink(c)),btn('📄 Tilføj PDF',()=>fileInput.click()));const fileInput=el('input');fileInput.type='file';fileInput.accept='.pdf,application/pdf';fileInput.style.display='none';fileInput.onchange=async()=>{const f=fileInput.files?.[0];if(!f)return;const name=prompt('Hvad skal materialet hedde?',f.name);if(name===null)return;try{const fileId=uid();await putFile(fileId,f);c.materials.push({id:uid(),name:name.trim()||f.name,type:'file',fileId,fileName:f.name,mime:f.type||'application/pdf',startPage:1});store();draw()}catch(e){console.error(e);alert('PDF’en kunne ikke gemmes i browseren.')}};actions.append(fileInput);right.append(actions);
