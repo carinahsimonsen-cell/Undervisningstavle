@@ -336,7 +336,7 @@ body.viewing .agenda .ut-agenda-arrow{display:flex;justify-content:center;align-
 .ut-agenda-link-control.linked .btn{background:#dceeff;border-color:#8fbee5;font-weight:750}
 </style>
 <style id="ut-viewing-help-fix">
-/* Hjælp er et redigeringsværktøj og skjules i visningstilstand. hjaelp.js indsætter knappen lige efter Klasser. */
+/* Hjælp er et redigeringsværktøj og skjules i visningstilstand. */
 body.viewing #classesBtn + button.btn{display:none!important}
 </style>
 
@@ -1815,5 +1815,372 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
   window.addEventListener('resize',()=>{if(active){if(active.isConnected)position(active);else hideHint()}});
 })();
 </script>
-<script src="hjaelp.js"></script>
+<script>
+/* Undervisningstavle – indbygget hjælp. Opdateret oktober 2026. */
+(function () {
+  'use strict';
+
+  if (document.getElementById('ut-help-overlay')) return;
+
+  const sections = [
+    ['Opret og planlæg en tavle', `
+      <p>Når du åbner Undervisningstavlen, starter du i ugeskemaet. Herfra opretter du tavler til dine lektioner.</p>
+
+      <h4>Opret en tavle</h4>
+      <ol>
+        <li>Klik på en ledig lektion i skemaet.</li>
+        <li>Giv tavlen et navn, og vælg eventuelt <strong>klasse</strong> og <strong>fag</strong>.</li>
+        <li>Vælg <strong>Tavlesprog</strong>. <em>Automatisk efter fag</em> bruger English ved Engelsk, Deutsch ved Tysk og Dansk ved øvrige fag.</li>
+        <li>Vælg de <strong>lektioner på dagen</strong>, som skal høre til samme tavle.</li>
+        <li>Klik på <strong>Opret tavle</strong>.</li>
+      </ol>
+
+      <h4>Dobbeltlektioner og længere forløb samme dag</h4>
+      <p>Én tavle kan dække flere skemalektioner samme dag. Det er praktisk ved fx en dobbeltlektion eller fem sammenhængende lektioner med samme klasse og fag. Den samme tavle åbnes fra alle de valgte skemafelter, og det samlede tidsrum vises øverst.</p>
+      <p>Pauser mellem lektionerne bliver ikke automatisk placeret i dagsordenen. Brug <strong>☕ + Pause</strong>, så du selv kan lægge pausebrikken dér, hvor du forventer at være nået i undervisningen. Se <a href="#ut-help-chapter-2" data-ut-help-target="ut-help-chapter-2">punkt 2</a>.</p>
+
+      <h4>Ret tavlen senere</h4>
+      <p>Klik på <strong>✎ Tavle</strong> for at ændre navn, klasse, fag, tavlesprog, dagsordensoverskrift, tavlens lærernote eller hvilke lektioner tavlen dækker.</p>
+
+      <h4>Ret ringetiderne</h4>
+      <ol>
+        <li>Gå til <strong>← Skema</strong>.</li>
+        <li>Klik på <strong>⚙️ Ringetider</strong>.</li>
+        <li>Ret start- og sluttider, og brug eventuelt <strong>+ Lektion</strong>.</li>
+        <li>Klik på <strong>Gem ringetider</strong>.</li>
+      </ol>
+    `],
+
+    ['Lav dagens program – punkter, koblinger og pauser', `
+      <p>Dagsordenen er kernen i tavlen. Hver aktivitet er et programpunkt.</p>
+
+      <h4>Tilføj et programpunkt</h4>
+      <ol>
+        <li>Klik på <strong>+ Nyt punkt</strong>.</li>
+        <li>Skriv aktivitetens navn.</li>
+        <li>Udfyld eventuelt beskrivelse, <strong>🎒 Du skal bruge…</strong>, arbejdsform og forventet tid.</li>
+        <li>Tilføj eventuelt materialer, gruppeinddeling eller ekstra funktioner.</li>
+        <li>Klik på <strong>Gem</strong>.</li>
+      </ol>
+      <p>Træk i <strong>☰</strong> for at flytte et punkt. Klik på <strong>✎</strong> for at redigere det.</p>
+
+      <h4>Kobl punkter sammen</h4>
+      <p>Klik på <strong>↓ Kobl punkter sammen</strong> mellem to punkter, hvis de hører sammen. Nummereringen bliver fx <strong>2, 2a, 2b</strong>. Når hovedpunktet er aktivt i visningstilstand, vises de koblede underpunkter sammen med det.</p>
+      <p>En pause bryder en koblet blok, så et punkt efter en pause starter som et nyt hovedpunkt.</p>
+
+      <h4>Tilføj en pause</h4>
+      <ol>
+        <li>Klik på <strong>☕ + Pause</strong>.</li>
+        <li>Vælg en foreslået pause mellem tavlens lektioner, eller skriv et andet tidsrum.</li>
+        <li>Gem pausen, og træk den derefter til det sted i dagsordenen, hvor du forventer, at pausen kommer.</li>
+      </ol>
+      <p>Pausebrikken har sin egen farve, men samme skrifttype som dagsordenen. Den har <strong>ingen nummerering</strong> og påvirker ikke nummereringen af de øvrige punkter.</p>
+
+      <h4>Gennemført og sprunget over</h4>
+      <p>Klik på <strong>✓</strong> ved et gennemført punkt eller <strong>↷</strong> ved et punkt, I springer over. Brug <strong>↶</strong> for at fortryde. Ved koblede punkter følger underpunkterne hovedpunktets fremdrift.</p>
+
+      <h4>Kopiér eller flyt et enkelt punkt</h4>
+      <p>Klik på <strong>⧉</strong> ved punktet. Vælg derefter en anden tavle og enten <strong>Kopiér</strong> eller <strong>Flyt</strong>. Hvis punktet indgår i en koblet blok, kan du vælge kun punktet eller hele blokken. Materialer, indstillinger og punktets lærernote følger med.</p>
+    `],
+
+    ['Tilføj og omdøb materialer på et punkt', `
+      <p>Et programpunkt kan have flere materialer, fx links og filer.</p>
+
+      <h4>Tilføj et link</h4>
+      <ol>
+        <li>Åbn punktet med <strong>✎</strong>.</li>
+        <li>Find <strong>📎 Materialer (valgfrit)</strong>.</li>
+        <li>Skriv et tydeligt navn til materialet.</li>
+        <li>Indsæt linket, og klik på <strong>+ Tilføj link</strong>.</li>
+        <li>Klik på <strong>Gem</strong>, når punktet er færdigt.</li>
+      </ol>
+
+      <h4>Tilføj en fil</h4>
+      <p>Skriv først et materialenavn, og klik derefter på <strong>📎 Tilføj fil</strong>. PDF-filer kan vises direkte på tavlen.</p>
+
+      <h4>Omdøb et materiale</h4>
+      <p>Klik på <strong>✎ Omdøb</strong> ved et allerede tilføjet materiale. Omdøbningen gælder det konkrete materiale på tavlen. Hvis materialet stammer fra <strong>Mine forløb</strong>, ændrer det ikke automatisk originalens navn i ressourcebanken.</p>
+
+      <h4>Gem i Mine forløb</h4>
+      <p>Nye punkter starter som udgangspunkt med <strong>Gem ikke i Mine forløb</strong>. Vælg kun et forløb, hvis punktet eller materialet faktisk skal kobles til det. Koblingen huskes på selve punktet og er uafhængig af tavlens tags. Se <a href="#ut-help-chapter-11" data-ut-help-target="ut-help-chapter-11">punkt 11</a>.</p>
+    `],
+
+    ['Vis Google Slides, PowerPoint, PDF og YouTube', `
+      <h4>Google Slides med animationer og video</h4>
+      <p>Brug et <strong>/preview</strong>-link, hvis præsentationen skal vises direkte inde i Undervisningstavlen med animationer og indlejrede videoer.</p>
+      <ol>
+        <li>Åbn præsentationen i Google Slides.</li>
+        <li>Kopiér adressen.</li>
+        <li>Erstat slutningen fra <strong>/edit…</strong> med <strong>/preview</strong>.</li>
+        <li>Tilføj linket som materiale på et programpunkt.</li>
+      </ol>
+      <p>Eksempel: <code>…/presentation/d/ABC123/preview</code>.</p>
+
+      <h4>PowerPoint eller Google Slides som PDF</h4>
+      <p>Gem eller download præsentationen som PDF, og tilføj PDF-filen som materiale. Du kan vælge en startside. Animationer, overgange og indlejrede videoer følger ikke med i PDF-versionen.</p>
+
+      <h4>YouTube i et slideshow</h4>
+      <p>En indlejret YouTube-video kan afspilles inde i tavlens slideshow. Videoen har eksplicit fuldskærmstilladelse, og videooverlayet har desuden knappen <strong>⛶ Fuld skærm-video</strong>. Brug den, hvis YouTubes egen fuldskærmsknap ikke overtager hele skærmen korrekt.</p>
+
+      <h4>Vis materiale sammen med tavleelementer</h4>
+      <p>Når et materiale er åbent i stor visning, kan du klikke på <strong>▣ Vis med…</strong> og fx vise dagsordenen, timeren eller andre tavleelementer i et sidepanel. Vælg 80/20, 70/30 eller 60/40 efter behov.</p>
+      <p>Hvis det aktive programpunkt har <strong>🎲 Træk gruppe/par</strong> eller <strong>🎯 Træk tilfældig elev</strong> slået til, kan de funktioner også bruges direkte fra dagsordenen i slideshow-sidepanelet.</p>
+    `],
+
+    ['Visning, fuld skærm og sidepanel', `
+      <h4>Visningstilstand</h4>
+      <p>Klik på <strong>👁 Visning</strong>, når eleverne skal se tavlen. Lærerfunktioner som tags, redigering, hjælp og lærernoter skjules.</p>
+      <p>Når du åbner en tavle fra skemaet, starter den igen i redigeringstilstand, så du ikke ved en fejl møder en gammel elevvisning under forberedelsen.</p>
+
+      <h4>Fuld skærm</h4>
+      <p>Klik på <strong>⛶ Fuld skærm</strong>, når tavlen skal fylde klassens whiteboard.</p>
+
+      <h4>Det højre sidepanel</h4>
+      <p>Beskeder, lektier og andre almindelige tavleelementer i højre side bliver vist med større tekst i visningstilstand, så de er lettere at læse fra klassen.</p>
+
+      <h4>Dagsorden i slideshow-sidepanelet</h4>
+      <p>Dagsordenen bruger et særskilt kompakt layout, når den vises ved siden af et slideshow. Det aktive punkt er tydeligt, kommende punkter er mere kompakte, og relevante interaktive funktioner kan bruges direkte dér.</p>
+    `],
+
+    ['Klasser, Dagens elever og fødselsdage', `
+      <h4>Opret en klasse</h4>
+      <ol>
+        <li>Gå til <strong>← Skema</strong> og klik på <strong>👥 Klasser</strong>.</li>
+        <li>Klik på <strong>+ Ny klasse</strong>.</li>
+        <li>Skriv klassens navn og elever – ét navn pr. linje.</li>
+        <li>Gem klassen. Du kan derefter tilføje fødselsdage.</li>
+      </ol>
+
+      <h4>Dagens elever</h4>
+      <p>Klik på <strong>👥 Dagens elever</strong> på tavlen og slå elever fra, som ikke skal indgå i dagens grupper eller lodtrækninger. Det sletter dem ikke fra klassen.</p>
+
+      <h4>Fødselsdage</h4>
+      <p>Fødselsdagshilsner knyttes til den <strong>første planlagte tavle for elevens klasse efter fødselsdagen</strong>. Det betyder fx, at en fødselsdag i en weekend eller ferie kan blive vist på den første relevante undervisningsdag for netop den klasse. Forberedelse af tavlen på forhånd bruger ikke hilsnen.</p>
+    `],
+
+    ['Grupper og makkere på det enkelte punkt', `
+      <p>Gruppeinddeling kan knyttes direkte til et bestemt dagsordenspunkt.</p>
+
+      <h4>Vælg en inddeling</h4>
+      <ol>
+        <li>Vælg <strong>👥 Makker</strong> eller <strong>👥👥 Gruppe</strong> som arbejdsform.</li>
+        <li>Vælg en gemt inddeling, dan tilfældige grupper eller lav en manuel inddeling.</li>
+        <li>Klik på <strong>Gem</strong>.</li>
+      </ol>
+      <p>Klik på <strong>👥 Vis inddeling</strong> ved punktet for at se grupperne.</p>
+
+      <h4>Gemte inddelinger og sprog</h4>
+      <p>Under <strong>👥 Klasser → Inddelinger</strong> kan en gemt inddeling have et standardnavn samt valgfrit <strong>engelsk</strong> og <strong>tysk</strong> navn. Tavlen bruger det navn, der passer til tavlesproget, hvis det findes.</p>
+
+      <h4>Træk gruppe/par</h4>
+      <p>Funktionen er et <strong>tilvalg på det enkelte punkt</strong>. Slå <strong>🎲 Vis “Træk gruppe/par” på tavlen</strong> til under punktets gruppefunktioner, hvis du faktisk skal bruge lodtrækningen. Nye punkter har den slået fra som standard.</p>
+      <p>Lodtrækningsfeltet kan flyttes frit rundt på skærmen og ændres i størrelse. Placering og størrelse huskes.</p>
+
+      <h4>Udearbejde og mødegrupper</h4>
+      <p>Du kan markere udvalgte grupper til udearbejde og registrere det, når det faktisk er sket. Du kan også lade grupper mødes bagefter og enten fordele dem automatisk i mødegrupper eller sammensætte mødegrupper manuelt. En mødegruppe kan bestå af mere end to grupper.</p>
+    `],
+
+    ['Træk tilfældig elev på et bestemt punkt', `
+      <p><strong>🎯 Træk tilfældig elev</strong> er et selvstændigt tilvalg på hvert programpunkt og kan bruges uanset arbejdsform – også ved makker- eller gruppearbejde.</p>
+
+      <h4>Slå funktionen til</h4>
+      <ol>
+        <li>Åbn punktet med <strong>✎</strong>.</li>
+        <li>Under <strong>⚙️ Funktioner til punktet</strong> markér <strong>🎯 Vis “Træk tilfældig elev” på tavlen</strong>.</li>
+        <li>Vælg eventuelt, om eleverne skal kunne se tælleren med <strong>antal tilbage og valgt</strong>.</li>
+        <li>Gem punktet.</li>
+      </ol>
+
+      <h4>Fravælg enkelte elever uden at markere fravær</h4>
+      <p>I forberedelsen kan du fravælge enkelte elever fra netop denne lodtrækning. Fravalget er adskilt fra <strong>Dagens elever</strong> og vises ikke for eleverne.</p>
+      <p>Listen er dynamisk: Elever, der allerede er slået fra under <strong>Dagens elever</strong>, vises ikke i punktets fravalgsliste og kan heller ikke trækkes. Hvis eleven senere kommer med igen under Dagens elever, dukker eleven automatisk op i listen igen.</p>
+
+      <h4>Under undervisningen</h4>
+      <p>Funktionen vises kun, når det relevante punkt er aktivt. Elever trækkes uden gentagelser, indtil du nulstiller runden. Feltet kan flyttes og ændres i størrelse, og funktionen virker også fra dagsordenen i slideshow-sidepanelet.</p>
+    `],
+
+    ['Tilføj ekstra elementer til tavlen', `
+      <p>Klik på <strong>+ Tilføj element</strong> for at lægge et selvstændigt element i højre side af tavlen.</p>
+
+      <h4>📌 Besked og ✏️ Tavlenoter</h4>
+      <p>Brug en besked til information, der skal stå tydeligt for eleverne. Tavlenoter kan bruges til stikord eller tekst, der skal være synlig på selve tavlen.</p>
+
+      <h4>▶️ YouTube-video</h4>
+      <p>Indsæt et almindeligt YouTube- eller youtu.be-link. Videoen afspilles inde i Undervisningstavlen og kan gemmes i <strong>Mine forløb</strong>.</p>
+
+      <h4>📐 GeoGebra</h4>
+      <p>Vælg en <strong>.ggb-fil</strong> fra computeren og åbn aktiviteten i stor visning, når den skal bruges.</p>
+
+      <h4>⏱ Timer</h4>
+      <p>Timeren kan bruges som digital eller visuel nedtælling. Hvis et aktivt programpunkt har en forventet tid, kan tavlen også bruge den tid. Hvis tiden ændres eller fjernes fra det aktive punkt, opdateres timeren tilsvarende.</p>
+
+      <h4>🎯 Én elev</h4>
+      <p>Der findes fortsat et selvstændigt elevlodtræknings-element via <strong>+ Tilføj element</strong>. Til aktiviteter, hvor lodtrækningen kun skal bruges på ét bestemt programpunkt, er den punkt-specifikke funktion i <a href="#ut-help-chapter-8" data-ut-help-target="ut-help-chapter-8">punkt 8</a> normalt mere hensigtsmæssig.</p>
+    `],
+
+    ['Tavlesprog: Dansk, English og Deutsch', `
+      <p>Tavlesproget styrer de faste elevtekster som fx arbejdsformer, <strong>Du skal bruge</strong>, gruppeknapper og andre systemtekster. Dine egne titler, beskrivelser og materialenavne oversættes ikke automatisk.</p>
+      <ul>
+        <li><strong>Automatisk efter fag:</strong> English ved Engelsk, Deutsch ved Tysk og Dansk ved øvrige fag.</li>
+        <li><strong>Dansk:</strong> tvinger danske systemtekster.</li>
+        <li><strong>English:</strong> tvinger engelske systemtekster.</li>
+        <li><strong>Deutsch:</strong> tvinger tyske systemtekster.</li>
+      </ul>
+      <p>Du kan ændre sproget under <strong>✎ Tavle</strong>. Gemte gruppeinddelinger kan have egne engelske og tyske navne; mangler et oversat navn, bruges standardnavnet.</p>
+    `],
+
+    ['Mine forløb – gem og genbrug materialer', `
+      <p><strong>📁 Mine forløb</strong> er din ressourcebank til materialer og elementer, du vil kunne finde og genbruge.</p>
+
+      <h4>Opret og find forløb</h4>
+      <p>Forløb kan have navn, fag, klassetrin og planlægningsnoter. Filtrene <strong>Alle fag</strong> og <strong>Alle klassetrin</strong> dannes automatisk ud fra de værdier, du faktisk har brugt i dine forløb. Når du skriver fag eller klassetrin, får du forslag fra eksisterende værdier, men du kan stadig skrive noget nyt.</p>
+
+      <h4>Tavletag og forløbskobling er ikke det samme</h4>
+      <p>Et punkt eller element husker sin <strong>egen</strong> kobling til Mine forløb. Tavlens tag bruges ikke til automatisk at vælge en materialebank. Nye punkter og elementer starter derfor på <strong>Gem ikke i Mine forløb</strong>.</p>
+      <p>Hvis du aktivt kobler et punkt til et forløb på en tavle uden tags, kan tavlen automatisk få forløbets navn som tag. Har tavlen allerede tags, ændres de ikke bare fordi et enkelt materiale gemmes et andet sted.</p>
+
+      <h4>Hent materiale</h4>
+      <p>Brug <strong>📁 Hent fra Mine forløb</strong> i et programpunkt eller ved tilføjelse af tavleelementer. Du kan søge på tværs af forløb og materialer.</p>
+
+      <h4>Lærernoter i et forløb</h4>
+      <p>Hvert forløb har en sammenklappelig <strong>📝 Lærernoter</strong>-sektion. Her samles relevante tavle- og punktnoter med dato, klasse og punkt, så erfaringer fra tidligere undervisning er nemme at finde igen.</p>
+    `],
+
+    ['Tags, søgning og årsoversigt', `
+      <h4>Tags</h4>
+      <p>Tags er lærerens emneord til en tavle, fx <em>Hitman</em> eller <em>Gys</em>. Klik på <strong>🏷️</strong> ved tavlens navn. Tags vises ikke i elevvisningen.</p>
+      <p>Når du opretter et nyt tag, kan du vælge, om tagget også skal oprettes som et forløb i <strong>Mine forløb</strong>.</p>
+
+      <h4>Find tidligere tavler</h4>
+      <p>Gå til <strong>← Skema → ⌕ Find tavler</strong>. Søg efter tag, tavlenavn eller indhold.</p>
+
+      <h4>Årsoversigt</h4>
+      <p>Klik på <strong>📅 Årsoversigt</strong> og filtrér efter skoleår, årgang/klasse og fag. Du kan vælge <strong>Kronologisk</strong> eller <strong>Efter emne</strong>.</p>
+      <p>Efter emne samler tavler med samme tag og viser bl.a. periode, antal tavler/lektioner, planlagt tid og ugefordeling. Forløbets lærer-noter kan foldes ud i en særskilt <strong>📝 Noter</strong>-sektion.</p>
+      <p class="ut-help-important"><strong>Vigtigt:</strong> Årsoversigtens tidsberegninger er planlægningsoverslag baseret på tavlernes valgte skemalektioner og ringetider – ikke en registrering af faktisk undervisningstid.</p>
+    `],
+
+    ['Lærernoter – erfaringer kun til dig', `
+      <p>Lærernoter er kun til læreren og vises aldrig i elevvisning eller slideshow.</p>
+
+      <h4>Note til et programpunkt</h4>
+      <p>Klik på den lille <strong>🗒️/📝-knap</strong> sammen med punktets øvrige knapper. Her kan du skrive fx <em>“10 min. er for lang tid – 5 min. er rigeligt”</em>. Noten ligger ikke som et stort felt i <strong>Nyt/Redigér programpunkt</strong>.</p>
+      <p>Punktnoten følger med, hvis punktet kopieres eller flyttes til en anden tavle.</p>
+
+      <h4>Note til hele tavlen</h4>
+      <p>Klik på <strong>✎ Tavle</strong> og skriv en lærernote til hele tavlen. Den vises som en lærerintern note i redigeringstilstand og skjules for eleverne.</p>
+
+      <h4>Find noterne igen</h4>
+      <p>I <strong>Mine forløb</strong> og i årsoversigtens emnevisning kan relevante noter foldes ud samlet, så du kan bruge dine erfaringer næste gang forløbet planlægges.</p>
+    `],
+
+    ['Kopiér tavler – og kopiér eller flyt punkter', `
+      <h4>Kopiér en hel tavle</h4>
+      <ol>
+        <li>Åbn tavlen og klik på <strong>✎ Tavle</strong>.</li>
+        <li>Vælg <strong>Kopiér/flyt…</strong>.</li>
+        <li>Vælg en eller flere ledige lektioner.</li>
+        <li>Vælg eventuelt <strong>Nulstil ✓ / ↷ på kopien</strong>.</li>
+        <li>Klik på kopieringsknappen.</li>
+      </ol>
+      <p>Kopierne bliver selvstændige tavler. Tavlens overordnede lærernote kopieres ikke automatisk.</p>
+
+      <h4>Kopiér eller flyt et enkelt programpunkt</h4>
+      <p>Klik på <strong>⧉</strong> ved punktet. Du kan vælge en anden tavle og enten kopiere eller flytte. Kommende tavler og tavler med samme klasse/fag prioriteres i listen. Hvis punktet er koblet med underpunkter, kan hele blokken tages med.</p>
+    `],
+
+    ['Tilpas tavlens udseende', `
+      <h4>Baggrund og dagsordenstil</h4>
+      <p>Klik på <strong>🎨 Udseende</strong>. Vælg et tema eller et eget baggrundsbillede, justér baggrundens styrke og vælg eventuelt en enklere dagsordenstil.</p>
+      <p>Brug rolige baggrunde med god kontrast, især hvis tavlen skal ses på et whiteboard fra afstand.</p>
+
+      <h4>Flytbare lodtrækningsfelter</h4>
+      <p>Felterne til gruppe-/makkerlodtrækning og punktvis elevlodtrækning kan trækkes rundt på skærmen og ændres i størrelse. Tavlen husker din placering og størrelse.</p>
+    `],
+
+    ['Hvor bliver dine tavler og forløb gemt?', `
+      <p class="ut-help-important"><strong>Vigtigt:</strong> Tavler, klasser, forløb og de fleste indstillinger gemmes lokalt i browseren på den computer, hvor du bruger Undervisningstavlen. De synkroniseres ikke automatisk til en anden computer.</p>
+      <p>Hvis du forbereder hjemme og underviser på en anden computer, skal du derfor bruge den løsning til sikkerhedskopi/overførsel, som du normalt anvender til tavlens data. Undgå at slette browserens webstedsdata, hvis du vil bevare dine tavler.</p>
+    `],
+
+    ['Hvis noget ikke virker', `
+      <h4>Et link kan ikke vises inde i tavlen</h4>
+      <p>Nogle hjemmesider tillader ikke indlejring. Åbn materialet i en ny fane i stedet.</p>
+
+      <h4>Google Slides vises ikke som slideshow</h4>
+      <p>Kontrollér, at du bruger et <strong>/preview</strong>-link, hvis præsentationen skal vises inde i tavlen, og at den Google-konto, du bruger, har adgang.</p>
+
+      <h4>YouTube bliver ikke fuld skærm</h4>
+      <p>Brug knappen <strong>⛶ Fuld skærm-video</strong> i videooverlayet. Den gør selve videoområdet fuldskærm og er især nyttig, hvis browseren ellers lader slideshowet beholde fuldskærmen.</p>
+
+      <h4>En elev mangler i grupper eller lodtrækning</h4>
+      <p>Kontrollér først <strong>👥 Dagens elever</strong>. Ved punktvis elevlodtrækning skal du også kontrollere, om eleven er fravalgt specifikt på punktet.</p>
+
+      <h4>Træk gruppe/par eller Træk tilfældig elev vises ikke</h4>
+      <p>Begge funktioner er tilvalg på det enkelte programpunkt. Åbn punktet med <strong>✎</strong> og kontrollér indstillingerne under gruppefunktioner eller <strong>⚙️ Funktioner til punktet</strong>.</p>
+
+      <h4>Jeg kan ikke se redigeringsknapper eller lærernoter</h4>
+      <p>Du kan være i <strong>👁 Visning</strong>. Gå tilbage til redigeringstilstand. Lærernoter er med vilje skjult for eleverne.</p>
+
+      <h4>Jeg kan ikke finde tavlerne på en anden computer</h4>
+      <p>Data gemmes lokalt i browseren. Se <a href="#ut-help-chapter-16" data-ut-help-target="ut-help-chapter-16">punkt 16</a>.</p>
+    `]
+  ];
+
+  const style = document.createElement('style');
+  style.id = 'ut-help-style';
+  style.textContent = `
+    #ut-help-overlay{display:none;position:fixed;inset:0;z-index:2147483640;background:rgba(20,28,38,.72);padding:clamp(8px,3vw,28px);box-sizing:border-box;align-items:center;justify-content:center}
+    #ut-help-overlay.ut-help-open{display:flex}
+    #ut-help-panel{background:#fff;color:#202936;width:min(1020px,100%);height:min(94vh,920px);border-radius:16px;display:flex;flex-direction:column;box-shadow:0 20px 70px #0005;overflow:hidden;font-family:inherit}
+    #ut-help-panel .ut-help-top{padding:17px 23px;border-bottom:1px solid #dce2e9;display:flex;justify-content:space-between;gap:16px;align-items:center}
+    #ut-help-panel .ut-help-top h2{font-size:23px;margin:0}
+    #ut-help-panel .ut-help-scroll{padding:22px 28px 45px;overflow-y:auto;scroll-behavior:smooth;overscroll-behavior:contain;line-height:1.65}
+    #ut-help-panel .ut-help-scroll h3{font-size:22px;margin:0 0 14px;line-height:1.3}
+    #ut-help-panel .ut-help-scroll h4{font-size:17px;margin:24px 0 7px}
+    #ut-help-panel .ut-help-scroll p{margin:10px 0}
+    #ut-help-panel .ut-help-scroll ol,#ut-help-panel .ut-help-scroll ul{padding-left:27px;margin:9px 0 16px}
+    #ut-help-panel .ut-help-scroll li{padding-left:4px;margin:5px 0}
+    #ut-help-panel .ut-help-index{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:9px;margin:18px 0 30px}
+    #ut-help-panel .ut-help-index a{color:#1e4969;text-decoration:none;background:#f1f5f9;border:1px solid #dce5ed;border-radius:9px;padding:11px 13px;font-weight:600;display:block}
+    #ut-help-panel .ut-help-index a:hover,#ut-help-panel .ut-help-index a:focus{background:#e3eef8;outline-offset:2px}
+    #ut-help-panel .ut-help-chapter{border-top:1px solid #dce2e9;padding:28px 0 15px;scroll-margin-top:14px}
+    #ut-help-panel .ut-help-chapter a[data-ut-help-target]{color:#1e4969;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+    #ut-help-panel .ut-help-chapter a[data-ut-help-target]:hover,#ut-help-panel .ut-help-chapter a[data-ut-help-target]:focus{color:#0f3450}
+    #ut-help-panel .ut-help-return{display:inline-block;margin-top:18px;color:#1e4969;font-weight:600;text-decoration:underline}
+    #ut-help-panel .ut-help-important{border-left:4px solid #bc6926;background:#fff7ed;padding:13px 16px;border-radius:6px}
+    #ut-help-panel code{background:#f3f5f7;border-radius:5px;padding:2px 5px;overflow-wrap:anywhere}
+    @media(max-width:600px){#ut-help-panel .ut-help-scroll{padding:15px 16px 32px}#ut-help-panel .ut-help-top{padding:12px 15px}#ut-help-panel .ut-help-top h2{font-size:19px}}
+  `;
+  document.head.appendChild(style);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'ut-help-overlay';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-labelledby','ut-help-heading');
+
+  const index = sections.map(([title],i)=>`<a href="#ut-help-chapter-${i+1}" data-ut-help-target="ut-help-chapter-${i+1}">${i+1}. ${title}</a>`).join('');
+  const body = sections.map(([title,content],i)=>`<section class="ut-help-chapter" id="ut-help-chapter-${i+1}"><h3>${i+1}. ${title}</h3>${content}<a class="ut-help-return" href="#ut-help-index" data-ut-help-target="ut-help-index">↑ Tilbage til indholdsfortegnelsen</a></section>`).join('');
+
+  overlay.innerHTML = `<div id="ut-help-panel"><div class="ut-help-top"><h2 id="ut-help-heading">❔ Hjælp til Undervisningstavlen</h2><button class="btn" type="button" id="ut-help-close">✕ Luk</button></div><div class="ut-help-scroll" id="ut-help-scroll"><p>Her finder du hjælp til den nuværende version af tavlen. <strong>Er du ny?</strong> Begynd med punkt 1. Ellers kan du hoppe direkte til den funktion, du vil bruge.</p><nav class="ut-help-index" id="ut-help-index" aria-label="Hjælpens indholdsfortegnelse">${index}</nav>${body}<p><strong>Tip:</strong> Du behøver ikke bruge alle funktioner. Tavlen er lavet, så de fleste ekstra funktioner kan slås til kun dér, hvor de giver mening.</p></div></div>`;
+  document.body.appendChild(overlay);
+
+  let previousFocus;
+  function openHelp(){previousFocus=document.activeElement;overlay.classList.add('ut-help-open');document.getElementById('ut-help-scroll').scrollTop=0;document.getElementById('ut-help-close').focus()}
+  function closeHelp(){overlay.classList.remove('ut-help-open');if(previousFocus&&typeof previousFocus.focus==='function')previousFocus.focus()}
+  document.getElementById('ut-help-close').addEventListener('click',closeHelp);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeHelp()});
+  overlay.querySelectorAll('[data-ut-help-target]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();document.getElementById(a.dataset.utHelpTarget)?.scrollIntoView({behavior:'smooth',block:'start'})}));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('ut-help-open')){e.preventDefault();e.stopImmediatePropagation();closeHelp()}},true);
+
+  function makeHelpButton(){const b=document.createElement('button');b.className='btn';b.type='button';b.textContent='❔ Hjælp';b.addEventListener('click',openHelp);return b}
+  const scheduleButton=document.getElementById('classesBtn');if(scheduleButton)scheduleButton.insertAdjacentElement('afterend',makeHelpButton());
+  const boardButton=document.getElementById('viewBtn');if(boardButton)boardButton.insertAdjacentElement('beforebegin',makeHelpButton());
+
+  const fileInput=document.getElementById('materialFile');
+  if(fileInput){const reminder=document.createElement('p');reminder.className='sub';reminder.style.margin='8px 0 0';reminder.innerHTML='<strong>PowerPoint eller Google Slides som PDF?</strong> Vælg PDF-filen her. <strong>Google Slides med animationer og video?</strong> Indsæt et almindeligt link eller et /preview-link i linkfeltet ovenfor. Se Hjælp, punkt 4.';fileInput.insertAdjacentElement('afterend',reminder)}
+})();
+
+</script>
 </body></html>
