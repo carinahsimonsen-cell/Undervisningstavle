@@ -1816,6 +1816,234 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
 })();
 </script>
 <script>
+/* Fuld sikkerhedskopi og overførsel mellem computere. */
+(function(){
+  'use strict';
+  if(document.getElementById('utBackupBack')) return;
+
+  const STORAGE_PREFIX='undervisningstavle.';
+  const FILE_DB_NAME='undervisningstavle_materialer_v1';
+  const FILE_STORE='files';
+  const BACKUP_FORMAT='undervisningstavle-full-backup';
+  const BACKUP_VERSION=1;
+
+  const style=document.createElement('style');
+  style.id='ut-backup-style';
+  style.textContent=`
+    #utBackupBack{z-index:2147483635}
+    #utBackupBack .ut-backup-modal{max-width:760px}
+    .ut-backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+    .ut-backup-card{border:1px solid var(--line);border-radius:12px;padding:15px;background:#fafbfc}
+    .ut-backup-card h3{margin:0 0 8px;font-size:18px}
+    .ut-backup-card p{margin:7px 0;line-height:1.45}
+    .ut-backup-warning{border-left:4px solid #bc6926;background:#fff7ed;padding:10px 12px;border-radius:6px;margin:10px 0}
+    .ut-backup-status{margin-top:9px;min-height:20px;font-size:13px;color:var(--muted)}
+    .ut-backup-fileinfo{margin-top:9px;padding:9px 11px;border-radius:8px;background:#eef5fa;font-size:13px;line-height:1.45}
+    body.viewing .ut-backup-open{display:none!important}
+    @media(max-width:720px){.ut-backup-grid{grid-template-columns:1fr}}
+  `;
+  document.head.appendChild(style);
+
+  const back=document.createElement('div');
+  back.className='modalback';
+  back.id='utBackupBack';
+  back.innerHTML=`
+    <div class="modal ut-backup-modal">
+      <h2>💾 Sikkerhedskopi og overførsel</h2>
+      <p class="sub">Flyt hele Undervisningstavlen mellem computere med én fil. Backupfilen indeholder tavler, klasser, Mine forløb, noter, indstillinger og lokalt uploadede materialefiler.</p>
+      <div class="ut-backup-grid">
+        <section class="ut-backup-card">
+          <h3>⬇️ Eksportér fuld sikkerhedskopi</h3>
+          <p>Download én <strong>.utbackup</strong>-fil med alle Undervisningstavlens lokale data på denne computer.</p>
+          <button class="btn primary" type="button" id="utBackupExport">⬇️ Download fuld sikkerhedskopi</button>
+          <div class="ut-backup-status" id="utBackupExportStatus"></div>
+        </section>
+        <section class="ut-backup-card">
+          <h3>⬆️ Importér sikkerhedskopi</h3>
+          <p>Vælg en tidligere eksporteret <strong>.utbackup</strong>-fil. Importen erstatter Undervisningstavlens lokale data på denne computer.</p>
+          <input type="file" id="utBackupFile" accept=".utbackup,application/json" hidden>
+          <button class="btn" type="button" id="utBackupChoose">📂 Vælg backupfil</button>
+          <div id="utBackupFileInfo"></div>
+          <div class="ut-backup-warning"><strong>Vigtigt:</strong> Eksportér gerne en sikkerhedskopi af denne computer først. Importen erstatter kun Undervisningstavlens data – andre hjemmesiders data røres ikke.</div>
+          <button class="btn danger" type="button" id="utBackupImport" disabled>⬆️ Importér og erstat lokale data</button>
+          <div class="ut-backup-status" id="utBackupImportStatus"></div>
+        </section>
+      </div>
+      <div class="mactions"><button class="btn" type="button" id="utBackupClose">Luk</button></div>
+    </div>`;
+  document.body.appendChild(back);
+
+  const exportBtn=document.getElementById('utBackupExport');
+  const exportStatus=document.getElementById('utBackupExportStatus');
+  const chooseBtn=document.getElementById('utBackupChoose');
+  const fileInput=document.getElementById('utBackupFile');
+  const fileInfo=document.getElementById('utBackupFileInfo');
+  const importBtn=document.getElementById('utBackupImport');
+  const importStatus=document.getElementById('utBackupImportStatus');
+  const closeBtn=document.getElementById('utBackupClose');
+  let pendingBackup=null;
+
+  function open(){back.style.display='flex'}
+  function close(){back.style.display='none';fileInput.value='';pendingBackup=null;importBtn.disabled=true;fileInfo.innerHTML='';importStatus.textContent=''}
+  closeBtn.onclick=close;
+  back.addEventListener('click',e=>{if(e.target===back)close()});
+
+  function addOpenButton(){
+    const b=document.createElement('button');
+    b.className='btn ut-backup-open';
+    b.type='button';
+    b.textContent='💾 Sikkerhedskopi';
+    b.title='Eksportér eller importér hele Undervisningstavlen';
+    b.addEventListener('click',open);
+    return b;
+  }
+  const scheduleAnchor=document.getElementById('utCoursesBtn')||document.getElementById('yearOverviewBtn');
+  if(scheduleAnchor)scheduleAnchor.insertAdjacentElement('afterend',addOpenButton());
+  const boardAnchor=document.getElementById('appearance');
+  if(boardAnchor)boardAnchor.insertAdjacentElement('afterend',addOpenButton());
+
+  function localStamp(){
+    const d=new Date(),pad=n=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`;
+  }
+  function formatBytes(n){
+    n=Number(n)||0;
+    if(n<1024)return `${n} B`;
+    if(n<1024*1024)return `${(n/1024).toFixed(n<10240?1:0)} KB`;
+    return `${(n/1024/1024).toFixed(1)} MB`;
+  }
+  function downloadBlob(blob,name){
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }
+  function blobToBase64(blob){
+    return new Promise((resolve,reject)=>{
+      const r=new FileReader();
+      r.onload=()=>resolve(String(r.result||'').split(',')[1]||'');
+      r.onerror=()=>reject(r.error||new Error('Kunne ikke læse filen'));
+      r.readAsDataURL(blob);
+    });
+  }
+  function base64ToBytes(data){
+    const bin=atob(data||''),out=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);
+    return out;
+  }
+  async function encodeStoredValue(value){
+    if(value instanceof Blob){
+      return {__utType:value instanceof File?'File':'Blob',name:value.name||'',type:value.type||'',lastModified:value.lastModified||0,data:await blobToBase64(value)};
+    }
+    return {__utType:'JSON',value:value};
+  }
+  function decodeStoredValue(value){
+    if(!value||typeof value!=='object')return value;
+    if(value.__utType==='File'||value.__utType==='Blob'){
+      const bytes=base64ToBytes(value.data||''),opts={type:value.type||''};
+      if(value.__utType==='File'&&typeof File==='function')return new File([bytes],value.name||'fil',{...opts,lastModified:value.lastModified||Date.now()});
+      const blob=new Blob([bytes],opts);
+      if(value.name)try{Object.defineProperty(blob,'name',{value:value.name})}catch(e){}
+      return blob;
+    }
+    if(value.__utType==='JSON')return value.value;
+    return value;
+  }
+  function requestResult(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+  function transactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Databasehandlingen blev afbrudt'))})}
+  function openFileDatabase(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open(FILE_DB_NAME,1);
+      req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(FILE_STORE))db.createObjectStore(FILE_STORE)};
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+  async function exportStoredFiles(){
+    const db=await openFileDatabase();
+    try{
+      const tx=db.transaction(FILE_STORE,'readonly'),store=tx.objectStore(FILE_STORE);
+      const done=transactionDone(tx),keysReq=store.getAllKeys(),valuesReq=store.getAll();
+      const [keys,values]=await Promise.all([requestResult(keysReq),requestResult(valuesReq)]);
+      await done;
+      const entries=[];
+      for(let i=0;i<values.length;i++)entries.push({key:keys[i],value:await encodeStoredValue(values[i])});
+      return entries;
+    }finally{db.close()}
+  }
+  async function restoreStoredFiles(entries){
+    const db=await openFileDatabase();
+    try{
+      const tx=db.transaction(FILE_STORE,'readwrite'),store=tx.objectStore(FILE_STORE),done=transactionDone(tx);
+      store.clear();
+      for(const entry of entries||[])store.put(decodeStoredValue(entry.value),entry.key);
+      await done;
+    }finally{db.close()}
+  }
+  function exportLocalStorage(){
+    const out={};
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key&&key.startsWith(STORAGE_PREFIX))out[key]=localStorage.getItem(key);
+    }
+    return out;
+  }
+  function replaceLocalStorage(data){
+    const remove=[];
+    for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.startsWith(STORAGE_PREFIX))remove.push(key)}
+    remove.forEach(key=>localStorage.removeItem(key));
+    Object.entries(data||{}).forEach(([key,value])=>{if(key.startsWith(STORAGE_PREFIX))localStorage.setItem(key,String(value))});
+  }
+  function backupSummary(backup){
+    let main={boards:[],classes:[]},courses=[];
+    try{main=JSON.parse(backup.localStorage?.['undervisningstavle.v07']||'{}')||{}}catch(e){}
+    try{courses=JSON.parse(backup.localStorage?.['undervisningstavle.forloeb.v1']||'[]')||[]}catch(e){}
+    return {boards:Array.isArray(main.boards)?main.boards.length:0,classes:Array.isArray(main.classes)?main.classes.length:0,courses:Array.isArray(courses)?courses.length:0,files:Array.isArray(backup.files)?backup.files.length:0};
+  }
+  function validBackup(data){
+    return data&&data.format===BACKUP_FORMAT&&Number(data.version)>=1&&data.localStorage&&typeof data.localStorage==='object'&&Array.isArray(data.files);
+  }
+
+  exportBtn.onclick=async()=>{
+    exportBtn.disabled=true;exportStatus.textContent='Samler tavler og materialefiler…';
+    try{
+      const local=exportLocalStorage(),files=await exportStoredFiles();
+      const backup={format:BACKUP_FORMAT,version:BACKUP_VERSION,createdAt:new Date().toISOString(),app:'Undervisningstavle',localStorage:local,files};
+      const json=JSON.stringify(backup),blob=new Blob([json],{type:'application/json'}),summary=backupSummary(backup);
+      downloadBlob(blob,`Undervisningstavle_backup_${localStamp()}.utbackup`);
+      exportStatus.textContent=`✓ Backup klar: ${summary.boards} tavler · ${summary.classes} klasser · ${summary.courses} forløb · ${summary.files} materialefiler · ${formatBytes(blob.size)}`;
+    }catch(err){console.error(err);exportStatus.textContent='Kunne ikke oprette sikkerhedskopien.';alert('Sikkerhedskopien kunne ikke oprettes. Ingen data er blevet ændret.')}finally{exportBtn.disabled=false}
+  };
+
+  chooseBtn.onclick=()=>fileInput.click();
+  fileInput.onchange=async()=>{
+    pendingBackup=null;importBtn.disabled=true;importStatus.textContent='';fileInfo.innerHTML='';
+    const file=fileInput.files?.[0];if(!file)return;
+    try{
+      const data=JSON.parse(await file.text());
+      if(!validBackup(data))throw new Error('Ugyldigt backupformat');
+      pendingBackup=data;
+      const s=backupSummary(data),when=data.createdAt?new Date(data.createdAt).toLocaleString('da-DK'):'ukendt tidspunkt';
+      fileInfo.innerHTML=`<div class="ut-backup-fileinfo"><strong>${file.name.replace(/[<>&]/g,'')}</strong><br>Oprettet: ${when}<br>${s.boards} tavler · ${s.classes} klasser · ${s.courses} forløb · ${s.files} materialefiler · ${formatBytes(file.size)}</div>`;
+      importBtn.disabled=false;
+    }catch(err){console.error(err);fileInfo.innerHTML='<div class="ut-backup-warning">Filen kunne ikke læses som en gyldig Undervisningstavle-sikkerhedskopi.</div>'}
+  };
+
+  importBtn.onclick=async()=>{
+    if(!pendingBackup)return;
+    const s=backupSummary(pendingBackup);
+    const ok=confirm(`Importér denne sikkerhedskopi?\n\n${s.boards} tavler · ${s.classes} klasser · ${s.courses} forløb · ${s.files} materialefiler\n\nUndervisningstavlens nuværende lokale data på denne computer bliver erstattet. Andre hjemmesiders data røres ikke.`);
+    if(!ok)return;
+    importBtn.disabled=true;chooseBtn.disabled=true;exportBtn.disabled=true;importStatus.textContent='Importerer data og materialefiler…';
+    try{
+      await restoreStoredFiles(pendingBackup.files);
+      replaceLocalStorage(pendingBackup.localStorage);
+      importStatus.textContent='✓ Import færdig. Tavlen genindlæses…';
+      setTimeout(()=>location.reload(),350);
+    }catch(err){console.error(err);importStatus.textContent='Importen kunne ikke gennemføres.';alert('Importen kunne ikke gennemføres fuldt ud. Genindlæs siden og kontrollér dine data. Brug din backupfil til at prøve igen.');importBtn.disabled=false;chooseBtn.disabled=false;exportBtn.disabled=false}
+  };
+})();
+</script>
+<script>
 /* Undervisningstavle – indbygget hjælp. Opdateret oktober 2026. */
 (function () {
   'use strict';
@@ -2098,9 +2326,27 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
       <p>Felterne til gruppe-/makkerlodtrækning og punktvis elevlodtrækning kan trækkes rundt på skærmen og ændres i størrelse. Tavlen husker din placering og størrelse.</p>
     `],
 
-    ['Hvor bliver dine tavler og forløb gemt?', `
-      <p class="ut-help-important"><strong>Vigtigt:</strong> Tavler, klasser, forløb og de fleste indstillinger gemmes lokalt i browseren på den computer, hvor du bruger Undervisningstavlen. De synkroniseres ikke automatisk til en anden computer.</p>
-      <p>Hvis du forbereder hjemme og underviser på en anden computer, skal du derfor bruge den løsning til sikkerhedskopi/overførsel, som du normalt anvender til tavlens data. Undgå at slette browserens webstedsdata, hvis du vil bevare dine tavler.</p>
+    ['Sikkerhedskopi og flyt mellem computere', `
+      <p class="ut-help-important"><strong>Vigtigt:</strong> Undervisningstavlens data gemmes lokalt i browseren. De synkroniseres ikke automatisk mellem din arbejdscomputer og din private computer.</p>
+      <p>Brug <strong>💾 Sikkerhedskopi</strong> til at flytte hele tavlen mellem computere. Den fulde backup indeholder tavler, klasser, elevlister, faste inddelinger, Mine forløb, tags, lærernoter, indstillinger og de lokalt uploadede materialefiler, fx PDF- og GeoGebra-filer.</p>
+
+      <h4>Eksportér fra den computer, du arbejder på</h4>
+      <ol>
+        <li>Klik på <strong>💾 Sikkerhedskopi</strong>.</li>
+        <li>Klik på <strong>⬇️ Download fuld sikkerhedskopi</strong>.</li>
+        <li>Gem eller send den downloadede <strong>.utbackup</strong>-fil til dig selv.</li>
+      </ol>
+
+      <h4>Importér på den anden computer</h4>
+      <ol>
+        <li>Åbn Undervisningstavlen og klik på <strong>💾 Sikkerhedskopi</strong>.</li>
+        <li>Klik på <strong>📂 Vælg backupfil</strong> og vælg din <strong>.utbackup</strong>-fil.</li>
+        <li>Kontrollér oversigten over tavler, klasser, forløb og materialefiler.</li>
+        <li>Klik på <strong>⬆️ Importér og erstat lokale data</strong>.</li>
+        <li>Efter import genindlæses tavlen automatisk med backupfilens data.</li>
+      </ol>
+      <p>Importen erstatter kun lokale data, der tilhører <strong>Undervisningstavlen</strong>. Den ændrer ikke data fra andre hjemmesider. Det er en god vane at eksportere en frisk backup fra den computer, du forlader, før du importerer en anden.</p>
+      <p><strong>Eksempel på weekend-arbejdsgang:</strong> Eksportér fredag på arbejdscomputeren → importér hjemme → forbered hjemme → eksportér den nye backup → importér på arbejdscomputeren mandag.</p>
     `],
 
     ['Hvis noget ikke virker', `
@@ -2123,7 +2369,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
       <p>Du kan være i <strong>👁 Visning</strong>. Gå tilbage til redigeringstilstand. Lærernoter er med vilje skjult for eleverne.</p>
 
       <h4>Jeg kan ikke finde tavlerne på en anden computer</h4>
-      <p>Data gemmes lokalt i browseren. Se <a href="#ut-help-chapter-16" data-ut-help-target="ut-help-chapter-16">punkt 16</a>.</p>
+      <p>Data gemmes lokalt i browseren. Brug den fulde sikkerhedskopi til at flytte dem mellem computere; se <a href="#ut-help-chapter-16" data-ut-help-target="ut-help-chapter-16">punkt 16</a>.</p>
     `]
   ];
 
