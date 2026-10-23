@@ -2043,6 +2043,202 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
   };
 })();
 </script>
+<script id="ut-week-copy-script">
+/* Undervisningstavle – kopiér en uges skemastruktur til flere uger. */
+(function(){
+  'use strict';
+  if(document.getElementById('utWeekCopyBack')) return;
+
+  const style=document.createElement('style');
+  style.id='ut-week-copy-style';
+  style.textContent=`
+    #utWeekCopyBack{z-index:2147483632}
+    #utWeekCopyBack .ut-week-copy-modal{width:min(900px,96vw)}
+    .ut-week-copy-source{border:1px solid var(--line);background:#f7f9f7;border-radius:12px;padding:12px 14px;margin:8px 0 14px}
+    .ut-week-copy-source strong{display:block;font-size:17px;margin-bottom:4px}
+    .ut-week-copy-tools{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+    .ut-week-copy-list{border:1px solid var(--line);border-radius:12px;max-height:42vh;overflow:auto;background:#fff}
+    .ut-week-copy-row{display:grid;grid-template-columns:auto minmax(210px,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+    .ut-week-copy-row:last-child{border-bottom:0}
+    .ut-week-copy-row:hover{background:#f7faf7}
+    .ut-week-copy-row input{width:auto;min-height:auto}
+    .ut-week-copy-row small{color:var(--muted);text-align:right}
+    .ut-week-copy-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    .ut-week-copy-option{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fafbfa}
+    .ut-week-copy-option label{font-weight:700;display:flex;gap:8px;align-items:flex-start}
+    .ut-week-copy-option input{width:auto;min-height:auto;margin-top:3px}
+    .ut-week-copy-warning{margin-top:8px;color:#8a4618;font-size:13px}
+    .ut-week-copy-summary{color:var(--muted);font-size:14px;margin-top:8px}
+    @media(max-width:650px){.ut-week-copy-options{grid-template-columns:1fr}.ut-week-copy-row{grid-template-columns:auto 1fr}.ut-week-copy-row small{grid-column:2;text-align:left}}
+  `;
+  document.head.appendChild(style);
+
+  const back=document.createElement('div');
+  back.className='modalback';
+  back.id='utWeekCopyBack';
+  back.innerHTML=`
+    <div class="modal ut-week-copy-modal">
+      <h2>📋 Kopiér ugeplan</h2>
+      <p class="sub">Brug den uge, du står på, som skabelon. Vælg derefter de uger, hvor samme skemastruktur skal oprettes.</p>
+      <div class="ut-week-copy-source" id="utWeekCopySource"></div>
+      <div class="ut-week-copy-tools">
+        <button class="btn" type="button" id="utWeekCopyAll">Vælg alle 52 uger</button>
+        <button class="btn" type="button" id="utWeekCopyFirst10">Vælg næste 10</button>
+        <button class="btn" type="button" id="utWeekCopyFirst20">Vælg næste 20</button>
+        <button class="btn" type="button" id="utWeekCopyNone">Ingen</button>
+      </div>
+      <div class="ut-week-copy-list" id="utWeekCopyList"></div>
+      <div class="ut-week-copy-options">
+        <div class="ut-week-copy-option">
+          <label><input type="radio" name="utWeekCopyMode" value="structure" checked> <span>Kun skemastruktur <small class="sub" style="display:block;font-weight:400">Klasse, fag, navn, tavlesprog, udseende og samlede lektioner kopieres. Dagsorden, materialer, tags, tavleelementer og lærernoter kopieres ikke.</small></span></label>
+          <label style="margin-top:10px"><input type="radio" name="utWeekCopyMode" value="content"> <span>Skemastruktur + indhold <small class="sub" style="display:block;font-weight:400">Kopierer også dagsorden, materialer og tavleelementer. Gennemført/sprunget over nulstilles.</small></span></label>
+        </div>
+        <div class="ut-week-copy-option">
+          <label><input type="checkbox" id="utWeekCopyEmptyOnly" checked> <span>Opret kun på ledige pladser <small class="sub" style="display:block;font-weight:400">Eksisterende tavler bliver ikke rørt. Tavler med konflikt springes over.</small></span></label>
+          <div class="ut-week-copy-warning">Fjerner du fluebenet, bliver eksisterende tavler i de berørte skemafelter erstattet.</div>
+        </div>
+      </div>
+      <div class="ut-week-copy-summary" id="utWeekCopySummary"></div>
+      <div class="mactions">
+        <button class="btn primary" type="button" id="utWeekCopyConfirm" disabled>Kopiér til valgte uger</button>
+        <button class="btn" type="button" id="utWeekCopyClose">Annuller</button>
+      </div>
+    </div>`;
+  document.body.appendChild(back);
+
+  const sourceEl=document.getElementById('utWeekCopySource');
+  const listEl=document.getElementById('utWeekCopyList');
+  const summaryEl=document.getElementById('utWeekCopySummary');
+  const confirmBtn=document.getElementById('utWeekCopyConfirm');
+  const emptyOnly=document.getElementById('utWeekCopyEmptyOnly');
+  const selectedWeeks=new Set();
+  let sourceMonday=null;
+  let sourceBoards=[];
+  let targetWeeks=[];
+
+  function dayIndex(dateString){
+    const d=new Date(dateString+'T12:00:00');
+    return (d.getDay()+6)%7;
+  }
+  function addDays(date,n){const d=new Date(date);d.setHours(12,0,0,0);d.setDate(d.getDate()+n);return d}
+  function weekLabel(m){const fri=addDays(m,4);return `Uge ${isoWeekNumber(m)} · ${fmtDate(m)} – ${fmtDate(fri)}`}
+  function boardsInWeek(m){
+    const start=iso(m),end=iso(addDays(m,4));
+    return state.boards.filter(b=>b.date>=start&&b.date<=end).sort((a,b)=>a.date.localeCompare(b.date)||boardSlots(a)[0]-boardSlots(b)[0]);
+  }
+  function targetExistingCount(m){return boardsInWeek(m).length}
+  function updateSummary(){
+    const n=selectedWeeks.size;
+    confirmBtn.disabled=!n||!sourceBoards.length;
+    confirmBtn.textContent=n?`Kopiér til ${n} uge${n===1?'':'r'}`:'Kopiér til valgte uger';
+    if(!sourceBoards.length){summaryEl.textContent='Der er ingen tavler i den aktuelle uge at kopiere.';return}
+    const boardWord=sourceBoards.length===1?'tavle':'tavler';
+    summaryEl.textContent=`Skabelonen indeholder ${sourceBoards.length} ${boardWord}. ${n?n+' uge'+(n===1?' er':'r er')+' valgt.':'Vælg mindst én mål-uge.'}`;
+  }
+  function setSelection(count){
+    selectedWeeks.clear();
+    targetWeeks.forEach((m,i)=>{if(count===Infinity||i<count)selectedWeeks.add(iso(m))});
+    listEl.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=selectedWeeks.has(cb.value));
+    updateSummary();
+  }
+  function renderWeeks(){
+    listEl.replaceChildren();
+    targetWeeks=[];
+    for(let i=1;i<=52;i++)targetWeeks.push(addDays(sourceMonday,i*7));
+    for(const m of targetWeeks){
+      const key=iso(m),existing=targetExistingCount(m);
+      const row=document.createElement('label');row.className='ut-week-copy-row';
+      const cb=document.createElement('input');cb.type='checkbox';cb.value=key;cb.checked=selectedWeeks.has(key);
+      const title=document.createElement('strong');title.textContent=weekLabel(m);
+      const meta=document.createElement('small');meta.textContent=existing?`${existing} eksisterende tavle${existing===1?'':'r'}`:'Ledig uge';
+      cb.addEventListener('change',()=>{cb.checked?selectedWeeks.add(key):selectedWeeks.delete(key);updateSummary()});
+      row.append(cb,title,meta);listEl.append(row);
+    }
+  }
+  function open(){
+    sourceMonday=new Date(weekStart);sourceMonday.setHours(12,0,0,0);
+    sourceBoards=boardsInWeek(sourceMonday);
+    selectedWeeks.clear();
+    sourceEl.innerHTML=`<strong>${weekLabel(sourceMonday)}</strong><span>${sourceBoards.length} tavle${sourceBoards.length===1?'':'r'} i skabelonen. Samlede dobbelt-/flerlektioner bevares som én tavle.</span>`;
+    renderWeeks();updateSummary();back.style.display='flex';
+  }
+  function close(){back.style.display='none';selectedWeeks.clear()}
+
+  function cleanItemRuntime(item){
+    if(!item||typeof item!=='object')return;
+    item.status='open';
+    delete item.drawnGroups;delete item.drawnGroupIds;delete item.randomDrawn;delete item.studentDrawn;delete item.studentDrawHistory;
+    if(item.extras&&typeof item.extras==='object'){
+      delete item.extras.drawnGroups;delete item.extras.drawnGroupIds;delete item.extras.randomDrawn;
+    }
+  }
+  function makeCopy(src,targetDate,mode){
+    const slots=boardSlots(src).slice();
+    if(mode==='structure'){
+      return {
+        id:uid(),name:src.name,date:targetDate,slot:slots[0],slots,
+        classId:src.classId||'',subject:src.subject||'',displayLanguage:src.displayLanguage||'auto',
+        excluded:[],birthdayDismissed:false,theme:src.theme||'light',bgImage:src.bgImage||'',bgStrength:src.bgStrength??45,
+        agendaTitle:src.agendaTitle||'',agendaStyle:src.agendaStyle||'standard',tags:[],items:[],widgets:[],
+        timer:{seconds:600,initial:600,running:false}
+      };
+    }
+    const cp=JSON.parse(JSON.stringify(src));
+    cp.id=uid();cp.date=targetDate;cp.slot=slots[0];cp.slots=slots;cp.excluded=[];cp.teacherNote='';cp.birthdayDismissed=false;
+    delete cp.birthdayDismissedSignature;
+    (cp.items||[]).forEach(cleanItemRuntime);
+    if(cp.timer){cp.timer.running=false;cp.timer.seconds=cp.timer.initial||cp.timer.seconds||600}
+    return cp;
+  }
+  function conflictingBoards(date,slots){
+    const found=new Map();
+    slots.forEach(slot=>{const b=boardAt(date,slot);if(b)found.set(b.id,b)});
+    return [...found.values()];
+  }
+
+  document.getElementById('utWeekCopyAll').onclick=()=>setSelection(Infinity);
+  document.getElementById('utWeekCopyFirst10').onclick=()=>setSelection(10);
+  document.getElementById('utWeekCopyFirst20').onclick=()=>setSelection(20);
+  document.getElementById('utWeekCopyNone').onclick=()=>setSelection(0);
+  document.getElementById('utWeekCopyClose').onclick=close;
+  back.addEventListener('click',e=>{if(e.target===back)close()});
+
+  confirmBtn.onclick=()=>{
+    if(!sourceBoards.length||!selectedWeeks.size)return;
+    const structureOnly=(document.querySelector('input[name="utWeekCopyMode"]:checked')?.value||'structure')==='structure';
+    const onlyEmpty=emptyOnly.checked;
+    if(!onlyEmpty&&!confirm('Du har slået “Opret kun på ledige pladser” fra. Eksisterende tavler i de berørte skemafelter bliver slettet og erstattet. Fortsæt?'))return;
+    let created=0,skipped=0,replaced=0;
+    const selected=[...selectedWeeks].map(x=>new Date(x+'T12:00:00')).sort((a,b)=>a-b);
+    for(const targetMonday of selected){
+      for(const src of sourceBoards){
+        const targetDate=iso(addDays(targetMonday,dayIndex(src.date)));
+        const slots=boardSlots(src);
+        const conflicts=conflictingBoards(targetDate,slots);
+        if(conflicts.length&&onlyEmpty){skipped++;continue}
+        if(conflicts.length&&!onlyEmpty){
+          const ids=new Set(conflicts.map(b=>b.id));
+          state.boards=state.boards.filter(b=>!ids.has(b.id));
+          replaced+=conflicts.length;
+        }
+        state.boards.push(makeCopy(src,targetDate,structureOnly?'structure':'content'));
+        created++;
+      }
+    }
+    save();renderSchedule();close();
+    let msg=`${created} tavle${created===1?'':'r'} blev oprettet.`;
+    if(skipped)msg+=` ${skipped} blev sprunget over på grund af eksisterende tavler.`;
+    if(replaced)msg+=` ${replaced} eksisterende tavle${replaced===1?' blev':'r blev'} erstattet.`;
+    alert(msg);
+  };
+
+  const openBtn=document.createElement('button');
+  openBtn.className='btn';openBtn.type='button';openBtn.id='utWeekCopyOpen';openBtn.textContent='📋 Kopiér ugeplan';openBtn.title='Kopiér denne uges skemastruktur til flere uger';openBtn.onclick=open;
+  const scheduleBackup=document.querySelector('#scheduleView .ut-backup-open');
+  const anchor=scheduleBackup||document.getElementById('yearOverviewBtn');
+  if(anchor)anchor.insertAdjacentElement('afterend',openBtn);
+})();
+</script>
 <script>
 /* Undervisningstavle – indbygget hjælp. Opdateret oktober 2026. */
 (function () {
@@ -2303,6 +2499,19 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
     `],
 
     ['Kopiér tavler – og kopiér eller flyt punkter', `
+      <h4>Kopiér en hel ugeplan</h4>
+      <p>Hvis du har oprettet dit faste skema i én uge, kan du bruge <strong>📋 Kopiér ugeplan</strong> i ugeskemaet til at oprette samme struktur i mange kommende uger på én gang.</p>
+      <ol>
+        <li>Gå til den uge, der skal bruges som skabelon.</li>
+        <li>Klik på <strong>📋 Kopiér ugeplan</strong>.</li>
+        <li>Sæt flueben ved de uger, der skal have samme skema. Du kan fx vælge alle og derefter fjerne ferieuger.</li>
+        <li>Lad <strong>Kun skemastruktur</strong> være valgt, hvis du kun vil kopiere tavlernes navn, klasse, fag, tavlesprog, udseende og hvilke lektioner de dækker. Dagsorden, materialer, tags, tavleelementer og lærernoter kopieres da ikke.</li>
+        <li><strong>Opret kun på ledige pladser</strong> er slået til som standard. Dermed bliver allerede forberedte tavler aldrig overskrevet.</li>
+        <li>Klik på <strong>Kopiér til … uger</strong>.</li>
+      </ol>
+      <p>Samlede dobbelt- og flerlektioner bevares som samlede tavler i målugerne. Hvis du får nyt skema midt i året, kan du blot bruge den første uge med det nye skema som en ny skabelon.</p>
+      <p class="ut-help-important"><strong>Tip:</strong> Vælg kun <strong>Skemastruktur + indhold</strong>, hvis du bevidst vil kopiere selve undervisningsindholdet. Status for gennemførte/oversprungne punkter nulstilles på kopierne.</p>
+
       <h4>Kopiér en hel tavle</h4>
       <ol>
         <li>Åbn tavlen og klik på <strong>✎ Tavle</strong>.</li>
