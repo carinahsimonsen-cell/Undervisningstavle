@@ -533,7 +533,7 @@ body.viewing .agenda .item.ut-linked-active .meta .ut-time-chip{font-size:clamp(
 
 <div class="overlay" id="geoOverlay"><div class="withMain"><div class="obar"><strong id="geoOverlayTitle">📐 GeoGebra</strong><button class="btn" type="button" onclick="chooseWith('geo')">▣ Vis med…</button><button class="btn" id="closeGeoOverlay">✕ Luk</button></div><div id="geoBig" style="flex:1;background:white;overflow:auto"></div></div><aside class="withSide"></aside></div>
 
-<div class="overlay" id="overlay"><div class="withMain"><div class="obar"><strong id="overlayTitle"></strong><button class="btn" type="button" onclick="chooseWith('material')">▣ Vis med…</button><button class="btn" id="openTab">↗ Ny fane</button><button class="btn" id="closeOverlay">✕ Luk</button></div><iframe id="frame" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen></iframe></div><aside class="withSide"></aside></div>
+<div class="overlay" id="overlay"><div class="withMain"><div class="obar"><strong id="overlayTitle"></strong><button class="btn" type="button" id="materialFullscreen">⛶ Fuld skærm</button><button class="btn" type="button" onclick="chooseWith('material')">▣ Vis med…</button><button class="btn" id="openTab">↗ Ny fane</button><button class="btn" id="closeOverlay">✕ Luk</button></div><iframe id="frame" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen></iframe></div><aside class="withSide"></aside></div>
 
 <script>
 const KEY="undervisningstavle.v07";
@@ -1509,7 +1509,33 @@ bgStrength.oninput=()=>{board().bgStrength=+bgStrength.value;save();applyTheme()
 viewBtn.onclick=()=>{closeTagPicker();document.body.classList.toggle("viewing");viewBtn.textContent=document.body.classList.contains("viewing")?"✎ Redigering":"👁 Visning";renderAgenda();renderBirthday();renderWidgets()}
 fullBtn.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(e){}};document.addEventListener("fullscreenchange",()=>fullBtn.textContent=document.fullscreenElement?"⛶ Afslut fuld skærm":"⛶ Fuld skærm")
 function show(x){x.style.display="flex"}function hide(x){x.style.display="none"}document.querySelectorAll("[data-close]").forEach(x=>x.onclick=()=>hide(x.closest(".modalback")));document.querySelectorAll(".modalback").forEach(x=>x.onclick=e=>{if(e.target===x)hide(x)})
-const FILE_DB="undervisningstavle_materialer_v1";function fileDB(){return new Promise((ok,no)=>{let r=indexedDB.open(FILE_DB,1);r.onupgradeneeded=()=>r.result.createObjectStore("files");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}async function putFile(id,file){let db=await fileDB();return new Promise((ok,no)=>{let tx=db.transaction("files","readwrite");tx.objectStore("files").put(file,id);tx.oncomplete=()=>ok();tx.onerror=()=>no(tx.error)})}async function getFile(id){let db=await fileDB();return new Promise((ok,no)=>{let r=db.transaction("files").objectStore("files").get(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function directDomain(u){try{let parsed=new URL(u),h=parsed.hostname.toLowerCase();if(h==="docs.google.com"&&/^\/presentation\/d\/[^/]+\/preview\/?$/.test(parsed.pathname))return false;return h.includes("drive.google.com")||h.includes("docs.google.com")||h.includes("blooket.com")}catch(e){return false}}async function smartOpenMaterial(item){utCurrentAttachment=null;withTarget=item;if(item.material?.fileId){let f=await getFile(item.material.fileId);if(!f){alert("Filen kunne ikke findes i denne browser.");return}let isPdf=f.type==="application/pdf"||/\.pdf$/i.test(f.name||item.material.name||"");if(isPdf){openPdfSlideshow(f,item.material.startPage||1);return}let u=URL.createObjectURL(f);openMaterial(u,item.material.name||item.title,true);return}if(!item.link)return;if(item.linkOpenInTab===true||directDomain(item.link)){window.open(item.link,"_blank","noopener");return}openMaterial(item.link,item.title,false)}let materialUrl="",materialBlob=false;function openMaterial(u,t,isBlob=false){materialUrl=u;materialBlob=isBlob;overlayTitle.textContent=t;frame.src=u;overlay.style.display="flex";applyWith("material")}function closeMaterialOverlay(){overlay.classList.remove("withLayout","ratio60","ratio70","ratio80");overlay.style.display="none";frame.src="about:blank";if(materialBlob&&materialUrl)URL.revokeObjectURL(materialUrl);materialUrl="";materialBlob=false;utCurrentAttachment=null;withChoice.classList.remove("open")}closeOverlay.onclick=closeMaterialOverlay;openTab.onclick=()=>{
+const FILE_DB="undervisningstavle_materialer_v1";function fileDB(){return new Promise((ok,no)=>{let r=indexedDB.open(FILE_DB,1);r.onupgradeneeded=()=>r.result.createObjectStore("files");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}async function putFile(id,file){let db=await fileDB();return new Promise((ok,no)=>{let tx=db.transaction("files","readwrite");tx.objectStore("files").put(file,id);tx.oncomplete=()=>ok();tx.onerror=()=>no(tx.error)})}async function getFile(id){let db=await fileDB();return new Promise((ok,no)=>{let r=db.transaction("files").objectStore("files").get(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function directDomain(u){try{let parsed=new URL(u),h=parsed.hostname.toLowerCase();if(h==="docs.google.com"&&/^\/presentation\/d\/[^/]+\/preview\/?$/.test(parsed.pathname))return false;return h.includes("drive.google.com")||h.includes("docs.google.com")||h.includes("blooket.com")}catch(e){return false}}async function smartOpenMaterial(item){utCurrentAttachment=null;withTarget=item;if(item.material?.fileId){let f=await getFile(item.material.fileId);if(!f){alert("Filen kunne ikke findes i denne browser.");return}let isPdf=f.type==="application/pdf"||/\.pdf$/i.test(f.name||item.material.name||"");if(isPdf){openPdfSlideshow(f,item.material.startPage||1);return}let u=URL.createObjectURL(f);openMaterial(u,item.material.name||item.title,true);return}if(!item.link)return;if(item.linkOpenInTab===true||directDomain(item.link)){window.open(item.link,"_blank","noopener");return}openMaterial(item.link,item.title,false)}let materialUrl="",materialBlob=false;function openMaterial(u,t,isBlob=false){materialUrl=u;materialBlob=isBlob;overlayTitle.textContent=t;frame.src=u;overlay.style.display="flex";applyWith("material")}function closeMaterialOverlay(){overlay.classList.remove("withLayout","ratio60","ratio70","ratio80");overlay.style.display="none";frame.src="about:blank";if(materialBlob&&materialUrl)URL.revokeObjectURL(materialUrl);materialUrl="";materialBlob=false;utCurrentAttachment=null;withChoice.classList.remove("open")}
+async function utToggleMaterialFullscreen(){
+ try{
+  if(document.fullscreenElement===overlay){await document.exitFullscreen();return}
+  if(document.fullscreenElement){await document.exitFullscreen()}
+  if(overlay.requestFullscreen)await overlay.requestFullscreen();
+  else if(overlay.webkitRequestFullscreen)overlay.webkitRequestFullscreen();
+ }catch(e){console.warn('Slideshowet kunne ikke åbnes i fuld skærm',e)}
+}
+function utUpdateMaterialFullscreenButton(){
+ if(!materialFullscreen)return;
+ materialFullscreen.textContent=document.fullscreenElement===overlay?'⛶ Afslut fuld skærm':'⛶ Fuld skærm';
+}
+materialFullscreen.onclick=utToggleMaterialFullscreen;
+let utPromotingMaterialFullscreen=false;
+document.addEventListener('fullscreenchange',async()=>{
+ utUpdateMaterialFullscreenButton();
+ // Google Slides kan bede om fullscreen på selve iframe'en. Forsøg i så fald
+ // at flytte fullscreen til hele Undervisningstavlens slideshow-overlay, så
+ // topbjælke og lodtrækningsknapper bliver synlige.
+ if(document.fullscreenElement===frame&&overlay.style.display==='flex'&&!utPromotingMaterialFullscreen){
+  utPromotingMaterialFullscreen=true;
+  try{if(overlay.requestFullscreen)await overlay.requestFullscreen()}catch(e){console.warn('Kunne ikke flytte Google Slides-fullscreen til tavlens slideshow',e)}
+  finally{utPromotingMaterialFullscreen=false;utUpdateMaterialFullscreenButton()}
+ }
+});
+closeOverlay.onclick=async()=>{if(document.fullscreenElement===overlay){try{await document.exitFullscreen()}catch(e){}}closeMaterialOverlay()};openTab.onclick=()=>{
   const url=materialUrl;
   if(!url)return;
   // Husk kun brugerens valg for det konkrete link, ikke for alle links på domænet.
@@ -1601,6 +1627,9 @@ function utSlideshowActionsHost(kind){
 function renderSlideshowPointActions(kind){
  const host=utSlideshowActionsHost(kind);if(!host)return;
  host.querySelector('.ut-slide-point-actions')?.remove();
+ // Hvis dagsordenen allerede vises i sidepanelet, ligger de interaktive
+ // punktfunktioner dér. Undgå en unødvendig dublet i topbjælken.
+ if((withConfig().ids||[]).includes('agenda'))return;
  const b=board(),items=utActiveAgendaActionItems();if(!b||!items.length)return;
  const actions=[];
  for(const item of items){
@@ -2493,7 +2522,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
 
       <h4>Vis materiale sammen med tavleelementer</h4>
       <p>Når et materiale er åbent i stor visning, kan du klikke på <strong>▣ Vis med…</strong> og fx vise dagsordenen, timeren eller andre tavleelementer i et sidepanel. Vælg 80/20, 70/30 eller 60/40 efter behov.</p>
-      <p>Hvis det aktive programpunkt har <strong>🎲 Træk gruppe/par</strong> eller <strong>🎯 Træk tilfældig elev</strong> slået til, får slideshowet også en lille adgangsknap i topbjælken. Du kan derfor bruge lodtrækningen, selv om du viser materialet alene uden dagsordenen i sidepanelet. Hvis dagsordenen er valgt i sidepanelet, kan funktionerne stadig bruges dérfra.</p>
+      <p>Hvis det aktive programpunkt har <strong>🎲 Træk gruppe/par</strong> eller <strong>🎯 Træk tilfældig elev</strong> slået til, får slideshowets topbjælke en adgangsknap, når du viser materialet <strong>uden dagsordenen i sidepanelet</strong>. Brug tavlens egen <strong>⛶ Fuld skærm</strong>-knap i topbjælken, hvis du vil have slidet stort og samtidig beholde lodtrækningsknapperne. Hvis dagsordenen vises i sidepanelet, bruges funktionerne direkte dér, så de ikke vises dobbelt.</p>
     `],
 
     ['Visning, fuld skærm og sidepanel', `
