@@ -1680,6 +1680,14 @@ function utSlideGroupLabel(item,b=board()){
  const pair=groups.length&&groups.every(g=>g.length===2);
  return pair?boardText('🎲 Træk par','🎲 Draw pair','🎲 Paar ziehen',b):boardText('🎲 Træk gruppe','🎲 Draw group','🎲 Gruppe ziehen',b);
 }
+function utSlideGroupPlainLabel(item,b=board()){
+ let groups=[];try{groups=utAgendaGroupsForItem(item,true)||[]}catch(e){}
+ const pair=groups.length&&groups.every(g=>g.length===2);
+ return pair?boardText('Træk par','Draw pair','Paar ziehen',b):boardText('Træk gruppe','Draw group','Gruppe ziehen',b);
+}
+function utSlideStudentPlainLabel(b=board()){
+ return boardText('Træk elev','Pick student','Person ziehen',b);
+}
 function utSlideshowActionsHost(kind){
  const root=withOverlays[kind];if(!root)return null;
  if(kind==='pdf')return document.getElementById('pdfSlideBar');
@@ -1695,17 +1703,17 @@ function renderSlideshowPointActions(kind){
  const b=board(),items=utActiveAgendaActionItems();if(!b||!items.length)return;
  const actions=[];
  for(const item of items){
-  if(item.utGroup?.kind&&item.utGroup.kind!=='none'&&item.utShowGroupDraw!==false)actions.push({type:'group',item,label:utSlideGroupLabel(item,b)});
-  if(item.utShowStudentDraw)actions.push({type:'student',item,label:boardText('🎯 Træk elev','🎯 Pick student','🎯 Person ziehen',b)});
+  if(item.utGroup?.kind&&item.utGroup.kind!=='none'&&item.utShowGroupDraw!==false)actions.push({type:'group',item,label:utSlideGroupPlainLabel(item,b)});
+  if(item.utShowStudentDraw)actions.push({type:'student',item,label:utSlideStudentPlainLabel(b)});
  }
  if(!actions.length)return;
  const wrap=document.createElement('div');wrap.className='ut-slide-point-actions';
  for(const action of actions){
   const btn=document.createElement('button');btn.type='button';btn.className='btn';
-  const icon=document.createElement('span');icon.textContent=action.type==='group'?'🎲':'🎯';
-  const label=document.createElement('span');label.className='ut-slide-action-label';label.textContent=' '+action.label.replace(/^[🎲🎯]\s*/,'');
+  const icon=document.createElement('span');icon.className='ut-slide-action-icon';icon.textContent=action.type==='group'?'🎲':'🎯';icon.setAttribute('aria-hidden','true');
+  const label=document.createElement('span');label.className='ut-slide-action-label';label.textContent=' '+action.label;
   btn.append(icon,label);
-  btn.title=(action.item.title?action.item.title+' · ':'')+action.label.replace(/^[🎲🎯]\s*/,'');
+  btn.title=(action.item.title?action.item.title+' · ':'')+action.label;
   btn.onclick=()=>action.type==='group'?utOpenAgendaGroupDraw(action.item):openAgendaStudentDraw(action.item);
   wrap.append(btn);
  }
