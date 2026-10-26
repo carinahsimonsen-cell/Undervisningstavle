@@ -438,7 +438,7 @@ body.viewing .agenda .item.ut-linked-active .meta .ut-time-chip{font-size:clamp(
   <button class="btn" id="viewBtn">👁 Visning</button>
   <button class="btn" id="fullBtn">⛶ Fuld skærm</button>
  </div>
- <div class="workspace" id="workspace"><main class="panel"><div id="boardTeacherNoteBanner" class="ut-teacher-note-board editonly hidden" title="Klik for at redigere tavlens lærernote"></div><div class="agendaHead"><h2 id="agendaTitle" class="agendaTitle"></h2><button id="agendaTitlePlaceholder" class="agendaTitlePlaceholder editonly" type="button">+ Tilføj overskrift</button><button id="editAgendaTitleBtn" class="btn agendaEditBtn editonly hidden" type="button" title="Redigér overskrift">✎</button></div><div id="agenda" class="agenda"></div><div class="legend editonly">☰ Flyt · ✎ Redigér · ⧉ kopiér/flyt til anden tavle · ✓ gennemført · ↷ sprunget over · 📎 materiale</div><div class="toolrow editonly" style="margin-top:12px"><button class="btn primary" id="newItem">+ Nyt punkt</button><button class="btn" id="utReuseAgendaBtn" type="button">♻️ Genbrug / opsamling</button><button class="btn" id="newPause" type="button">☕ + Pause</button></div></main><aside id="elementArea"><div id="birthdayBanner" class="birthday hidden"></div><div id="widgets"></div></aside></div>
+ <div class="workspace" id="workspace"><main class="panel"><div id="boardTeacherNoteBanner" class="ut-teacher-note-board editonly hidden" title="Klik for at redigere tavlens lærernote"></div><div class="agendaHead"><h2 id="agendaTitle" class="agendaTitle"></h2><button id="agendaTitlePlaceholder" class="agendaTitlePlaceholder editonly" type="button">+ Tilføj overskrift</button><button id="editAgendaTitleBtn" class="btn agendaEditBtn editonly hidden" type="button" title="Redigér overskrift">✎</button></div><div id="agenda" class="agenda"></div><div class="legend editonly">☰ Flyt · ✎ Redigér · ⧉ kopiér/flyt til anden tavle · ✓ gennemført · ↷ sprunget over · 📎 materiale</div><div class="toolrow editonly" style="margin-top:12px"><button class="btn primary" id="newItem">+ Nyt punkt</button><button class="btn" id="utReuseAgendaBtn" type="button">♻️ Genbrug punkt</button><button class="btn" id="newPause" type="button">☕ + Pause</button></div></main><aside id="elementArea"><div id="birthdayBanner" class="birthday hidden"></div><div id="widgets"></div></aside></div>
 </section>
 
 <div class="tagPicker hidden" id="boardTagPicker"><h3>🏷️ Emneord til tavlen</h3><div class="tagSelected" id="tagSelected"></div><input id="tagPickerInput" type="text" placeholder="Søg eller opret et emneord" autocomplete="off"><div class="tagChoices" id="tagChoices"></div><div class="tagHint">Vælg et tidligere emneord, eller skriv et nyt og tryk Enter. Klik på et tilføjet emneord for at fjerne det. Kun læreren ser denne funktion.</div></div>
@@ -883,11 +883,10 @@ function utAgendaTransferItem(item){
  };
  back.querySelector('#utAgendaTransferCopy').onclick=()=>perform(false);back.querySelector('#utAgendaTransferMove').onclick=()=>perform(true);show(back);select.focus();
 }
-// Genbrug tidligere programpunkter og lav en kort, redigerbar opsamling.
+// Genbrug tidligere programpunkter uden at åbne den gamle tavle.
 function utReusePlainText(html){
  const d=document.createElement('div');d.innerHTML=String(html||'');return String(d.textContent||'').replace(/\s+/g,' ').trim();
 }
-function utReuseEscapeHtml(value){return String(value??'').replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]))}
 function utReuseBoardTimeKey(b){return String(b?.date||'')+'|'+String(boardSlots(b)[0]??999).padStart(3,'0')}
 function utReusePreviousBoards(){
  const curB=board();if(!curB)return[];const curKey=utReuseBoardTimeKey(curB),curSubject=String(curB.subject||'').trim().toLocaleLowerCase('da-DK');
@@ -900,12 +899,6 @@ function utReuseBoardLabel(b){
  const slots=boardSlots(b),first=slots[0],last=slots[slots.length-1],start=state.times[first]?.[1]||'',end=state.times[last]?.[2]||'';
  const shortDate=new Date(String(b.date||'')+'T12:00:00').toLocaleDateString('da-DK',{weekday:'short',day:'numeric',month:'short'});
  return shortDate+(start&&end?' · '+start+'–'+end:'')+' · '+(b.name||'Tavle');
-}
-function utReuseSummaryDraft(entries){
- const lang=boardLanguage(),title=lang==='en'?'Last time…':lang==='de'?'Rückblick':'Opsamling fra sidst';
- const intro=lang==='en'?'Last time we worked with:':lang==='de'?'Letztes Mal haben wir damit gearbeitet:':'Sidste gang arbejdede vi med:';
- const lis=entries.map(({item})=>{let desc=utReusePlainText(item.desc||'');if(desc.length>180)desc=desc.slice(0,177).trimEnd()+'…';return '<li><strong>'+utReuseEscapeHtml(item.title||'Uden titel')+'</strong>'+(desc?' – '+utReuseEscapeHtml(desc):'')+'</li>'}).join('');
- return {title,desc:'<p>'+utReuseEscapeHtml(intro)+'</p><ul>'+lis+'</ul>'};
 }
 function utAgendaCloneForReuse(item,sourceBoard,targetBoard){
  const cp=utAgendaCloneForTransfer(item,false);
@@ -920,23 +913,23 @@ function utOpenReuseAgenda(){
  if(!back){
   back=document.createElement('div');back.id='utReuseAgendaBack';back.className='modalback';back.style.zIndex='10040';
   back.innerHTML=`<div class="modal" style="width:min(860px,96vw)">
-    <h2>♻️ Genbrug punkt eller lav opsamling</h2>
-    <p class="sub">Vælg en tidligere undervisningstime og markér de punkter, du vil bruge. Du kan enten kopiere punkterne direkte eller lave ét kort opsamlingspunkt.</p>
+    <h2>♻️ Genbrug tidligere punkt</h2>
+    <p class="sub">Vælg en tidligere undervisningstime og markér de punkter, du vil kopiere til denne tavle.</p>
     <div class="grid2">
       <div class="field"><label for="utReuseBoardSelect">Fra undervisningstime</label><select id="utReuseBoardSelect"></select></div>
       <div class="field"><label for="utReuseSearch">Søg i tidligere punkter</label><input id="utReuseSearch" type="search" placeholder="Fx Britain, Hitman eller retskrivning…" autocomplete="off"></div>
     </div>
     <div id="utReuseAgendaResults" style="max-height:48vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:8px"></div>
     <div id="utReuseAgendaChosen" class="sub" style="margin-top:9px"></div>
-    <div class="mactions"><button class="btn primary" type="button" id="utReuseCopy">♻️ Genbrug valgte</button><button class="btn" type="button" id="utReuseRecap">↩ Lav opsamling</button><button class="btn" type="button" id="utReuseClose">Luk</button></div>
+    <div class="mactions"><button class="btn primary" type="button" id="utReuseCopy">♻️ Genbrug valgte</button><button class="btn" type="button" id="utReuseClose">Luk</button></div>
   </div>`;
   document.body.append(back);back.querySelector('#utReuseClose').onclick=()=>hide(back);back.onclick=e=>{if(e.target===back)hide(back)};
  }
- const select=back.querySelector('#utReuseBoardSelect'),search=back.querySelector('#utReuseSearch'),results=back.querySelector('#utReuseAgendaResults'),chosen=back.querySelector('#utReuseAgendaChosen'),copyBtn=back.querySelector('#utReuseCopy'),recapBtn=back.querySelector('#utReuseRecap');
+ const select=back.querySelector('#utReuseBoardSelect'),search=back.querySelector('#utReuseSearch'),results=back.querySelector('#utReuseAgendaResults'),chosen=back.querySelector('#utReuseAgendaChosen'),copyBtn=back.querySelector('#utReuseCopy');
  const selected=new Map();select.replaceChildren();select.add(new Option('Alle tidligere tavler','__all__'));
  const curSubject=String(curB.subject||'').trim().toLocaleLowerCase('da-DK');boards.forEach(b=>{const sameClass=!!curB.classId&&b.classId===curB.classId,sameSubject=!!curSubject&&String(b.subject||'').trim().toLocaleLowerCase('da-DK')===curSubject;select.add(new Option((sameClass&&sameSubject?'★ ':sameClass?'• ':'')+utReuseBoardLabel(b),b.id))});
  select.value=boards[0]?.id||'__all__';search.value='';
- const updateChosen=()=>{const n=selected.size;chosen.textContent=n?(n===1?'1 punkt valgt':n+' punkter valgt'):'Ingen punkter valgt endnu.';copyBtn.disabled=!n;recapBtn.disabled=!n};
+ const updateChosen=()=>{const n=selected.size;chosen.textContent=n?(n===1?'1 punkt valgt':n+' punkter valgt'):'Ingen punkter valgt endnu.';copyBtn.disabled=!n};
  const visibleBoards=()=>{const id=select.value;return id==='__all__'?boards:boards.filter(b=>b.id===id)};
  const render=()=>{
   const q=String(search.value||'').trim().toLocaleLowerCase('da-DK');results.replaceChildren();let count=0;
@@ -948,7 +941,6 @@ function utOpenReuseAgenda(){
  };
  select.onchange=render;search.oninput=render;
  copyBtn.onclick=()=>{const entries=[...selected.values()];if(!entries.length)return;const clones=entries.map(({sourceBoard,item})=>utAgendaCloneForReuse(item,sourceBoard,curB));curB.items=curB.items||[];curB.items.push(...clones);if(!(curB.tags||[]).length){const linkedCourse=clones.find(x=>String(x.utCourse||'').trim())?.utCourse;if(linkedCourse)curB.tags=[linkedCourse]}save();hide(back);renderAgenda();alert((clones.length===1?'Punktet er':'De '+clones.length+' punkter er')+' genbrugt på denne tavle.')};
- recapBtn.onclick=()=>{const entries=[...selected.values()];if(!entries.length)return;const draft=utReuseSummaryDraft(entries);hide(back);editItem();itTitle.value=draft.title;itDesc.innerHTML=draft.desc;itNeed.value='';itMode.value='';itMins.value='';utAgendaSetupFields(null);utRenderStudentDrawPrepOptions();setTimeout(()=>itDesc.focus(),0)};
  render();show(back);setTimeout(()=>search.focus(),0);
 }
 document.getElementById('utReuseAgendaBtn')?.addEventListener('click',utOpenReuseAgenda);
@@ -2387,15 +2379,13 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
 
       <h4>♻️ Genbrug gamle punkter uden at åbne den gamle tavle</h4>
       <ol>
-        <li>Klik på <strong>♻️ Genbrug / opsamling</strong> ved siden af <strong>+ Nyt punkt</strong>.</li>
+        <li>Klik på <strong>♻️ Genbrug punkt</strong> ved siden af <strong>+ Nyt punkt</strong>.</li>
         <li>Vælg en tidligere undervisningstime. Den seneste relevante tavle med samme klasse og fag foreslås først.</li>
         <li>Markér et eller flere programpunkter. Du kan også vælge <strong>Alle tidligere tavler</strong> og søge på tværs af historikken.</li>
         <li>Klik på <strong>♻️ Genbrug valgte</strong> for at kopiere punkterne til den aktuelle tavle. Materialer og lærernoter følger med, mens gennemført-status nulstilles.</li>
       </ol>
       <p>Hvis du genbruger et punkt fra en anden klasse, fjernes den gamle klasses konkrete gruppeinddeling, så elevnavne fra en anden klasse ikke følger med.</p>
 
-      <h4>↩ Lav en kort opsamling fra en tidligere time</h4>
-      <p>Markér de relevante gamle punkter i samme vindue og klik på <strong>↩ Lav opsamling</strong>. Tavlen laver et nyt, kort opsamlingspunkt ud fra punkternes titler og beskrivelser. Teksten følger tavlens sprog (Dansk, English eller Deutsch) og åbnes i <strong>Nyt programpunkt</strong>, så du kan rette den, før du gemmer. Lærernoter bruges aldrig i elevopsummeringen.</p>
     `],
 
     ['Tilføj og omdøb materialer på et punkt', `
