@@ -416,6 +416,68 @@ body.viewing .agenda .item.ut-linked-active .meta .ut-time-chip{font-size:clamp(
 .ut-group-resize-handle{position:absolute;right:3px;bottom:3px;width:28px;height:28px;display:grid;place-items:center;border-radius:8px 0 12px 0;background:#e4ece7;border:1px solid #c9d7cf;color:#355c4d;font-size:18px;line-height:1;cursor:nwse-resize;touch-action:none;user-select:none;z-index:3;opacity:.88}.ut-group-resize-handle:hover{opacity:1}
 @media(max-width:700px){.ut-group-float{width:min(94vw,620px);height:min(54vh,390px);min-width:300px;min-height:240px}}
 </style>
+
+<style id="ut-group-draw-responsive-v3">
+/* Lodtrækningsfeltets indhold følger feltets egen størrelse – ikke viewportens. */
+.ut-group-float{container-type:size}
+.ut-group-float-head{
+  padding:clamp(9px,3cqmin,14px) clamp(11px,4cqmin,17px);
+  font-size:clamp(14px,4.2cqmin,21px);
+}
+.ut-group-float-head .btn{
+  font-size:clamp(14px,3.8cqmin,18px);
+  padding:clamp(6px,1.8cqmin,9px) clamp(8px,2.8cqmin,12px);
+}
+.ut-group-float-body{
+  justify-content:safe center;
+  padding:clamp(10px,4cqmin,20px) clamp(11px,4.5cqmin,22px);
+  gap:clamp(4px,1.6cqmin,8px);
+}
+.ut-group-float-result{
+  font-size:clamp(20px,7cqmin,38px);
+  line-height:1.16;
+  margin:clamp(2px,1cqmin,6px) 0 clamp(5px,2cqmin,10px);
+  min-width:0;
+}
+.ut-group-float .ut-group-drawn-title{
+  font-size:clamp(22px,8.5cqmin,46px);
+  line-height:1.08;
+  margin:0 0 clamp(5px,2cqmin,10px);
+}
+.ut-group-float .ut-group-drawn-names{
+  gap:clamp(5px,2.2cqmin,9px);
+  margin:clamp(5px,2cqmin,10px) 0 clamp(7px,2.8cqmin,15px);
+  align-items:center;
+}
+.ut-group-float .ut-group-drawn-names span{
+  padding:clamp(5px,2cqmin,8px) clamp(8px,3.2cqmin,15px);
+  font-size:clamp(19px,7.5cqmin,42px);
+  line-height:1.08;
+  border-radius:clamp(8px,2.5cqmin,12px);
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+.ut-group-float .sub{
+  font-size:clamp(13px,4.1cqmin,20px);
+  line-height:1.2;
+}
+.ut-group-float .toolrow{
+  gap:clamp(6px,2cqmin,10px);
+  margin-top:clamp(6px,2.5cqmin,12px);
+}
+.ut-group-float .btn{
+  font-size:clamp(13px,4cqmin,19px);
+  padding:clamp(7px,2.3cqmin,10px) clamp(9px,3.3cqmin,14px);
+  line-height:1.15;
+}
+/* Ved meget lave felter prioriteres resultat og knapper frem for luft. */
+@container (max-height:300px){
+  .ut-group-float-body{justify-content:flex-start}
+  .ut-group-float .ut-group-drawn-title{font-size:clamp(20px,7cqmin,34px)}
+  .ut-group-float .ut-group-drawn-names span{font-size:clamp(17px,6.3cqmin,30px)}
+  .ut-group-float .toolrow{margin-top:4px}
+}
+</style>
 <style id="ut-agenda-student-draw-v1">
 .ut-student-float .ut-group-drawn-title{font-size:clamp(36px,4.2vw,64px);line-height:1.15;margin:10px 0 16px;text-align:center}
 .ut-student-float .ut-group-float-result{display:flex;align-items:center;justify-content:center;min-height:90px}
@@ -2572,7 +2634,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
 
       <h4>Træk gruppe/par</h4>
       <p>Funktionen er et <strong>tilvalg på det enkelte punkt</strong>. Slå <strong>🎲 Vis “Træk gruppe/par” på tavlen</strong> til under punktets gruppefunktioner, hvis du faktisk skal bruge lodtrækningen. Nye punkter har den slået fra som standard.</p>
-      <p>Lodtrækningsfeltet kan flyttes frit rundt på skærmen og ændres i størrelse. Placering og størrelse huskes.</p>
+      <p>Lodtrækningsfeltet kan flyttes frit rundt på skærmen og ændres i størrelse. Placering og størrelse huskes, og tekst, navnebrikker og knapper tilpasser sig automatisk feltets aktuelle størrelse.</p>
 
       <h4>Udearbejde og mødegrupper</h4>
       <p>Du kan markere udvalgte grupper til udearbejde og registrere det, når det faktisk er sket. Du kan også lade grupper mødes bagefter og enten fordele dem automatisk i mødegrupper eller sammensætte mødegrupper manuelt. En mødegruppe kan bestå af mere end to grupper.</p>
