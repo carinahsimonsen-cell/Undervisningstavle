@@ -281,11 +281,17 @@ body.viewing .agenda .item .actions .icon:hover{background:color-mix(in srgb,var
 .obar .ut-slide-point-actions+.btn{margin-left:0}
 #pdfSlideBar .ut-slide-point-actions{display:flex;gap:7px;align-items:center}
 #pdfSlideBar .ut-slide-point-actions .btn{font-size:14px!important;min-width:auto!important;height:40px!important;padding:0 11px!important}
-#ytVideoOverlay .ut-slide-point-actions{position:absolute;top:12px;right:120px;z-index:6;display:flex;gap:7px}
-#ytVideoOverlay .ut-slide-point-actions .btn{border:1px solid #777;border-radius:9px;padding:10px;background:#222;color:white}
+#ytVideoToolbar{position:absolute;top:12px;left:18px;right:18px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:14px;pointer-events:none}
+#ytVideoToolbarLeft,#ytVideoToolbarRight{display:flex;align-items:center;gap:8px;flex-wrap:wrap;pointer-events:auto}
+#ytVideoToolbarRight{justify-content:flex-end;margin-left:auto}
+#ytVideoToolbar .btn,#ytVideoToolbar button{border:1px solid #777;border-radius:9px;padding:10px 12px;background:#222;color:white;cursor:pointer;font-size:16px;line-height:1.1;white-space:nowrap}
+#ytVideoOverlay .ut-slide-point-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0}
+#ytVideoOverlay .ut-slide-point-actions .btn{border:1px solid #777;border-radius:9px;padding:10px 12px;background:#222;color:white}
 @media (max-width:900px){
   .ut-slide-point-actions .ut-slide-action-label{display:none}
-  #ytVideoOverlay .ut-slide-point-actions{right:90px}
+  #ytVideoToolbar{left:8px;right:8px;top:8px;gap:8px}
+  #ytVideoToolbarLeft,#ytVideoToolbarRight{gap:5px}
+  #ytVideoToolbar .btn,#ytVideoToolbar button{font-size:14px;padding:8px 9px}
 }
 .withChoice{position:fixed;z-index:12050;top:65px;right:15px;background:white;color:#253329;border:1px solid #ccd3ce;border-radius:15px;padding:16px;width:min(360px,calc(100vw - 30px));max-height:75vh;overflow:auto;box-shadow:0 12px 45px #0006;display:none}
 .withChoice.open{display:block}.withChoice label{display:flex;gap:9px;align-items:center;padding:8px 0}.withChoice input{width:19px;height:19px}.withChoice select{padding:7px;width:100%;border-radius:7px}.withChoice .btn{margin-top:9px}
@@ -333,7 +339,7 @@ body.viewing .agenda .item .actions .icon:hover{background:color-mix(in srgb,var
 #ytVideoOverlay.open{display:flex}
 #ytVideoBox{width:min(1200px,96vw);aspect-ratio:16/9;position:relative;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.5)}
 #ytVideoFrame{width:100%;height:100%;border:0;display:block}
-#ytVideoClose{position:absolute;right:18px;top:14px;height:44px;padding:0 16px;border:1px solid #666;border-radius:12px;background:#242424;color:#fff;cursor:pointer;font-size:16px;z-index:2}
+#ytVideoClose{border:1px solid #666;border-radius:12px;background:#242424;color:#fff;cursor:pointer;font-size:16px}
 </style>
 <script src="https://www.geogebra.org/apps/deployggb.js"></script>
 
@@ -1654,7 +1660,7 @@ function clockNow(){clock.textContent=new Date().toLocaleTimeString("da-DK",{hou
 <div id="pdfSlideHint">← → skifter slide · Esc lukker</div></div><aside class="withSide"></aside>
 </div>
 <div id="ytVideoOverlay" aria-hidden="true"><div class="withMain">
-<button id="ytVideoClose" title="Luk video (Esc)">✕ Luk video</button><button type="button" onclick="chooseWith('youtube')" style="position:absolute;top:12px;left:145px;z-index:4;border:1px solid #777;border-radius:9px;padding:10px;background:#222;color:white;cursor:pointer">▣ Vis med…</button><button id="ytVideoFullscreen" type="button" title="Vis selve videoen i fuld skærm" style="position:absolute;top:12px;left:270px;z-index:4;border:1px solid #777;border-radius:9px;padding:10px;background:#222;color:white;cursor:pointer">⛶ Fuld skærm-video</button>
+<div id="ytVideoToolbar"><div id="ytVideoToolbarLeft"><button class="btn" type="button" onclick="chooseWith('youtube')">▣ Vis med…</button><button class="btn" id="ytVideoFullscreen" type="button" title="Vis selve videoen i fuld skærm">⛶ Fuld skærm-video</button></div><div id="ytVideoToolbarRight"><button class="btn" id="ytVideoClose" title="Luk video (Esc)">✕ Luk video</button></div></div>
 <div id="ytVideoBox"><iframe id="ytVideoFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen webkitallowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div><aside class="withSide"></aside>
 </div>
 <div id="withChoice" class="withChoice"><strong>Vis med…</strong><div class="sub">Vælg elementer fra den aktuelle tavle</div><div id="withOptions"></div><label for="withRatio">Fordeling af pladsen</label><select id="withRatio"><option value="80">80 % materiale / 20 % elementer</option><option value="70">70 % materiale / 30 % elementer</option><option value="60">60 % materiale / 40 % elementer</option></select><button class="btn primary" type="button" id="withApply">Gem og vis</button><button class="btn" type="button" id="withOnly">Vis kun materiale</button><button class="btn" type="button" id="withCancel">Annuller</button></div>
@@ -1691,7 +1697,7 @@ function utSlideStudentPlainLabel(b=board()){
 function utSlideshowActionsHost(kind){
  const root=withOverlays[kind];if(!root)return null;
  if(kind==='pdf')return document.getElementById('pdfSlideBar');
- if(kind==='youtube')return root.querySelector('.withMain')||root;
+ if(kind==='youtube')return document.getElementById('ytVideoToolbarRight')||root.querySelector('.withMain')||root;
  return root.querySelector('.obar');
 }
 function renderSlideshowPointActions(kind){
@@ -1718,7 +1724,7 @@ function renderSlideshowPointActions(kind){
   wrap.append(btn);
  }
  if(kind==='pdf')host.insertBefore(wrap,host.firstElementChild||null);
- else if(kind==='youtube')host.append(wrap);
+ else if(kind==='youtube'){const closeBtn=document.getElementById('ytVideoClose');host.insertBefore(wrap,closeBtn&&closeBtn.parentNode===host?closeBtn:null)}
  else host.insertBefore(wrap,host.querySelector('button')||null);
 }
 function withAvailable(){let b=board();if(!b)return[];let out=[];if(b.items?.length)out.push({id:"agenda",label:agendaPanelTitle(b)});if(!birthdayBanner.classList.contains("hidden"))out.push({id:"birthday",label:boardText("Fødselsdag","Birthday","Geburtstag",b)});for(let w of b.widgets||[])out.push({id:w.id,label:displayWidgetTitle(w,b),widget:w});return out}
