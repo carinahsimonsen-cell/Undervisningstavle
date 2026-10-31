@@ -11,7 +11,7 @@ button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);backgrou
 #scheduleView{padding:22px;min-height:100vh}.apphead{display:flex;gap:10px;align-items:center;margin-bottom:18px}.brand{font-weight:800;font-size:24px;margin-right:auto}.weeknav{display:flex;gap:8px;align-items:center}.weektitle{min-width:190px;text-align:center;font-weight:700}
 .schedule{display:grid;grid-template-columns:115px repeat(5,minmax(150px,1fr));border:1px solid var(--line);border-radius:16px;overflow:auto;background:#fff;box-shadow:var(--shadow)}
 .cell{min-height:112px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:11px}.corner,.dayhead{min-height:72px;background:#f7f8f6}.dayhead{font-weight:750;font-size:17px}.dayhead small{display:block;color:var(--muted);font-weight:400;margin-top:5px}.timecell{background:#f7f8f6;font-size:14px}.timecell strong{display:block;margin-bottom:5px}.slot{display:flex;align-items:center;justify-content:center;position:relative}.boardwrap{width:100%;position:relative}.boardwrap .boardcard{padding-right:88px}.boardmenu,.boarddelete{position:absolute;top:7px;width:34px;height:34px;border:0;border-radius:9px;background:#ffffffb8;font-size:20px;line-height:1;z-index:2}.boardmenu{right:7px}.boarddelete{right:47px;font-size:17px}.boardmenu:hover,.boarddelete:hover{background:#fff}.boarddelete:hover{background:#fff1f1}.addslot{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:22px;color:var(--muted)}.boardcard{width:100%;min-height:78px;text-align:left;border:1px solid #bdcec3;background:#edf5f0;border-radius:12px;padding:11px}.boardcard strong{display:block;font-size:16px}.boardcard small{display:block;color:var(--muted);margin-top:6px}
-#boardView{min-height:100vh;padding:22px;background:var(--boardbg,#edf0ea);background-size:cover;background-position:center}.top{display:flex;align-items:center;gap:9px;margin-bottom:16px}.identity{margin-right:auto}.boardname{font-size:31px;font-weight:800;margin:2px 0}.sub{color:var(--muted);font-size:14px}.clock{font-size:26px;font-weight:750;min-width:78px;text-align:center}
+#boardView{min-height:100vh;padding:22px;background:var(--boardbg,#edf0ea);background-size:cover;background-position:center}.top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"back identity status" "tools tools tools";align-items:center;column-gap:12px;row-gap:10px;margin-bottom:16px}.identity{grid-area:identity;min-width:0;margin-right:0}.boardname{font-size:31px;font-weight:800;margin:2px 0;white-space:nowrap}.sub{color:var(--muted);font-size:14px}.clock{font-size:26px;font-weight:750;min-width:78px;text-align:center}.ut-board-status{grid-area:status;display:flex;align-items:center;gap:10px;white-space:nowrap}.ut-board-tools{grid-area:tools;display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}.ut-board-back{grid-area:back}
 .workspace{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:17px;align-items:start}.workspace.noWidgets{grid-template-columns:1fr}.workspace.noWidgets #widgets{display:none}
 .agendaHead{display:flex;align-items:center;gap:8px;margin:0 0 14px 2px}.agendaHead .agendaTitle{margin:0}.agendaTitlePlaceholder{font-size:18px;font-weight:650;color:var(--muted);border:1px dashed var(--line);background:#ffffff99;border-radius:9px;padding:6px 10px;cursor:pointer}.agendaEditBtn{width:34px;height:34px;padding:0;border-radius:9px}.panel,.widget{background:#fffffff0;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}.panel{padding:19px}.agendaTitle{font-size:25px;font-weight:800;margin:0 0 14px 2px}.agendaTitle:empty{display:none}.agenda{display:flex;flex-direction:column;gap:9px}.item{display:flex;gap:9px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:11px}.item.current{border:2px solid var(--accent);background:#f5faf6}.handle{padding:7px;color:var(--muted);cursor:grab;font-size:20px}.status{width:23px;text-align:center;font-weight:800;font-size:19px}.content{flex:1;min-width:0}.title{font-weight:750;font-size:19px}.desc,.need{margin-top:5px;line-height:1.35}.desc{font-size:15px;color:#465149}.need{font-size:14px}.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);margin-top:7px}.timebtn{min-height:29px;padding:0 8px}.actions{display:flex;gap:5px}.done{opacity:.68}.done .title{text-decoration:line-through}.skipped{opacity:.38}.dragging{opacity:.3}.over{outline:3px solid #aabbb1}.legend{font-size:12px;color:var(--muted);margin-top:12px}
 #widgets{display:flex;flex-direction:column;gap:11px}.widget{padding:15px}.whead{display:flex;align-items:center;gap:6px}.whead h3{margin:0;flex:1}.wtext{margin-top:11px;white-space:pre-wrap;line-height:1.45}.notes{width:100%;min-height:220px;margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical;background:#fffefa}.notes:focus{min-height:360px}.saveflash{font-weight:700;color:var(--accent)}.timer{font-size:38px;text-align:center;font-weight:800;margin:12px}.timerrow{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}.timerrow input{width:58px;text-align:center}
@@ -54,7 +54,7 @@ body.viewing .item .meta .ut-mode-chip,body.viewing .item .meta .ut-time-chip{ba
 /* De store gruppeflader, når gruppeelementet bruges, følger samme grønne identitet. */
 .ut-groups-widget,.ut-group-panel{--ut-group-soft:#e7f7df;--ut-group-line:#afd59d}
 .ut-groups-widget{background:var(--ut-group-soft)!important;border-color:var(--ut-group-line)!important}
-@media(max-width:820px){.schedule{grid-template-columns:100px repeat(5,180px)}.workspace{grid-template-columns:1fr}.top{flex-wrap:wrap}.identity{width:100%}.grid2{grid-template-columns:1fr}.actions{flex-direction:column}.themes{grid-template-columns:repeat(3,1fr)}}\n/* Visuelt facelift 2026-10: farven ligger på de store dagsordenskort, mens metadata er rolige. */
+@media(max-width:820px){.schedule{grid-template-columns:100px repeat(5,180px)}.workspace{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.actions{flex-direction:column}.themes{grid-template-columns:repeat(3,1fr)}.top{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"back identity" "status status" "tools tools";align-items:start}.ut-board-status{justify-content:flex-start}.ut-board-tools{gap:7px}.ut-board-tools .btn{padding:8px 11px}.boardname{white-space:normal}}\n/* Visuelt facelift 2026-10: farven ligger på de store dagsordenskort, mens metadata er rolige. */
 body.viewing #boardView{font-family:"Trebuchet MS",Arial,sans-serif;--agenda-card:#dff1ff;--agenda-card-current:#bfe3ff;--agenda-card-border:#8fcaf3;--agenda-card-ink:#111111}
 body.viewing .panel,body.viewing .widget{border-color:#ffffffaa;box-shadow:0 10px 28px #26302920;backdrop-filter:blur(2px)}
 body.viewing .item{border-radius:18px;background:var(--agenda-card);border:1px solid color-mix(in srgb,var(--agenda-card-border) 58%,white);box-shadow:0 4px 13px #26302912;transition:background .18s,border-color .18s,box-shadow .18s,transform .18s}
@@ -540,11 +540,13 @@ body.viewing .agenda .item.ut-linked-active .meta .ut-time-chip{font-size:clamp(
 .ut-more-menu.open{display:grid;gap:5px}
 .ut-more-menu .btn{width:100%;text-align:left;justify-content:flex-start;white-space:nowrap}
 .boardcard .ut-schedule-topic{display:block;margin-top:3px;font-size:.86em;line-height:1.15;font-style:italic;color:#315e43;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ut-board-topic{display:flex;align-items:center;gap:7px;margin-left:10px;min-width:0;max-width:min(42vw,560px);padding-left:13px;border-left:1px solid rgba(60,85,68,.20)}
+.ut-board-heading-row{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;min-width:0}
+.ut-board-heading-row .boardname{margin:0}
+.ut-board-topic{display:flex;align-items:center;gap:10px;min-width:0;max-width:min(48vw,720px)}
 .ut-board-topic.hidden{display:none!important}
-.ut-board-topic-label{font-size:clamp(14px,1.05vw,17px);font-weight:650;color:var(--muted);white-space:nowrap;line-height:1.15}
-.ut-board-topic-values{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
-.ut-board-topic-pill{font-family:Georgia,'Times New Roman',serif;font-size:clamp(14px,1.05vw,17px);font-style:italic;font-weight:600;line-height:1.15;color:#203c2c;background:rgba(214,235,211,.62);border-radius:999px;padding:4px 10px;max-width:290px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ut-board-topic-label{font-size:clamp(18px,1.45vw,22px);font-weight:700;color:#5e6a62;white-space:nowrap;line-height:1.1}
+.ut-board-topic-values{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.ut-board-topic-pill{font-family:Georgia,'Times New Roman',serif;font-size:clamp(18px,1.45vw,22px);font-style:italic;font-weight:600;line-height:1.1;color:#203c2c;background:rgba(214,235,211,.62);border-radius:999px;padding:6px 14px;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #boardView .top>.identity{margin-right:0;flex:0 1 auto;min-width:0}
 #boardView #saveIndicator{margin-left:auto}
 body:not(.viewing) .ut-board-topic{cursor:pointer}
@@ -560,9 +562,32 @@ body:not(.viewing) .ut-board-topic:hover .ut-board-topic-pill{outline:2px solid 
 @media(max-width:1050px){
  #scheduleView .brand{font-size:0;width:8px;min-width:8px}
  #scheduleView .brand::after{content:'UT';font-size:18px;font-weight:800}
- #scheduleView .weeknav{gap:5px}.ut-board-topic{max-width:38vw}
+ #scheduleView .weeknav{gap:5px}.ut-board-topic{max-width:46vw}
 }
-@media(max-width:780px){#scheduleView .weektitle{font-size:14px}.ut-board-topic{max-width:48vw;padding-left:10px;margin-left:8px}.ut-board-topic-label{display:inline}}
+@media(max-width:780px){#scheduleView .weektitle{font-size:14px}.ut-board-heading-row{gap:10px}.ut-board-topic{max-width:100%}.ut-board-topic-label{display:inline;font-size:18px}.ut-board-topic-pill{font-size:18px;max-width:100%}}
+
+@media(max-width:1250px){
+ #boardView .top{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"back identity" "status status" "tools tools";align-items:start}
+ #boardView .ut-board-status{justify-content:flex-start}
+ #boardView .ut-board-tools{gap:7px}
+ #boardView .ut-board-tools .btn{padding:8px 11px}
+}
+@media(max-width:980px){
+ #boardView .ut-board-heading-row{align-items:flex-start;gap:8px 12px}
+ #boardView .boardname{font-size:clamp(28px,5vw,38px);white-space:nowrap}
+ #boardView .identity>.sub{font-size:13px;line-height:1.15}
+ #boardView .ut-board-topic-label,#boardView .ut-board-topic-pill{font-size:clamp(17px,2.4vw,21px)}
+ #boardView .ut-board-tools .btn{font-size:14px}
+}
+@media(max-width:680px){
+ #boardView .top{grid-template-columns:1fr;grid-template-areas:"back" "identity" "status" "tools"}
+ #boardView .ut-board-back{justify-self:start}
+ #boardView .ut-board-heading-row{display:flex;align-items:flex-start;gap:8px 10px}
+ #boardView .boardname{font-size:30px}
+ #boardView .ut-board-topic{max-width:100%;flex-wrap:wrap}
+ #boardView .ut-board-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+ #boardView .ut-board-tools .btn{width:100%;justify-content:center}
+}
 </style>
 
 </head>
@@ -574,14 +599,18 @@ body:not(.viewing) .ut-board-topic:hover .ut-board-topic-pill{outline:2px solid 
 
 <section id="boardView" class="hidden">
  <div class="top">
-  <button class="btn" id="backSchedule">← Skema</button>
-  <div class="identity"><div class="sub" id="boardWhen"></div><div class="boardname" id="boardName"></div></div><div id="boardTopic" class="ut-board-topic hidden" title="Klik for at vælge dagens emne"><span id="boardTopicLabel" class="ut-board-topic-label"></span><div id="boardTopicValues" class="ut-board-topic-values"></div></div><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button>
-  <div class="sub" id="saveIndicator">✓ Gemt</div><div class="clock" id="clock"></div>
-  <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
-  <button class="btn editonly" id="appearance">🎨 Udseende</button>
-  <button class="btn primary editonly" id="addWidget">+ Tilføj element</button>
-  <button class="btn" id="viewBtn">👁 Visning</button>
-  <button class="btn" id="fullBtn">⛶ Fuld skærm</button>
+  <button class="btn ut-board-back" id="backSchedule">← Skema</button>
+  <div class="identity"><div class="sub" id="boardWhen"></div><div class="ut-board-heading-row"><div class="boardname" id="boardName"></div><div id="boardTopic" class="ut-board-topic hidden" title="Klik for at vælge dagens emne"><span id="boardTopicLabel" class="ut-board-topic-label"></span><div id="boardTopicValues" class="ut-board-topic-values"></div></div></div></div>
+  <div class="ut-board-status"><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button><div class="sub" id="saveIndicator">✓ Gemt</div><div class="clock" id="clock"></div></div>
+  <div class="ut-board-tools">
+   <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
+   <button class="btn editonly" id="appearance">🎨 Udseende</button>
+   <button class="btn editonly" id="backupBtn">💾 Sikkerhedskopi</button>
+   <button class="btn primary editonly" id="addWidget">+ Tilføj element</button>
+   <button class="btn" id="helpBtnBoard">❓ Hjælp</button>
+   <button class="btn" id="viewBtn">👁 Visning</button>
+   <button class="btn" id="fullBtn">⛶ Fuld skærm</button>
+  </div>
  </div>
  <div class="workspace" id="workspace"><main class="panel"><div id="boardTeacherNoteBanner" class="ut-teacher-note-board editonly hidden" title="Klik for at redigere tavlens lærernote"></div><div class="agendaHead"><h2 id="agendaTitle" class="agendaTitle"></h2><button id="agendaTitlePlaceholder" class="agendaTitlePlaceholder editonly" type="button">+ Tilføj overskrift</button><button id="editAgendaTitleBtn" class="btn agendaEditBtn editonly hidden" type="button" title="Redigér overskrift">✎</button></div><div id="agenda" class="agenda"></div><div class="legend editonly">☰ Flyt · ✎ Redigér · ⧉ kopiér/flyt til anden tavle · ✓ gennemført · ↷ sprunget over · 📎 materiale</div><div class="toolrow editonly" style="margin-top:12px"><button class="btn primary" id="newItem">+ Nyt punkt</button><button class="btn" id="utReuseAgendaBtn" type="button">♻️ Genbrug punkt</button><button class="btn" id="newPause" type="button">☕ + Pause</button></div></main><aside id="elementArea"><div id="birthdayBanner" class="birthday hidden"></div><div id="widgets"></div></aside></div>
 </section>
@@ -2448,8 +2477,9 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
   }
   const scheduleAnchor=document.getElementById('utCoursesBtn')||document.getElementById('yearOverviewBtn');
   if(scheduleAnchor)scheduleAnchor.insertAdjacentElement('afterend',addOpenButton());
-  const boardAnchor=document.getElementById('appearance');
-  if(boardAnchor)boardAnchor.insertAdjacentElement('afterend',addOpenButton());
+  const fixedBoardBackup=document.getElementById('backupBtn');
+  if(fixedBoardBackup){fixedBoardBackup.title='Eksportér eller importér hele Undervisningstavlen';fixedBoardBackup.addEventListener('click',open)}
+  else {const boardAnchor=document.getElementById('appearance');if(boardAnchor)boardAnchor.insertAdjacentElement('afterend',addOpenButton())}
 
   function localStamp(){
     const d=new Date(),pad=n=>String(n).padStart(2,'0');
@@ -3201,7 +3231,9 @@ utSyncAllBoardCourseTags();
 
   function makeHelpButton(){const b=document.createElement('button');b.className='btn';b.type='button';b.textContent='❔ Hjælp';b.addEventListener('click',openHelp);return b}
   const scheduleButton=document.getElementById('classesBtn');if(scheduleButton)scheduleButton.insertAdjacentElement('afterend',makeHelpButton());
-  const boardButton=document.getElementById('viewBtn');if(boardButton)boardButton.insertAdjacentElement('beforebegin',makeHelpButton());
+  const fixedBoardHelp=document.getElementById('helpBtnBoard');
+  if(fixedBoardHelp)fixedBoardHelp.addEventListener('click',openHelp);
+  else {const boardButton=document.getElementById('viewBtn');if(boardButton)boardButton.insertAdjacentElement('beforebegin',makeHelpButton())}
 
   const fileInput=document.getElementById('materialFile');
   if(fileInput){const reminder=document.createElement('p');reminder.className='sub';reminder.style.margin='8px 0 0';reminder.innerHTML='<strong>PowerPoint eller Google Slides som PDF?</strong> Vælg PDF-filen her. <strong>Google Slides med animationer og video?</strong> Indsæt et almindeligt link eller et /preview-link i linkfeltet ovenfor. Se Hjælp, punkt 4.';fileInput.insertAdjacentElement('afterend',reminder)}
