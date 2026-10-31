@@ -637,6 +637,115 @@ body.viewing #boardView .boardname{white-space:nowrap}
  body.viewing #boardView .ut-board-tools{justify-self:end}
  body.viewing #boardView .ut-board-tools .btn{padding:7px 9px;font-size:13px}
 }
+
+/* Responsiv skalering på større skærme: redigeringstilstanden skal bruge den ekstra plads uden at blive overdimensioneret. */
+#boardView{padding:clamp(18px,1.45vw,30px)}
+#boardView .top{column-gap:clamp(14px,1.2vw,24px);row-gap:clamp(10px,.8vw,15px);margin-bottom:clamp(14px,1vw,20px)}
+#boardView .identity>.sub{font-size:clamp(14px,.95vw,18px);line-height:1.2}
+#boardView .boardname{font-size:clamp(31px,2.25vw,42px);line-height:1.05}
+#boardView .clock{font-size:clamp(26px,2vw,38px);min-width:clamp(78px,6vw,118px)}
+#boardView .ut-board-tools{gap:clamp(7px,.7vw,12px)}
+#boardView .ut-board-tools .btn{min-height:clamp(43px,3vw,54px);padding:0 clamp(13px,1vw,19px);font-size:clamp(15px,1vw,18px)}
+#boardView .ut-board-heading-row{gap:clamp(12px,1vw,20px)}
+#boardView .ut-board-topic{gap:clamp(8px,.65vw,12px)}
+#boardView .ut-board-topic-label,#boardView .ut-board-topic-pill{font-size:clamp(18px,1.35vw,24px)}
+#boardView .ut-board-topic-pill{padding:clamp(5px,.4vw,7px) clamp(11px,.8vw,16px)}
+#boardView .ut-board-heading-row .boardTagButton{margin-left:clamp(8px,.7vw,13px)}
+#boardView .panel{padding:clamp(19px,1.45vw,29px)}
+#boardView .agendaHead{gap:clamp(8px,.7vw,12px);margin-bottom:clamp(12px,1vw,18px)}
+#boardView .agendaTitle{font-size:clamp(25px,1.65vw,34px)}
+#boardView .agendaTitlePlaceholder{font-size:clamp(18px,1.15vw,22px);padding:clamp(6px,.45vw,9px) clamp(10px,.7vw,14px)}
+#boardView .agenda{gap:clamp(9px,.7vw,14px)}
+body:not(.viewing) #boardView .item{gap:clamp(9px,.7vw,14px);padding:clamp(11px,.85vw,16px);border-radius:clamp(13px,.85vw,17px)}
+body:not(.viewing) #boardView .item .title{font-size:clamp(19px,1.25vw,24px);line-height:1.18}
+body:not(.viewing) #boardView .item .desc{font-size:clamp(15px,.98vw,19px)}
+body:not(.viewing) #boardView .item .need{font-size:clamp(14px,.9vw,17px)}
+body:not(.viewing) #boardView .item .meta{font-size:clamp(14px,.9vw,17px);gap:clamp(8px,.65vw,12px)}
+body:not(.viewing) #boardView .item .handle{font-size:clamp(20px,1.25vw,24px);padding:clamp(7px,.55vw,10px)}
+body:not(.viewing) #boardView .item .actions{gap:clamp(5px,.45vw,8px)}
+body:not(.viewing) #boardView .item .actions .icon{width:clamp(42px,2.7vw,50px);height:clamp(42px,2.7vw,50px);font-size:clamp(18px,1.15vw,22px)}
+#boardView .legend{font-size:clamp(12px,.8vw,14px);margin-top:clamp(10px,.8vw,15px)}
+#boardView .toolrow{gap:clamp(7px,.6vw,11px)}
+#boardView .toolrow .btn{font-size:clamp(15px,1vw,18px);min-height:clamp(43px,3vw,52px);padding-inline:clamp(13px,1vw,18px)}
+
+</style>
+
+
+<style id="ut-v56-header-flow">
+/* Header-flow: identitet, emne, tag og klokke hænger sammen; værktøjer bruger resten af bredden. */
+#boardView .top{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:flex-end!important;
+  gap:clamp(10px,.85vw,16px)!important;
+  margin-bottom:clamp(12px,.9vw,18px)!important;
+}
+#boardView .ut-board-back{flex:0 0 auto;align-self:flex-end}
+#boardView .identity{flex:0 1 auto;min-width:0;margin-right:0!important}
+#boardView .identity>.sub{margin-bottom:2px}
+#boardView .ut-board-heading-row{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  gap:clamp(12px,.85vw,18px)!important;
+  min-width:0;
+}
+#boardView .boardname{flex:0 0 auto;white-space:nowrap}
+#boardView .ut-board-topic{flex:0 1 auto;max-width:min(34vw,520px);margin:0;padding:0;border-left:0}
+#boardView .ut-board-heading-row .boardTagButton{margin:0!important;flex:0 0 auto;align-self:center}
+#boardView .clock{
+  position:static!important;
+  transform:none!important;
+  grid-area:auto!important;
+  flex:0 0 auto;
+  min-width:0!important;
+  margin-left:clamp(2px,.35vw,7px);
+  text-align:left!important;
+  justify-self:auto!important;
+  align-self:center;
+}
+#boardView .ut-board-tools{
+  grid-area:auto!important;
+  flex:1 1 620px;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center;
+  justify-content:flex-end;
+  gap:clamp(7px,.55vw,11px)!important;
+  min-width:0;
+}
+#boardView .ut-board-status{
+  grid-area:auto!important;
+  flex:0 0 auto;
+  order:99;
+  align-self:center;
+  padding:0!important;
+}
+body.viewing #boardView .top{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:flex-end!important;
+  gap:clamp(10px,.8vw,15px)!important;
+}
+body.viewing #boardView .ut-board-tools{
+  flex:1 1 300px;
+  justify-content:flex-end!important;
+  width:auto!important;
+}
+body.viewing #boardView .ut-board-heading-row{flex-wrap:nowrap!important}
+@media(max-width:1100px){
+  #boardView .ut-board-tools{flex-basis:100%;justify-content:flex-start}
+  body.viewing #boardView .ut-board-tools{flex-basis:auto;justify-content:flex-end!important}
+  #boardView .ut-board-topic{max-width:min(42vw,440px)}
+}
+@media(max-width:760px){
+  #boardView .top{align-items:flex-start!important}
+  #boardView .identity{flex:1 1 calc(100% - 110px)}
+  #boardView .ut-board-heading-row{flex-wrap:wrap!important;gap:9px 11px!important}
+  #boardView .ut-board-topic{max-width:100%}
+  #boardView .ut-board-tools{flex:1 1 100%;justify-content:flex-start!important}
+  body.viewing #boardView .ut-board-tools{flex:1 1 100%;justify-content:flex-end!important}
+}
 </style>
 
 </head>
@@ -649,8 +758,7 @@ body.viewing #boardView .boardname{white-space:nowrap}
 <section id="boardView" class="hidden">
  <div class="top">
   <button class="btn ut-board-back" id="backSchedule">← Skema</button>
-  <div class="identity"><div class="sub" id="boardWhen"></div><div class="ut-board-heading-row"><div class="boardname" id="boardName"></div><div id="boardTopic" class="ut-board-topic hidden" title="Klik for at vælge dagens emne"><span id="boardTopicLabel" class="ut-board-topic-label"></span><div id="boardTopicValues" class="ut-board-topic-values"></div></div><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button></div></div>
-  <div class="clock" id="clock"></div>
+  <div class="identity"><div class="sub" id="boardWhen"></div><div class="ut-board-heading-row"><div class="boardname" id="boardName"></div><div id="boardTopic" class="ut-board-topic hidden" title="Klik for at vælge dagens emne"><span id="boardTopicLabel" class="ut-board-topic-label"></span><div id="boardTopicValues" class="ut-board-topic-values"></div></div><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button><div class="clock" id="clock"></div></div></div>
   <div class="ut-board-status"><div class="sub" id="saveIndicator" aria-live="polite"></div></div>
   <div class="ut-board-tools">
    <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
