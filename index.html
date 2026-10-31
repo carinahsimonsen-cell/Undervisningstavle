@@ -591,7 +591,7 @@ body:not(.viewing) .ut-board-topic:hover .ut-board-topic-pill{outline:2px solid 
  #boardView .ut-board-tools .btn{width:100%;justify-content:center}
 }
 
-/* Visningstilstand: hold headeren kompakt. Kun Hjælp, Redigering og Fuld skærm ligger til højre i samme række. */
+/* Visningstilstand: hold headeren kompakt. Kun Redigering og Fuld skærm ligger til højre i samme række. */
 body.viewing #boardView .top{
  display:grid;
  grid-template-columns:auto minmax(0,1fr) auto auto;
@@ -619,20 +619,21 @@ body.viewing #boardView .ut-board-tools .btn{
 body.viewing #boardView .ut-board-heading-row{flex-wrap:nowrap}
 body.viewing #boardView .boardname{white-space:nowrap}
 
-/* Klokken har sin egen faste midterplacering i headeren. */
+/* Klokken centreres i den øverste headerdel – ikke i hele headeren inkl. værktøjsrækken. */
 #boardView .clock{
  position:absolute;
  left:50%;
- top:50%;
- transform:translate(-50%,-50%);
+ top:28px;
+ transform:translateX(-50%);
  z-index:2;
  pointer-events:none;
 }
-#boardView .ut-board-status{padding-left:90px}
+#boardView .ut-board-status{padding-left:0}
+#boardView .ut-board-heading-row .boardTagButton{align-self:center;margin-left:2px;flex:0 0 auto}
 
 @media(max-width:1180px){
- #boardView .clock{position:static;transform:none;pointer-events:auto}
- #boardView .ut-board-status{padding-left:0}
+ #boardView .clock{position:static;transform:none;pointer-events:auto;grid-area:status;justify-self:center}
+ #boardView .ut-board-status{grid-area:status;justify-self:end}
 }
 
 @media(max-width:1050px){
@@ -657,14 +658,15 @@ body.viewing #boardView .boardname{white-space:nowrap}
 <section id="boardView" class="hidden">
  <div class="top">
   <button class="btn ut-board-back" id="backSchedule">← Skema</button>
-  <div class="identity"><div class="sub" id="boardWhen"></div><div class="ut-board-heading-row"><div class="boardname" id="boardName"></div><div id="boardTopic" class="ut-board-topic hidden" title="Klik for at vælge dagens emne"><span id="boardTopicLabel" class="ut-board-topic-label"></span><div id="boardTopicValues" class="ut-board-topic-values"></div></div></div></div>
-  <div class="ut-board-status"><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button><div class="sub" id="saveIndicator" aria-live="polite"></div><div class="clock" id="clock"></div></div>
+  <div class="identity"><div class="sub" id="boardWhen"></div><div class="ut-board-heading-row"><div class="boardname" id="boardName"></div><div id="boardTopic" class="ut-board-topic hidden" title="Klik for at vælge dagens emne"><span id="boardTopicLabel" class="ut-board-topic-label"></span><div id="boardTopicValues" class="ut-board-topic-values"></div></div><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button></div></div>
+  <div class="clock" id="clock"></div>
+  <div class="ut-board-status"><div class="sub" id="saveIndicator" aria-live="polite"></div></div>
   <div class="ut-board-tools">
    <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
    <button class="btn editonly" id="appearance">🎨 Udseende</button>
    <button class="btn editonly" id="backupBtn">💾 Sikkerhedskopi</button>
    <button class="btn primary editonly" id="addWidget">+ Tilføj element</button>
-   <button class="btn" id="helpBtnBoard">❓ Hjælp</button>
+   <button class="btn editonly" id="helpBtnBoard">❓ Hjælp</button>
    <button class="btn" id="viewBtn">👁 Visning</button>
    <button class="btn" id="fullBtn">⛶ Fuld skærm</button>
   </div>
