@@ -11,7 +11,7 @@ button{cursor:pointer}.btn{min-height:43px;border:1px solid var(--line);backgrou
 #scheduleView{padding:22px;min-height:100vh}.apphead{display:flex;gap:10px;align-items:center;margin-bottom:18px}.brand{font-weight:800;font-size:24px;margin-right:auto}.weeknav{display:flex;gap:8px;align-items:center}.weektitle{min-width:190px;text-align:center;font-weight:700}
 .schedule{display:grid;grid-template-columns:115px repeat(5,minmax(150px,1fr));border:1px solid var(--line);border-radius:16px;overflow:auto;background:#fff;box-shadow:var(--shadow)}
 .cell{min-height:112px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:11px}.corner,.dayhead{min-height:72px;background:#f7f8f6}.dayhead{font-weight:750;font-size:17px}.dayhead small{display:block;color:var(--muted);font-weight:400;margin-top:5px}.timecell{background:#f7f8f6;font-size:14px}.timecell strong{display:block;margin-bottom:5px}.slot{display:flex;align-items:center;justify-content:center;position:relative}.boardwrap{width:100%;position:relative}.boardwrap .boardcard{padding-right:88px}.boardmenu,.boarddelete{position:absolute;top:7px;width:34px;height:34px;border:0;border-radius:9px;background:#ffffffb8;font-size:20px;line-height:1;z-index:2}.boardmenu{right:7px}.boarddelete{right:47px;font-size:17px}.boardmenu:hover,.boarddelete:hover{background:#fff}.boarddelete:hover{background:#fff1f1}.addslot{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:22px;color:var(--muted)}.boardcard{width:100%;min-height:78px;text-align:left;border:1px solid #bdcec3;background:#edf5f0;border-radius:12px;padding:11px}.boardcard strong{display:block;font-size:16px}.boardcard small{display:block;color:var(--muted);margin-top:6px}
-#boardView{min-height:100vh;padding:22px;background:var(--boardbg,#edf0ea);background-size:cover;background-position:center}.top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"back identity status" "tools tools tools";align-items:center;column-gap:12px;row-gap:10px;margin-bottom:16px}.identity{grid-area:identity;min-width:0;margin-right:0}.boardname{font-size:31px;font-weight:800;margin:2px 0;white-space:nowrap}.sub{color:var(--muted);font-size:14px}.clock{font-size:26px;font-weight:750;min-width:78px;text-align:center}.ut-board-status{grid-area:status;display:flex;align-items:center;gap:10px;white-space:nowrap}.ut-board-tools{grid-area:tools;display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}.ut-board-back{grid-area:back}
+#boardView{min-height:100vh;padding:22px;background:var(--boardbg,#edf0ea);background-size:cover;background-position:center}.top{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"back identity status" "tools tools tools";align-items:center;column-gap:12px;row-gap:10px;margin-bottom:16px}.identity{grid-area:identity;min-width:0;margin-right:0}.boardname{font-size:31px;font-weight:800;margin:2px 0;white-space:nowrap}.sub{color:var(--muted);font-size:14px}.clock{font-size:26px;font-weight:750;min-width:78px;text-align:center}.ut-board-status{grid-area:status;display:flex;align-items:center;gap:10px;white-space:nowrap}.ut-board-tools{grid-area:tools;display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}.ut-board-back{grid-area:back}
 .workspace{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:17px;align-items:start}.workspace.noWidgets{grid-template-columns:1fr}.workspace.noWidgets #widgets{display:none}
 .agendaHead{display:flex;align-items:center;gap:8px;margin:0 0 14px 2px}.agendaHead .agendaTitle{margin:0}.agendaTitlePlaceholder{font-size:18px;font-weight:650;color:var(--muted);border:1px dashed var(--line);background:#ffffff99;border-radius:9px;padding:6px 10px;cursor:pointer}.agendaEditBtn{width:34px;height:34px;padding:0;border-radius:9px}.panel,.widget{background:#fffffff0;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}.panel{padding:19px}.agendaTitle{font-size:25px;font-weight:800;margin:0 0 14px 2px}.agendaTitle:empty{display:none}.agenda{display:flex;flex-direction:column;gap:9px}.item{display:flex;gap:9px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:11px}.item.current{border:2px solid var(--accent);background:#f5faf6}.handle{padding:7px;color:var(--muted);cursor:grab;font-size:20px}.status{width:23px;text-align:center;font-weight:800;font-size:19px}.content{flex:1;min-width:0}.title{font-weight:750;font-size:19px}.desc,.need{margin-top:5px;line-height:1.35}.desc{font-size:15px;color:#465149}.need{font-size:14px}.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);margin-top:7px}.timebtn{min-height:29px;padding:0 8px}.actions{display:flex;gap:5px}.done{opacity:.68}.done .title{text-decoration:line-through}.skipped{opacity:.38}.dragging{opacity:.3}.over{outline:3px solid #aabbb1}.legend{font-size:12px;color:var(--muted);margin-top:12px}
 #widgets{display:flex;flex-direction:column;gap:11px}.widget{padding:15px}.whead{display:flex;align-items:center;gap:6px}.whead h3{margin:0;flex:1}.wtext{margin-top:11px;white-space:pre-wrap;line-height:1.45}.notes{width:100%;min-height:220px;margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical;background:#fffefa}.notes:focus{min-height:360px}.saveflash{font-weight:700;color:var(--accent)}.timer{font-size:38px;text-align:center;font-weight:800;margin:12px}.timerrow{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}.timerrow input{width:58px;text-align:center}
@@ -548,7 +548,9 @@ body.viewing .agenda .item.ut-linked-active .meta .ut-time-chip{font-size:clamp(
 .ut-board-topic-values{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
 .ut-board-topic-pill{font-family:Georgia,'Times New Roman',serif;font-size:clamp(18px,1.45vw,22px);font-style:italic;font-weight:600;line-height:1.1;color:#203c2c;background:rgba(214,235,211,.62);border-radius:999px;padding:6px 14px;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #boardView .top>.identity{margin-right:0;flex:0 1 auto;min-width:0}
-#boardView #saveIndicator{margin-left:auto}
+#boardView #saveIndicator{display:none;margin-left:auto}
+#boardView #saveIndicator.ut-save-visible{display:block}
+body.viewing #boardView #saveIndicator{display:none!important}
 body:not(.viewing) .ut-board-topic{cursor:pointer}
 body:not(.viewing) .ut-board-topic:hover .ut-board-topic-pill{outline:2px solid rgba(68,113,82,.20)}
 .ut-topic-picker{position:fixed;z-index:2147483600;width:min(390px,calc(100vw - 24px));max-height:min(560px,calc(100vh - 24px));overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.22);padding:14px}
@@ -588,6 +590,61 @@ body:not(.viewing) .ut-board-topic:hover .ut-board-topic-pill{outline:2px solid 
  #boardView .ut-board-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
  #boardView .ut-board-tools .btn{width:100%;justify-content:center}
 }
+
+/* Visningstilstand: hold headeren kompakt. Kun Hjælp, Redigering og Fuld skærm ligger til højre i samme række. */
+body.viewing #boardView .top{
+ display:grid;
+ grid-template-columns:auto minmax(0,1fr) auto auto;
+ grid-template-areas:"back identity status tools";
+ align-items:center;
+ column-gap:12px;
+ row-gap:0;
+ margin-bottom:12px;
+}
+body.viewing #boardView .identity{min-width:0}
+body.viewing #boardView .ut-board-status{justify-self:end;gap:10px}
+body.viewing #boardView .ut-board-tools{
+ display:flex;
+ flex-wrap:nowrap;
+ width:auto;
+ gap:7px;
+ justify-self:end;
+}
+body.viewing #boardView .ut-board-tools .btn{
+ width:auto;
+ padding:8px 11px;
+ font-size:14px;
+ white-space:nowrap;
+}
+body.viewing #boardView .ut-board-heading-row{flex-wrap:nowrap}
+body.viewing #boardView .boardname{white-space:nowrap}
+
+/* Klokken har sin egen faste midterplacering i headeren. */
+#boardView .clock{
+ position:absolute;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%);
+ z-index:2;
+ pointer-events:none;
+}
+#boardView .ut-board-status{padding-left:90px}
+
+@media(max-width:1180px){
+ #boardView .clock{position:static;transform:none;pointer-events:auto}
+ #boardView .ut-board-status{padding-left:0}
+}
+
+@media(max-width:1050px){
+ body.viewing #boardView .top{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"back identity status" "tools tools tools";row-gap:7px}
+ body.viewing #boardView .ut-board-tools{justify-self:end}
+}
+@media(max-width:760px){
+ body.viewing #boardView .top{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"back identity" "status tools";align-items:center}
+ body.viewing #boardView .ut-board-status{justify-self:start}
+ body.viewing #boardView .ut-board-tools{justify-self:end}
+ body.viewing #boardView .ut-board-tools .btn{padding:7px 9px;font-size:13px}
+}
 </style>
 
 </head>
@@ -601,7 +658,7 @@ body:not(.viewing) .ut-board-topic:hover .ut-board-topic-pill{outline:2px solid 
  <div class="top">
   <button class="btn ut-board-back" id="backSchedule">← Skema</button>
   <div class="identity"><div class="sub" id="boardWhen"></div><div class="ut-board-heading-row"><div class="boardname" id="boardName"></div><div id="boardTopic" class="ut-board-topic hidden" title="Klik for at vælge dagens emne"><span id="boardTopicLabel" class="ut-board-topic-label"></span><div id="boardTopicValues" class="ut-board-topic-values"></div></div></div></div>
-  <div class="ut-board-status"><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button><div class="sub" id="saveIndicator">✓ Gemt</div><div class="clock" id="clock"></div></div>
+  <div class="ut-board-status"><button class="boardTagButton editonly" id="boardTagButton" type="button" title="Tilføj eller redigér emneord">🏷️</button><div class="sub" id="saveIndicator" aria-live="polite"></div><div class="clock" id="clock"></div></div>
   <div class="ut-board-tools">
    <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
    <button class="btn editonly" id="appearance">🎨 Udseende</button>
@@ -710,7 +767,7 @@ function utEnsureBoardTagMeta(b){if(!b)return;if(!Array.isArray(b.utManualTags))
 function utBoardItemCourseTags(b){const found=new Map();for(const x of b?.items||[]){if(!x||x.type==='pause')continue;let name=String(x.utCourse||'').trim();if(!name&&x.utCourseId)name=utCourseNameById(x.utCourseId);const k=utTagNorm(name);if(k&&!found.has(k))found.set(k,name)}return [...found.values()]}
 function utSyncBoardCourseTags(b){if(!b)return;utEnsureBoardTagMeta(b);b.utAutoCourseTags=utBoardItemCourseTags(b);const merged=new Map();for(const t of [...b.utManualTags,...b.utAutoCourseTags]){const name=String(t||'').trim(),k=utTagNorm(name);if(k&&!merged.has(k))merged.set(k,name)}b.tags=[...merged.values()].slice(0,20)}
 function utSyncAllBoardCourseTags(){for(const b of state?.boards||[])utSyncBoardCourseTags(b)}
-function save(){utSyncAllBoardCourseTags();localStorage.setItem(KEY,JSON.stringify(state));let el=document.getElementById("saveIndicator");if(el){el.textContent="Gemmer…";el.classList.add("saveflash");clearTimeout(window.__saved);window.__saved=setTimeout(()=>{el.textContent="✓ Gemt";el.classList.remove("saveflash")},250)}}
+function save(){utSyncAllBoardCourseTags();localStorage.setItem(KEY,JSON.stringify(state));let el=document.getElementById("saveIndicator");if(el&&!document.body.classList.contains("viewing")){clearTimeout(window.__saved);clearTimeout(window.__saveHide);el.textContent="Gemmer…";el.classList.add("saveflash","ut-save-visible");window.__saved=setTimeout(()=>{el.textContent="✓ Gemt";el.classList.remove("saveflash");window.__saveHide=setTimeout(()=>{el.classList.remove("ut-save-visible");el.textContent=""},1400)},300)}}
 function monday(d){let x=new Date(d);x.setHours(12,0,0,0);let n=x.getDay()||7;x.setDate(x.getDate()-n+1);return x}
 function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function isoWeekNumber(d){const day=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));day.setUTCDate(day.getUTCDate()+4-(day.getUTCDay()||7));const yearStart=new Date(Date.UTC(day.getUTCFullYear(),0,1));return Math.ceil((((day-yearStart)/86400000)+1)/7)}
