@@ -2021,7 +2021,7 @@ function yearNotesForBoards(bs,courseName=''){
  let out=[],courseKey=String(courseName||'').trim().toLocaleLowerCase('da-DK');
  for(const b of bs||[]){
   if(String(b.teacherNote||'').trim())out.push({date:b.date,board:b,item:'Hele tavlen',note:String(b.teacherNote).trim()});
-  for(const x of b.items||[]){if(x.type==='pause'||!String(x.teacherNote||'').trim())continue;const linked=!courseKey||String(x.utCourse||'').trim().toLocaleLowerCase('da-DK')===courseKey||(b.tags||[]).some(t=>String(t).trim().toLocaleLowerCase('da-DK')===courseKey);if(linked)out.push({date:b.date,board:b,item:x.title||'Programpunkt',note:String(x.teacherNote).trim()})}
+  for(const x of b.items||[]){if(x.type==='pause'||!String(x.teacherNote||'').trim())continue;const linked=!courseKey||String(x.utCourse||'').trim().toLocaleLowerCase('da-DK')===courseKey;if(linked)out.push({date:b.date,board:b,item:x.title||'Programpunkt',note:String(x.teacherNote).trim()})}
  }
  return out.sort((a,b)=>a.date.localeCompare(b.date));
 }
@@ -2340,7 +2340,7 @@ const back=el('div','modalback');back.id='utCourseBack';back.style.display='none
 let selected=null,courseFilterSubject='',courseFilterGrade='',courseSearchValue='';const close=()=>{back.style.display='none'};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&back.style.display==='flex'){e.preventDefault();close()}});
 function courseTeacherNotes(c){
  const key=norm(c?.name||''),cid=c?.id||'';let out=[];
- for(const b of state.boards||[]){const boardTagged=(b.tags||[]).some(t=>norm(t)===key);if(boardTagged&&String(b.teacherNote||'').trim())out.push({date:b.date,board:b,item:'Hele tavlen',note:String(b.teacherNote).trim()});for(const x of b.items||[]){if(x.type==='pause'||!String(x.teacherNote||'').trim())continue;const linked=(cid&&x.utCourseId===cid)||norm(x.utCourse||'')===key||boardTagged;if(linked)out.push({date:b.date,board:b,item:x.title||'Programpunkt',note:String(x.teacherNote).trim()})}}
+ for(const b of state.boards||[]){const boardTagged=(b.tags||[]).some(t=>norm(t)===key);if(boardTagged&&String(b.teacherNote||'').trim())out.push({date:b.date,board:b,item:'Hele tavlen',note:String(b.teacherNote).trim()});for(const x of b.items||[]){if(x.type==='pause'||!String(x.teacherNote||'').trim())continue;const linked=(cid&&x.utCourseId===cid)||norm(x.utCourse||'')===key;if(linked)out.push({date:b.date,board:b,item:x.title||'Programpunkt',note:String(x.teacherNote).trim()})}}
  return out.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
 }
 function draw(){modal.replaceChildren();const top=el('div','ut-course-top');top.append(el('h2','','📁 Mine forløb'),btn('✕ Luk',close));modal.append(top);
@@ -3234,7 +3234,7 @@ utSyncAllBoardCourseTags();
       <p>Brug <strong>📁 Hent fra Mine forløb</strong> i et programpunkt eller ved tilføjelse af tavleelementer. Du kan søge på tværs af forløb og materialer.</p>
 
       <h4>Lærernoter i et forløb</h4>
-      <p>Hvert forløb har en sammenklappelig <strong>📝 Lærernoter</strong>-sektion. Her samles relevante tavle- og punktnoter med dato, klasse og punkt, så erfaringer fra tidligere undervisning er nemme at finde igen.</p>
+      <p>Hvert forløb har en sammenklappelig <strong>📝 Lærernoter</strong>-sektion. Punktnoter følger altid det konkrete programpunkts egen kobling til Mine forløb – ikke tavlens øvrige tags. En note på et punkt, der er koblet til fx <strong>From Empire to Brexit</strong>, vises derfor kun dér, selv om tavlen også er tagget med <strong>Starters</strong>. Tavlenoter kan fortsat vises ved tavlens relevante tags, fordi de ikke tilhører ét bestemt punkt.</p>
     `],
 
     ['Tags, søgning og årsoversigt', `
