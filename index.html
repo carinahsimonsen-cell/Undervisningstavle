@@ -919,21 +919,10 @@ let utWorkModesDraft=[];
 const utWorkModeOptions=['👩‍🏫 Fælles','👤 Individuelt','👥 Makker','👥👥 Gruppe','🚶 Bevægelse'];
 function utEditorHasMode(re){return utWorkModesDraft.some(m=>re.test(m))}
 function utRenderWorkModePicker(){const box=document.getElementById('utModePicker');if(!box)return;box.replaceChildren();for(const mode of utWorkModeOptions){const btn=document.createElement('button');btn.type='button';btn.className='ut-mode-choice'+(utWorkModesDraft.includes(mode)?' selected':'');const idx=utWorkModesDraft.indexOf(mode);if(idx>=0){const n=document.createElement('span');n.className='ut-mode-order';n.textContent=String(idx+1);btn.append(n)}const tx=document.createElement('span');tx.textContent=mode;btn.append(tx);btn.onclick=()=>{const i=utWorkModesDraft.indexOf(mode);if(i>=0)utWorkModesDraft.splice(i,1);else utWorkModesDraft.push(mode);itMode.value=utWorkModesDraft.at(-1)||'';utRenderWorkModePicker();const wrap=document.getElementById('utAgendaGroupFields');if(wrap)wrap.style.display=utEditorHasMode(/Makker|Gruppe/i)?'block':'none';utAgendaEditorRefresh();utRefreshIndividualOutdoorPrep()};box.append(btn)}}
-function utCompositeWorkLabel(b=board()){return boardText('👥👥 Sammensat gruppe','👥👥 Combined group','👥👥 Zusammengesetzte Gruppe',b)}
 function utWorkSequenceLabels(item,b=board()){
  const modes=utItemModes(item),labels=modes.map(m=>displayWorkMode(m,b));const k=item?.utGroup?.kind;let linked='';
  if(k==='seatmate'||k==='table')linked=utAgendaQuickLinkLabel(k,b);else if(k==='saved'){const set=groupSetsForClass().find(g=>g.id===item.utGroup.setId);if(set)linked='👥 '+groupSetDisplayName(set,b)}
- const groupIndexes=modes.map((m,i)=>(/Makker|Gruppe/i.test(m)?i:-1)).filter(i=>i>=0);
- const hasComposite=!!item?.utGroupExtras?.meetingEnabled&&Array.isArray(item?.utGroupExtras?.meetings)&&item.utGroupExtras.meetings.length>0;
- if(linked){
-  let replaceIndex=-1;
-  // Når grupper/par efterfølgende sættes sammen, beskriver den konkrete inddeling
-  // den første gruppefase. Den næste gruppefase er de sammensatte grupper.
-  if(hasComposite&&groupIndexes.length>=2)replaceIndex=groupIndexes[0];
-  else if(groupIndexes.length)replaceIndex=groupIndexes[groupIndexes.length-1];
-  if(replaceIndex>=0)labels[replaceIndex]=linked;else labels.push(linked);
-  if(hasComposite&&groupIndexes.length>=2){const compositeIndex=groupIndexes.find(i=>i>replaceIndex);if(compositeIndex!=null)labels[compositeIndex]=utCompositeWorkLabel(b)}
- }
+ if(linked){let replaced=false;for(let i=modes.length-1;i>=0;i--){if(/Makker|Gruppe/i.test(modes[i])){labels[i]=linked;replaced=true;break}}if(!replaced)labels.push(linked)}
  return labels
 }
 function utWorkSequenceText(item,b=board()){return utWorkSequenceLabels(item,b).join(' → ')}
@@ -3139,7 +3128,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
 
     ['Visning, fuld skærm og sidepanel', `
       <h4>Visningstilstand</h4>
-      <p>Klik på <strong>👁 Visning</strong>, når eleverne skal se tavlen. Lærerfunktioner som tags, redigering, hjælp og lærernoter skjules.</p>
+      <p>Klik på <strong>👁 Visning</strong>, når eleverne skal se tavlen. Lærerfunktioner som tags, redigering, hjælp og lærernoter skjules.</p><p><strong>🖥️ Lærervisning</strong> er valgfri. Den åbner et separat elevvindue og viser samtidig en privat lærerflade med aktivt punkt, punktets lærernote, næste punkt og timer. Brug Windows + P → Udvid, hvis elevvinduet skal ligge på whiteboardet, mens lærerfladen bliver på din egen skærm.</p>
       <p>Når du åbner en tavle fra skemaet, starter den igen i redigeringstilstand, så du ikke ved en fejl møder en gammel elevvisning under forberedelsen.</p>
 
       <h4>Fuld skærm</h4>
@@ -3252,7 +3241,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
       <p>Et punkt eller element husker sin <strong>egen</strong> kobling til Mine forløb. Tavlens tag bruges ikke til automatisk at vælge en materialebank. Nye punkter og elementer starter derfor på <strong>Gem ikke i Mine forløb</strong>.</p>
       <p>Tavlen synkroniserer automatisk tags fra <strong>alle programpunkter</strong>, der er koblet til Mine forløb. Hvis punkt 1 fx er koblet til <strong>Starters</strong> og punkt 2-4 til <strong>From Empire to Brexit</strong>, får tavlen automatisk begge tags, så årsoversigten bliver komplet. Automatiske tags forsvinder igen, når ingen punkter på tavlen længere bruger forløbet. Dine egne manuelle tags bevares uafhængigt.</p>
       <p><strong>Dagens emne</strong> vises både i ugeoversigten og i tavlens top. Systemet foreslår ét emne ud fra punkternes forløbskoblinger: det emne, der bruges på flest punkter, vælges; ved lighed vælges det senest forekommende. Klik på emnet i redigeringstilstand for at overstyre eller vælge flere. Alle tags bevares stadig til årsoversigten.</p>
-      <p><strong>Flere arbejdsformer på samme punkt:</strong> Under Arbejdsform kan du vælge flere i den rækkefølge, de skal bruges, fx Fælles → Makker. Klik på en valgt arbejdsform igen for at fjerne den. Hvis punktet er koblet til fx Sidemakker, Bordgruppe eller en fast inddeling, erstatter den konkrete kobling den relevante Makker/Gruppe-fase i elevvisningen. Hvis du fx vælger Makker → Gruppe, kobler punktet til Blå makker og bruger Sæt grupper/par sammen, vises arbejdsgangen som Blå makker → Sammensat gruppe.</p>
+      <p><strong>Flere arbejdsformer på samme punkt:</strong> Under Arbejdsform kan du vælge flere i den rækkefølge, de skal bruges, fx Fælles → Makker. Klik på en valgt arbejdsform igen for at fjerne den. Hvis punktet er koblet til fx Sidemakker eller Bordgruppe, vises den konkrete kobling i stedet for den generelle Makker/Gruppe-tekst i elevvisningen.</p>
 utSyncAllBoardCourseTags();
 
       <h4>Hent materiale</h4>
@@ -3453,4 +3442,84 @@ utSyncAllBoardCourseTags();
 })();
 </script>
 
+
+
+<style id="ut-presenter-style">
+#utPresenterPanel{display:none;position:fixed;right:18px;bottom:18px;z-index:2147483000;width:min(430px,calc(100vw - 36px));max-height:min(76vh,720px);overflow:auto;background:#fff;color:#202820;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 55px rgba(0,0,0,.22);padding:16px}
+#utPresenterPanel.open{display:block}
+#utPresenterPanel .ut-presenter-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+#utPresenterPanel .ut-presenter-head h2{font-size:20px;margin:0;flex:1}
+#utPresenterPanel .ut-presenter-section{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+#utPresenterPanel .ut-presenter-label{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:5px}
+#utPresenterPanel .ut-presenter-title{font-size:18px;font-weight:800;line-height:1.25}
+#utPresenterPanel .ut-presenter-note{white-space:pre-wrap;line-height:1.45;background:#fff7df;border:1px solid #ead9a5;border-radius:10px;padding:10px;margin-top:8px}
+#utPresenterPanel .ut-presenter-empty{color:var(--muted);font-style:italic}
+#utPresenterPanel .ut-presenter-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+#utPresenterPanel .ut-presenter-timer{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+#utPresenterStudentStatus{font-size:13px;color:var(--muted)}
+body.ut-student-window #backSchedule,body.ut-student-window #viewBtn,body.ut-student-window #saveIndicator{display:none!important}
+body.ut-student-window .ut-board-tools .editonly{display:none!important}
+body.ut-student-window .ut-board-tools{margin-left:auto}
+body.ut-student-window #boardTagButton{display:none!important}
+@media(max-width:700px){#utPresenterPanel{right:8px;bottom:8px;width:calc(100vw - 16px);max-height:72vh}}
+</style>
+<script id="ut-presenter-view">
+(function(){
+ const param=new URLSearchParams(location.search);
+ const studentBoardId=param.get('utStudentBoard');
+ const channel=('BroadcastChannel' in window)?new BroadcastChannel('undervisningstavle-presenter-v1'):null;
+ let studentWin=null,presenterTimer=null;
+ function refreshFromStorage(){try{state=load()}catch(e){};if(currentId&&boardView&&!boardView.classList.contains('hidden')){renderBoard();renderWidgets()}}
+ function enterStudentWindow(){
+   if(!studentBoardId)return false;
+   document.body.classList.add('ut-student-window','viewing');
+   const target=state.boards.find(b=>b.id===studentBoardId);
+   if(!target){alert('Tavlen kunne ikke findes på denne computer.');return true}
+   openBoard(studentBoardId);
+   document.body.classList.add('ut-student-window','viewing');
+   viewBtn.textContent='✎ Redigering';
+   renderBoard();renderAgenda();renderWidgets();renderBirthday();
+   document.title=(target.name||'Tavle')+' · elevvisning';
+   window.addEventListener('storage',e=>{if(e.key===KEY){refreshFromStorage()}});
+   channel?.addEventListener('message',e=>{if(e.data?.type==='state-changed'||e.data?.type==='focus-student'){refreshFromStorage()}});
+   return true;
+ }
+ if(enterStudentWindow())return;
+ const tools=document.querySelector('#boardView .ut-board-tools');
+ const presenterBtn=document.createElement('button');presenterBtn.className='btn editonly';presenterBtn.type='button';presenterBtn.id='utPresenterBtn';presenterBtn.textContent='🖥️ Lærervisning';
+ if(tools){const view=document.getElementById('viewBtn');tools.insertBefore(presenterBtn,view||tools.firstChild)}
+ const panel=document.createElement('aside');panel.id='utPresenterPanel';panel.innerHTML=`<div class="ut-presenter-head"><h2>🖥️ Lærervisning</h2><button class="btn" type="button" id="utPresenterClose">✕</button></div><div id="utPresenterStudentStatus"></div><div class="ut-presenter-section"><div class="ut-presenter-label">Aktivt punkt</div><div class="ut-presenter-title" id="utPresenterActiveTitle"></div><div class="ut-presenter-note" id="utPresenterNote"></div><div class="ut-presenter-actions"><button class="btn primary" type="button" id="utPresenterDone">✓ Gennemført</button><button class="btn" type="button" id="utPresenterSkip">↷ Spring over</button></div></div><div class="ut-presenter-section"><div class="ut-presenter-label">Næste punkt</div><div class="ut-presenter-title" id="utPresenterNext"></div></div><div class="ut-presenter-section"><div class="ut-presenter-label">Timer</div><div class="ut-presenter-timer" id="utPresenterTimer">00:00</div><div class="ut-presenter-actions"><button class="btn" type="button" id="utPresenterTimerToggle">Start/pause</button><button class="btn" type="button" id="utPresenterTimerReset">Nulstil</button><button class="btn" type="button" id="utPresenterFocusStudent">Vis elevvindue</button></div></div><div class="ut-presenter-section sub">Brug Windows + P → <strong>Udvid</strong>. Træk elevvinduet over på whiteboardet og klik <strong>Fuld skærm</strong> dér. Denne lærerflade bliver på din egen skærm.</div>`;document.body.append(panel);
+ const $=id=>document.getElementById(id);
+ function nextRealItem(b,idx){for(let i=idx+1;i<(b?.items||[]).length;i++){if(b.items[i]?.type!=='pause'&&b.items[i]?.status==='open')return b.items[i]}return null}
+ function updatePresenter(){
+   if(!panel.classList.contains('open'))return;
+   const b=board();if(!b)return;
+   const idx=cur(),item=idx>=0?b.items[idx]:null,next=idx>=0?nextRealItem(b,idx):null;
+   $('utPresenterActiveTitle').textContent=item?.title||'Ingen aktivt punkt';
+   const note=String(item?.teacherNote||'').trim();$('utPresenterNote').textContent=note||'Ingen lærernote til dette punkt.';$('utPresenterNote').classList.toggle('ut-presenter-empty',!note);
+   $('utPresenterNext').textContent=next?.title||'Ingen næste punkt';
+   $('utPresenterTimer').textContent=(typeof tf==='function'?tf(b.timer?.seconds||0):String(b.timer?.seconds||0));
+   $('utPresenterStudentStatus').textContent=studentWin&&!studentWin.closed?'Elevvinduet er åbent og synkroniseres automatisk.':'Elevvinduet er ikke åbent.';
+ }
+ function notify(){channel?.postMessage({type:'state-changed',boardId:currentId});try{studentWin?.postMessage({type:'ut-state-changed',boardId:currentId},location.origin)}catch(e){};updatePresenter()}
+ function openPresenter(){
+   const b=board();if(!b)return alert('Åbn en tavle først.');
+   const url=new URL(location.href);url.searchParams.set('utStudentBoard',b.id);
+   studentWin=window.open(url.toString(),'UndervisningstavleElev','popup=yes,width=1280,height=800');
+   if(!studentWin){alert('Browseren blokerede elevvinduet. Tillad pop op-vinduer for siden og prøv igen.');return}
+   panel.classList.add('open');
+   clearInterval(presenterTimer);presenterTimer=setInterval(updatePresenter,500);updatePresenter();
+ }
+ presenterBtn.onclick=openPresenter;
+ $('utPresenterClose').onclick=()=>{panel.classList.remove('open');clearInterval(presenterTimer);presenterTimer=null};
+ $('utPresenterDone').onclick=()=>{const i=cur();if(i>=0){utSetAgendaGroupStatus(i,'done');notify()}};
+ $('utPresenterSkip').onclick=()=>{const i=cur();if(i>=0){utSetAgendaGroupStatus(i,'skipped');notify()}};
+ $('utPresenterTimerToggle').onclick=()=>{utToggleBoardTimer();notify()};
+ $('utPresenterTimerReset').onclick=()=>{utResetBoardTimer();notify()};
+ $('utPresenterFocusStudent').onclick=()=>{if(studentWin&&!studentWin.closed){studentWin.focus();channel?.postMessage({type:'focus-student'})}else openPresenter()};
+ window.addEventListener('storage',e=>{if(e.key===KEY){try{state=load()}catch(err){};updatePresenter()}});
+ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='ut-state-changed')refreshFromStorage()});
+ const oldSave=save;save=function(){oldSave();notify()};
+})();
+</script>
 </body></html>
