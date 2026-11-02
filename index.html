@@ -162,10 +162,10 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 .ut-group-overlay{padding:8px!important}
 .ut-group-panel{width:100%!important;height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)!important}
 .ut-group-scroll{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px!important}
-.ut-group-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--group-cols,3),minmax(0,1fr))!important;grid-template-rows:repeat(var(--group-rows,2),minmax(0,1fr));gap:10px;overflow:auto}
-.ut-group-card{min-height:0;padding:clamp(6px,1vh,12px);display:flex;flex-direction:column;overflow:auto}
-.ut-group-card h3{font-size:clamp(14px,1.7vw,20px);margin:0 0 4px}
-.ut-group-person{padding:clamp(3px,.65vh,9px) 8px!important;margin:3px 0!important;font-size:clamp(13px,1.4vw,20px)!important;cursor:grab}
+.ut-group-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;grid-template-rows:none!important;grid-auto-rows:max-content;gap:12px;overflow:auto;align-content:start;align-items:start}
+.ut-group-card{min-height:0;padding:clamp(9px,1vh,13px);display:flex;flex-direction:column;overflow:visible;height:auto!important;align-self:start}
+.ut-group-card h3{font-size:clamp(16px,1.45vw,20px);margin:0 0 7px}
+.ut-group-person{padding:clamp(6px,.65vh,9px) 9px!important;margin:4px 0!important;font-size:clamp(14px,1.25vw,18px)!important;cursor:grab;min-height:34px;box-sizing:border-box}
 .ut-group-person.ut-picked-person{outline:3px solid #377a69;background:#e0f1e8}
 .ut-group-editbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 14px;border-top:1px solid #d9dedb;background:#fff}
 .ut-group-editbar .sub{font-size:13px}
@@ -196,7 +196,7 @@ body.viewing .ut-groups-widget .ut-groups-teacher{display:none!important}
 body.viewing .ut-groups-student{display:flex;flex-direction:column;gap:8px}
 .ut-groups-student .btn{width:100%;white-space:normal}
 .ut-groups-student .sub{font-size:12px}
-.ut-group-grid{align-content:stretch}
+.ut-group-grid{align-content:start}
 .ut-group-card{justify-content:flex-start}
 .ut-group-float{width:min(340px,calc(100vw - 24px));border-radius:19px;box-shadow:0 16px 48px rgba(21,35,29,.24);border:1px solid #d3dfd7}
 .ut-group-float-head{padding:11px 14px;background:#f4f7f4;border-bottom:1px solid #e4eae5;font-size:13px;letter-spacing:.01em}
@@ -1824,7 +1824,7 @@ function openGroupOverview(w,readOnly=false){
  function onFullscreenChange(){if(!document.fullscreenElement&&overlay.isConnected)dismiss()}
  document.addEventListener('keydown',onKey,true);document.addEventListener('fullscreenchange',onFullscreenChange);close.onclick=dismiss;overlay.onclick=e=>{if(e.target===overlay)dismiss()};
  let selected=null;
- function resize(){const discussion=utDiscussionGroups(w.groups||[],w.utMeetings||[]),count=discussion.length||(w.groups||[]).filter(g=>g.length).length;if(!count)return;const width=grid.clientWidth||window.innerWidth;const height=grid.clientHeight||window.innerHeight;let best=1,score=-Infinity;for(let cols=1;cols<=Math.min(count,Math.max(1,Math.floor(width/150)));cols++){const rows=Math.ceil(count/cols),cardW=(width-(cols-1)*10)/cols,cardH=(height-(rows-1)*10)/rows,maxNames=Math.max(1,...(w.groups||[]).map(g=>g.length));const minHeight=42+maxNames*35;const fit=Math.min(cardW/185,cardH/minHeight);const value=Math.min(1.5,fit)*100-cols*.3;if(value>score){score=value;best=cols}}grid.style.setProperty('--group-cols',best);grid.style.setProperty('--group-rows',Math.ceil(count/best))}
+ function resize(){/* Grid'et bruger nu auto-fit og naturlige korthøjder; browseren tilpasser kolonnerne efter pladsen. */}
  function update(){
   selected=null;grid.replaceChildren();const groups=w.groups||[],isPairs=currentGroupLabel(w)==='makkerpar',meetingNoun=isPairs?boardText('Makkerpar','Pair'):boardText('Gruppe','Group');w.utMeetings=utNormalizeMeetings(w.utMeetings,groups.length);
   const discussion=utDiscussionGroups(groups,w.utMeetings);
