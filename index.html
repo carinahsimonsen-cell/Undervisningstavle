@@ -919,10 +919,21 @@ let utWorkModesDraft=[];
 const utWorkModeOptions=['👩‍🏫 Fælles','👤 Individuelt','👥 Makker','👥👥 Gruppe','🚶 Bevægelse'];
 function utEditorHasMode(re){return utWorkModesDraft.some(m=>re.test(m))}
 function utRenderWorkModePicker(){const box=document.getElementById('utModePicker');if(!box)return;box.replaceChildren();for(const mode of utWorkModeOptions){const btn=document.createElement('button');btn.type='button';btn.className='ut-mode-choice'+(utWorkModesDraft.includes(mode)?' selected':'');const idx=utWorkModesDraft.indexOf(mode);if(idx>=0){const n=document.createElement('span');n.className='ut-mode-order';n.textContent=String(idx+1);btn.append(n)}const tx=document.createElement('span');tx.textContent=mode;btn.append(tx);btn.onclick=()=>{const i=utWorkModesDraft.indexOf(mode);if(i>=0)utWorkModesDraft.splice(i,1);else utWorkModesDraft.push(mode);itMode.value=utWorkModesDraft.at(-1)||'';utRenderWorkModePicker();const wrap=document.getElementById('utAgendaGroupFields');if(wrap)wrap.style.display=utEditorHasMode(/Makker|Gruppe/i)?'block':'none';utAgendaEditorRefresh();utRefreshIndividualOutdoorPrep()};box.append(btn)}}
+function utCompositeWorkLabel(b=board()){return boardText('👥👥 Sammensat gruppe','👥👥 Combined group','👥👥 Zusammengesetzte Gruppe',b)}
 function utWorkSequenceLabels(item,b=board()){
  const modes=utItemModes(item),labels=modes.map(m=>displayWorkMode(m,b));const k=item?.utGroup?.kind;let linked='';
  if(k==='seatmate'||k==='table')linked=utAgendaQuickLinkLabel(k,b);else if(k==='saved'){const set=groupSetsForClass().find(g=>g.id===item.utGroup.setId);if(set)linked='👥 '+groupSetDisplayName(set,b)}
- if(linked){let replaced=false;for(let i=modes.length-1;i>=0;i--){if(/Makker|Gruppe/i.test(modes[i])){labels[i]=linked;replaced=true;break}}if(!replaced)labels.push(linked)}
+ const groupIndexes=modes.map((m,i)=>(/Makker|Gruppe/i.test(m)?i:-1)).filter(i=>i>=0);
+ const hasComposite=!!item?.utGroupExtras?.meetingEnabled&&Array.isArray(item?.utGroupExtras?.meetings)&&item.utGroupExtras.meetings.length>0;
+ if(linked){
+  let replaceIndex=-1;
+  // Når grupper/par efterfølgende sættes sammen, beskriver den konkrete inddeling
+  // den første gruppefase. Den næste gruppefase er de sammensatte grupper.
+  if(hasComposite&&groupIndexes.length>=2)replaceIndex=groupIndexes[0];
+  else if(groupIndexes.length)replaceIndex=groupIndexes[groupIndexes.length-1];
+  if(replaceIndex>=0)labels[replaceIndex]=linked;else labels.push(linked);
+  if(hasComposite&&groupIndexes.length>=2){const compositeIndex=groupIndexes.find(i=>i>replaceIndex);if(compositeIndex!=null)labels[compositeIndex]=utCompositeWorkLabel(b)}
+ }
  return labels
 }
 function utWorkSequenceText(item,b=board()){return utWorkSequenceLabels(item,b).join(' → ')}
@@ -3241,7 +3252,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
       <p>Et punkt eller element husker sin <strong>egen</strong> kobling til Mine forløb. Tavlens tag bruges ikke til automatisk at vælge en materialebank. Nye punkter og elementer starter derfor på <strong>Gem ikke i Mine forløb</strong>.</p>
       <p>Tavlen synkroniserer automatisk tags fra <strong>alle programpunkter</strong>, der er koblet til Mine forløb. Hvis punkt 1 fx er koblet til <strong>Starters</strong> og punkt 2-4 til <strong>From Empire to Brexit</strong>, får tavlen automatisk begge tags, så årsoversigten bliver komplet. Automatiske tags forsvinder igen, når ingen punkter på tavlen længere bruger forløbet. Dine egne manuelle tags bevares uafhængigt.</p>
       <p><strong>Dagens emne</strong> vises både i ugeoversigten og i tavlens top. Systemet foreslår ét emne ud fra punkternes forløbskoblinger: det emne, der bruges på flest punkter, vælges; ved lighed vælges det senest forekommende. Klik på emnet i redigeringstilstand for at overstyre eller vælge flere. Alle tags bevares stadig til årsoversigten.</p>
-      <p><strong>Flere arbejdsformer på samme punkt:</strong> Under Arbejdsform kan du vælge flere i den rækkefølge, de skal bruges, fx Fælles → Makker. Klik på en valgt arbejdsform igen for at fjerne den. Hvis punktet er koblet til fx Sidemakker eller Bordgruppe, vises den konkrete kobling i stedet for den generelle Makker/Gruppe-tekst i elevvisningen.</p>
+      <p><strong>Flere arbejdsformer på samme punkt:</strong> Under Arbejdsform kan du vælge flere i den rækkefølge, de skal bruges, fx Fælles → Makker. Klik på en valgt arbejdsform igen for at fjerne den. Hvis punktet er koblet til fx Sidemakker, Bordgruppe eller en fast inddeling, erstatter den konkrete kobling den relevante Makker/Gruppe-fase i elevvisningen. Hvis du fx vælger Makker → Gruppe, kobler punktet til Blå makker og bruger Sæt grupper/par sammen, vises arbejdsgangen som Blå makker → Sammensat gruppe.</p>
 utSyncAllBoardCourseTags();
 
       <h4>Hent materiale</h4>
