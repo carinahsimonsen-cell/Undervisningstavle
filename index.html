@@ -749,6 +749,26 @@ body.viewing #boardView .ut-board-heading-row{flex-wrap:nowrap!important}
 }
 </style>
 
+
+<style id="ut-v65-sticky-board-header">
+/* Headeren bliver synlig, mens dagsordenen scroller. */
+#boardView .top{
+  position:sticky!important;
+  top:0!important;
+  z-index:40!important;
+  background:color-mix(in srgb, var(--boardbg,#edf0ea) 94%, white 6%)!important;
+  padding:clamp(8px,.7vw,12px) 0!important;
+  box-shadow:0 8px 18px rgba(35,45,38,.10)!important;
+  isolation:isolate;
+}
+body.viewing #boardView .top{
+  padding:clamp(6px,.55vw,10px) 0!important;
+  box-shadow:0 7px 16px rgba(35,45,38,.10)!important;
+}
+@supports not (background:color-mix(in srgb, white 50%, black 50%)){
+  #boardView .top{background:var(--boardbg,#edf0ea)!important}
+}
+</style>
 </head>
 <body>
 <section id="scheduleView">
@@ -3422,7 +3442,7 @@ utSyncAllBoardCourseTags();
   const index = sections.map(([title],i)=>`<a href="#ut-help-chapter-${i+1}" data-ut-help-target="ut-help-chapter-${i+1}">${i+1}. ${title}</a>`).join('');
   const body = sections.map(([title,content],i)=>`<section class="ut-help-chapter" id="ut-help-chapter-${i+1}"><h3>${i+1}. ${title}</h3>${content}<a class="ut-help-return" href="#ut-help-index" data-ut-help-target="ut-help-index">↑ Tilbage til indholdsfortegnelsen</a></section>`).join('');
 
-  overlay.innerHTML = `<div id="ut-help-panel"><div class="ut-help-top"><h2 id="ut-help-heading">❔ Hjælp til Undervisningstavlen</h2><button class="btn" type="button" id="ut-help-close">✕ Luk</button></div><div class="ut-help-scroll" id="ut-help-scroll"><p>Her finder du hjælp til den nuværende version af tavlen. <strong>Er du ny?</strong> Begynd med punkt 1. Ellers kan du hoppe direkte til den funktion, du vil bruge.</p><nav class="ut-help-index" id="ut-help-index" aria-label="Hjælpens indholdsfortegnelse">${index}</nav>${body}<p><strong>Tip:</strong> Du behøver ikke bruge alle funktioner. Tavlen er lavet, så de fleste ekstra funktioner kan slås til kun dér, hvor de giver mening.</p></div></div>`;
+  overlay.innerHTML = `<div id="ut-help-panel"><div class="ut-help-top"><h2 id="ut-help-heading">❔ Hjælp til Undervisningstavlen</h2><button class="btn" type="button" id="ut-help-close">✕ Luk</button></div><div class="ut-help-scroll" id="ut-help-scroll"><p>Her finder du hjælp til den nuværende version af tavlen. <strong>Er du ny?</strong> Begynd med punkt 1. Ellers kan du hoppe direkte til den funktion, du vil bruge.</p><nav class="ut-help-index" id="ut-help-index" aria-label="Hjælpens indholdsfortegnelse">${index}</nav>${body}<p><strong>Tip:</strong> Du behøver ikke bruge alle funktioner. Tavlen er lavet, så de fleste ekstra funktioner kan slås til kun dér, hvor de giver mening.</p><p><strong>Fast header:</strong> Når en lang dagsorden kræver scrolling, bliver tavlens header siddende øverst, så fag, dagens emne, klokke og relevante kontroller fortsat er synlige.</p></div></div>`;
   document.body.appendChild(overlay);
 
   let previousFocus;
