@@ -162,11 +162,16 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 /* Grupper: tilpasset fuldskærmsoversigt og uafhængig, flytbar udtrækning */
 .ut-group-overlay{padding:8px!important}
 .ut-group-panel{width:100%!important;height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)!important}
-.ut-group-scroll{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px!important}
-.ut-group-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;grid-template-rows:none!important;grid-auto-rows:max-content;gap:12px;overflow:auto;align-content:start;align-items:start}
-.ut-group-card{min-height:0;padding:clamp(9px,1vh,13px);display:flex;flex-direction:column;overflow:visible;height:auto!important;align-self:start}
-.ut-group-card h3{font-size:clamp(16px,1.45vw,20px);margin:0 0 7px}
-.ut-group-person{padding:clamp(6px,.65vh,9px) 9px!important;margin:4px 0!important;font-size:clamp(14px,1.25vw,18px)!important;cursor:grab;min-height:34px;box-sizing:border-box}
+.ut-group-scroll{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px!important;overflow:hidden}
+.ut-group-grid{--ut-group-cols:4;--ut-group-font:18px;--ut-group-heading:20px;flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--ut-group-cols),minmax(0,1fr))!important;grid-auto-rows:minmax(0,1fr)!important;gap:12px;overflow:hidden;align-content:stretch;align-items:stretch}
+.ut-group-card{min-height:0;padding:clamp(7px,.8vh,12px);display:flex;flex-direction:column;overflow:hidden;height:100%!important;align-self:stretch;justify-content:flex-start}
+.ut-group-card h3{font-size:var(--ut-group-heading);line-height:1.08;margin:0 0:.35em;flex:none}
+.ut-group-card>.sub{font-size:calc(var(--ut-group-font) * .78)!important;line-height:1.15}
+.ut-group-person{padding:.32em .55em!important;margin:.2em 0!important;font-size:var(--ut-group-font)!important;line-height:1.12!important;cursor:grab;min-height:0;box-sizing:border-box;flex:none;white-space:normal;overflow-wrap:anywhere}
+.ut-group-card>div[style*="border-top"]{margin-top:.28em!important;padding-top:.28em!important}
+.ut-group-card>div[style*="border-top"]>.sub{font-size:calc(var(--ut-group-font) * .76)!important;line-height:1.1}
+.ut-group-panel.ut-group-fit .ut-group-actions{flex:none}
+.ut-group-panel.ut-group-fit .ut-group-editbar{flex:none}
 .ut-group-person.ut-picked-person{outline:3px solid #377a69;background:#e0f1e8}
 .ut-group-editbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 14px;border-top:1px solid #d9dedb;background:#fff}
 .ut-group-editbar .sub{font-size:13px}
@@ -175,7 +180,7 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 .ut-group-float-body{padding:14px;text-align:center}
 .ut-group-float-result{font-size:22px;font-weight:750;margin:10px 0;overflow-wrap:anywhere}
 .ut-group-float .toolrow{justify-content:center}
-@media(max-width:700px){.ut-group-head{padding:10px!important}.ut-group-grid{gap:6px}.ut-group-scroll{padding:7px!important}.ut-group-person{font-size:13px!important}.ut-group-card{padding:5px}}
+@media(max-width:700px){.ut-group-head{padding:10px!important}.ut-group-grid{gap:6px}.ut-group-scroll{padding:7px!important}.ut-group-card{padding:5px}}
 
 
 
@@ -1996,7 +2001,43 @@ function openGroupOverview(w,readOnly=false){
  function onFullscreenChange(){if(!document.fullscreenElement&&overlay.isConnected)dismiss()}
  document.addEventListener('keydown',onKey,true);document.addEventListener('fullscreenchange',onFullscreenChange);close.onclick=dismiss;overlay.onclick=e=>{if(e.target===overlay)dismiss()};
  let selected=null;
- function resize(){/* Grid'et bruger nu auto-fit og naturlige korthøjder; browseren tilpasser kolonnerne efter pladsen. */}
+ function resize(){
+  if(!grid.isConnected)return;
+  const cards=[...grid.querySelectorAll('.ut-group-card')],n=cards.length;if(!n)return;
+  panel.classList.add('ut-group-fit');
+  const rect=grid.getBoundingClientRect(),W=Math.max(120,rect.width),H=Math.max(120,rect.height);
+  const gap=parseFloat(getComputedStyle(grid).gap)||12;
+  const lineCounts=cards.map(card=>{
+   const people=card.querySelectorAll('.ut-group-person').length;
+   const sections=card.querySelectorAll(':scope > div[style*=\"border-top\"]').length;
+   const hasSource=[...card.children].some(el=>el.classList?.contains('sub'));
+   return Math.max(2,1+people+sections*.7+(hasSource?.8:0));
+  });
+  const maxLines=Math.max(...lineCounts);
+  let best={score:-Infinity,cols:1,font:12,heading:14};
+  for(let cols=1;cols<=Math.min(n,8);cols++){
+   const rows=Math.ceil(n/cols);
+   const cellW=(W-gap*(cols-1))/cols,cellH=(H-gap*(rows-1))/rows;
+   if(cellW<115||cellH<72)continue;
+   const byHeight=(cellH-26)/(maxLines*1.42);
+   const byWidth=Math.max(11,cellW/14.5);
+   const font=Math.max(11,Math.min(27,byHeight,byWidth));
+   const unused=(cols*rows-n)/(cols*rows);
+   const aspectPenalty=Math.abs((cellW/cellH)-1.55)*.45;
+   const score=font-unused*2-aspectPenalty;
+   if(score>best.score)best={score,cols,font,heading:Math.min(31,font*1.18)};
+  }
+  grid.style.setProperty('--ut-group-cols',String(best.cols));
+  grid.style.setProperty('--ut-group-font',best.font.toFixed(1)+'px');
+  grid.style.setProperty('--ut-group-heading',best.heading.toFixed(1)+'px');
+  // Hvis et enkelt kort alligevel bliver for højt, reduceres skriften samlet lidt ad gangen.
+  let attempts=0;
+  while(attempts<5&&cards.some(c=>c.scrollHeight>c.clientHeight+2)){
+   best.font=Math.max(10,best.font*.90);best.heading=Math.max(12,best.heading*.92);
+   grid.style.setProperty('--ut-group-font',best.font.toFixed(1)+'px');
+   grid.style.setProperty('--ut-group-heading',best.heading.toFixed(1)+'px');attempts++;
+  }
+ }
  function update(){
   selected=null;grid.replaceChildren();const groups=w.groups||[],isPairs=currentGroupLabel(w)==='makkerpar',meetingNoun=isPairs?boardText('Makkerpar','Pair'):boardText('Gruppe','Group');w.utMeetings=utNormalizeMeetings(w.utMeetings,groups.length);
   const discussion=utDiscussionGroups(groups,w.utMeetings);
@@ -2009,7 +2050,7 @@ function openGroupOverview(w,readOnly=false){
   }
   if(!readOnly)refreshExtras();requestAnimationFrame(resize)
  }
- extras.ontoggle=()=>{grid.style.minHeight=extras.open?'min(48vh,500px)':'min(65vh,700px)';update()};
+ extras.ontoggle=()=>{update()};
  add.onclick=()=>{w.groups=w.groups||[];w.groups.push([]);rememberGroupArrangement(w);resetGroupDraw(w);save();update()};del.onclick=()=>{if(!(w.groups||[]).length)return;const gone=w.groups.pop()||[];if(gone.length){if(!w.groups.length)w.groups=[[]];gone.forEach((n,i)=>w.groups[i%w.groups.length].push(n))}rememberGroupArrangement(w);resetGroupDraw(w);save();update()};store.onclick=()=>saveGroupSet(w);window.addEventListener('resize',resize);update();close.focus()
 }
 function utFloatingLayerHost(){
@@ -3342,7 +3383,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
         <li>Vælg en gemt inddeling, dan tilfældige grupper eller lav en manuel inddeling. Ved tilfældig inddeling kan du også vælge kønsstyring og angive elevpar, der ikke må være sammen. Hvis én elev ellers ville stå alene, fordeles eleven automatisk ind i en eksisterende gruppe.</li>
         <li>Klik på <strong>Gem</strong>.</li>
       </ol>
-      <p>Klik på <strong>👥 Vis inddeling</strong> ved punktet for at se grupperne.</p>
+      <p>Klik på <strong>👥 Vis inddeling</strong> ved punktet for at se grupperne. Gruppeoversigten tilpasser automatisk antal kolonner, kortstørrelser og tekst, så alle grupper så vidt muligt fylder hele skærmen uden scrolling.</p>
       <h4>Genbrug samme grupper på næste punkt</h4>
       <p>Under <strong>Inddeling</strong> kan du vælge <strong>♻️ Brug inddeling fra punkt …</strong>. Du kan vælge et tidligere punkt allerede i forberedelsen, også selv om den tilfældige inddeling først bliver dannet i selve timen. Når grupperne bliver dannet på det første punkt, overtager det næste punkt præcis den samme konkrete fordeling.</p>
 
