@@ -1243,7 +1243,12 @@ function utAgendaSetupFields(item){
 }
 function utAgendaReadGroupLinks(){const item=editingItem?board()?.items?.find(x=>x.id===editingItem):null;utCaptureCurrentGroupPhase(item);return utGroupLinksDraft.filter(x=>x.kind&&x.kind!=='none').sort((a,b)=>a.phaseIndex-b.phaseIndex).map(x=>JSON.parse(JSON.stringify(x)))}
 function utAgendaReadGroupPayload(){const links=utAgendaReadGroupLinks();return{utGroups:links,utGroup:links[0]||{kind:'none'}}}
-function utAgendaReadFields(){return utAgendaReadGroupPayload().utGroup}
+function utAgendaReadFields(){
+ const item=editingItem?board()?.items?.find(x=>x.id===editingItem):null;
+ utCaptureCurrentGroupPhase(item);
+ const current=utGroupLinksDraft.find(x=>x.phaseIndex===utActiveGroupPhaseIndex);
+ return current?JSON.parse(JSON.stringify(current)):{kind:'none',phaseIndex:Number.isInteger(utActiveGroupPhaseIndex)?utActiveGroupPhaseIndex:undefined};
+}
 
 function utAgendaRenderAvoidPairs(){const host=document.getElementById('utAgendaAvoidList');if(!host)return;host.replaceChildren();if(!utRandomAvoidDraft.length){const s=document.createElement('div');s.className='sub';s.textContent='Ingen særlige kombinationer.';host.append(s);return}utRandomAvoidDraft.forEach((p,i)=>{const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:7px;margin:5px 0';const label=document.createElement('span');label.style.flex='1';label.textContent=p[0]+' ↮ '+p[1];const del=document.createElement('button');del.type='button';del.className='btn';del.textContent='✕';del.title='Fjern regel';del.onclick=()=>{utRandomAvoidDraft.splice(i,1);utAgendaRenderAvoidPairs();utAgendaEditorRefresh()};row.append(label,del);host.append(row)})}
 // Editor for de to valgfrie gruppefunktioner, med egne data for hvert punkt.
@@ -1327,7 +1332,7 @@ function utAgendaEditorRefresh(){
  });
 }
 function utAgendaReadExtras(){return utAgendaDraft?JSON.parse(JSON.stringify(utAgendaDraft)):{outdoorEnabled:false,meetingEnabled:false,outdoor:[],outdoorMeetings:[],outdoorStudents:[],meetings:[],registered:false}}
-function utAgendaReadFields(){const wrap=document.getElementById('utAgendaGroupFields');if(!wrap||wrap.style.display==='none')return {kind:'none'};const value=document.getElementById('utAgendaGroupKind').value,old=editingItem?board()?.items?.find(x=>x.id===editingItem)?.utGroup:null;const randomMode=document.getElementById('utAgendaRandomMode')?.value||'size',randomNumber=+document.getElementById('utAgendaGroupSize').value||2;let next;if(value.startsWith('reuse:')){const sourceId=value.slice(6),source=board()?.items?.find(x=>x.id===sourceId),groups=utAgendaConcreteGroups(source);next={kind:'manual',groups:groups.map(g=>[...g]),sourceItemId:sourceId,sourceItemTitle:source?.title||''}}else next=value==='seatmate'?{kind:'seatmate'}:value==='table'?{kind:'table'}:value==='manual'?{kind:'manual',groups:(utManualDraft||[]).map(g=>[...g])}:value.startsWith('set:')?{kind:'saved',setId:value.slice(4)}:value==='random'?(randomMode==='count'?{kind:'random',mode:'count',count:Math.max(1,randomNumber),rules:utRandomRulesFromUI()}:{kind:'random',mode:'size',size:Math.max(2,randomNumber),rules:utRandomRulesFromUI()}):{kind:'none'};const phaseSel=document.getElementById('utAgendaGroupPhase');if(next.kind!=='none'&&phaseSel&&phaseSel.value!=='')next.phaseIndex=+phaseSel.value;const sameRules=next.kind!=='random'||JSON.stringify(old?.rules||{})===JSON.stringify(next.rules||{});const sameRandom=next.kind!=='random'||(((old?.mode||'size')===(next.mode||'size'))&&((next.mode==='count'?+(old?.count||old?.size):+old?.size)===(next.mode==='count'?+next.count:+next.size))&&sameRules);const same=old&&old.kind===next.kind&&(next.kind!=='saved'||old.setId===next.setId)&&(next.kind!=='manual'||(old.sourceItemId||'')===(next.sourceItemId||''))&&sameRandom;if(same&&old.dayGroups?.length)next.dayGroups=old.dayGroups.map(g=>[...g]);if(same&&next.kind==='random'&&old.groups?.length)next.groups=old.groups.map(g=>[...g]);return next}
+
 
 let utAttachmentDraft=[];
 function utAttachmentName(a){return String(a?.displayName||a?.name||a?.fileName||a?.url||'Materiale')}
@@ -3824,4 +3829,5 @@ body.ut-student-window #boardTagButton{display:none!important}
 })();
 </script>
 <!-- v73: slideshow-timer kan justeres direkte; dagsordenstid synkroniseres ved auto-timer -->
+<!-- v74: udearbejde følger aktiv arbejdsfase; gammel enkelt-inddeling-læser fjernet -->
 </body></html>
