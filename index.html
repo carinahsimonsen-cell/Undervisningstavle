@@ -1060,7 +1060,7 @@ function applyTheme(){let b=board(),v=document.getElementById("boardView");v.cla
  else v.style.backgroundImage="none";
  if(b.bgImage){let strength=(100-b.bgStrength)/100;v.style.backgroundImage=`linear-gradient(rgba(255,255,255,${strength}),rgba(255,255,255,${strength})),url("${b.bgImage}")`;v.style.backgroundSize="cover";v.style.backgroundPosition="center"}
 }
-function utAgendaActiveItem(){const b=board();return b?.items?.find(x=>x.status==='open')||null}
+function utAgendaActiveItem(){const b=board();if(!b?.items?.length)return null;if(b.utActiveItemId){const active=b.items.find(x=>x.id===b.utActiveItemId);if(active)return active}return b.items.find(x=>x.status==='open')||null}
 // Mødegrupper gemmes som {members:[gruppeindekser...],dir}. Gamle parvise {a,b,dir}-data
 // normaliseres automatisk, så eksisterende tavler fortsat virker.
 function utNormalizeMeetings(list,maxCount=Infinity){
@@ -2435,9 +2435,30 @@ function richListLevel(editor,direction){
   document.execCommand("indent",false,null);
  }else{
   const list=li.parentElement;
-  const parentLi=list&&list.parentElement&&list.parentElement.closest?list.parentElement.closest("li"):null;
+  const parentLi=list&&list.parentElement&&list.parentElement.tagName==="LI"?list.parentElement:null;
   if(!parentLi||!editor.contains(parentLi))return;
-  document.execCommand("outdent",false,null);
+  const outerList=parentLi.parentElement;
+  if(!outerList||!outerList.matches("ul,ol"))return;
+
+  // Flyt eventuelle efterfølgende punkter med som underpunkter til det punkt,
+  // der rykkes ud. Det bevarer rækkefølgen som i en normal listeeditor.
+  const following=[];
+  let sib=li.nextElementSibling;
+  while(sib){const next=sib.nextElementSibling;if(sib.tagName==="LI")following.push(sib);sib=next}
+  if(following.length){
+   let childList=[...li.children].find(el=>el.matches&&el.matches("ul,ol"));
+   if(!childList){childList=document.createElement(list.tagName.toLowerCase());li.append(childList)}
+   following.forEach(x=>childList.append(x));
+  }
+
+  outerList.insertBefore(li,parentLi.nextSibling);
+  if(!list.querySelector(":scope > li"))list.remove();
+
+  // Bevar en brugbar markørposition efter flytningen.
+  const r=document.createRange();
+  r.selectNodeContents(li);r.collapse(false);
+  sel.removeAllRanges();sel.addRange(r);
+  editor._utSavedRange=r.cloneRange();
  }
  editor.dispatchEvent(new Event("input",{bubbles:true}));
 }
@@ -3862,3 +3883,15 @@ body.ut-student-window #boardTagButton{display:none!important}
 <!-- v74: udearbejde følger aktiv arbejdsfase; gammel enkelt-inddeling-læser fjernet -->
 <div style="display:none" id="ut-v75-note">Individuelt udearbejde initialiseres også på punkter uden makker- eller gruppeinddeling.</div>
 <div class="ut-help-note" style="display:none">I visningstilstand kan du klikke direkte på et dagsordenspunkt for at gøre det aktivt uden at markere det forrige som gennemført eller sprunget over.</div></body></html>
+
+<style id="ut-v81-need-separation">
+/* v81: Gør "Du skal bruge" visuelt adskilt fra beskrivelsen på det aktive punkt. */
+body.viewing #boardView .agenda .item.current .need{
+  margin-top:clamp(14px,1.4vw,20px)!important;
+  padding-top:clamp(8px,.8vw,12px);
+  border-top:1px solid color-mix(in srgb, var(--agenda-card-ink, #1f2a23) 16%, transparent);
+}
+@supports not (color: color-mix(in srgb, black 50%, white)){
+  body.viewing #boardView .agenda .item.current .need{border-top-color:rgba(31,42,35,.16)}
+}
+</style>
