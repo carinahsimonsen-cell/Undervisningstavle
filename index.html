@@ -111,8 +111,8 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 
 .richbar{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}.richbar button{min-width:36px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px}.richbar .sep{width:1px;background:var(--line);margin:3px}
 .ut-emoji-wrap{position:relative;display:inline-flex}.ut-emoji-picker{position:absolute;left:0;top:calc(100% + 6px);z-index:2147483000;display:none;width:min(330px,82vw);grid-template-columns:repeat(8,1fr);gap:4px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 12px 30px #0002}.ut-emoji-picker.open{display:grid}.ut-emoji-picker button{min-width:34px!important;width:34px;height:34px;font-size:21px;padding:0;border:0;background:transparent}.ut-emoji-picker button:hover{background:#f1f5f2}.ut-emoji-picker .ut-emoji-close{grid-column:1/-1;width:auto!important;min-width:0!important;font-size:13px!important;border:1px solid var(--line)!important;background:#fff!important;padding:0 8px!important}
-.richedit{width:100%;min-height:95px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;line-height:1.45;overflow:auto}.richedit ul{margin:5px 0;padding-left:23px}
-.richdisplay ul{margin:5px 0;padding-left:23px}.richdisplay p{margin:4px 0}.notesrich{min-height:220px;resize:vertical}.notesrich:focus{min-height:360px}
+.richedit{width:100%;min-height:95px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;line-height:1.45;overflow:auto}.richedit ul{margin:5px 0;padding-left:23px}.richedit ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richedit ul ul ul{list-style-type:square}
+.richdisplay ul{margin:5px 0;padding-left:23px}.richdisplay ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richdisplay ul ul ul{list-style-type:square}.richdisplay p{margin:4px 0}.notesrich{min-height:220px;resize:vertical}.notesrich:focus{min-height:360px}
 
 .birthday{position:relative;background:#fff;border:2px solid #d9b9b9;border-radius:16px;padding:18px 46px 18px 18px;box-shadow:var(--shadow);font-size:18px;overflow:hidden;margin-bottom:12px}
 .birthday .birthtitle{display:flex;align-items:center;justify-content:center;gap:12px;text-align:center;font-size:25px;font-weight:850;letter-spacing:.04em}
@@ -2422,6 +2422,25 @@ function cleanRich(html){
  return t.innerHTML.trim();
 }
 function richCmd(editor,cmd,val=null){editor.focus();document.execCommand(cmd,false,val)}
+function richListLevel(editor,direction){
+ utRestoreEditorRange(editor);
+ const sel=getSelection();if(!sel||!sel.rangeCount)return;
+ let node=sel.anchorNode; if(node&&node.nodeType!==1)node=node.parentElement;
+ const li=node&&node.closest?node.closest("li"):null;
+ if(!li||!editor.contains(li))return;
+ if(direction==="indent"){
+  let prev=li.previousElementSibling;
+  while(prev&&prev.tagName!=="LI")prev=prev.previousElementSibling;
+  if(!prev)return;
+  document.execCommand("indent",false,null);
+ }else{
+  const list=li.parentElement;
+  const parentLi=list&&list.parentElement&&list.parentElement.closest?list.parentElement.closest("li"):null;
+  if(!parentLi||!editor.contains(parentLi))return;
+  document.execCommand("outdent",false,null);
+ }
+ editor.dispatchEvent(new Event("input",{bubbles:true}));
+}
 function insertSymbol(editor,sym){editor.focus();document.execCommand("insertText",false,sym)}
 function utRangeInside(editor,range){try{let n=range.commonAncestorContainer;return n===editor||editor.contains(n.nodeType===1?n:n.parentNode)}catch(e){return false}}
 function utSaveEditorRange(editor){const sel=getSelection();if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);if(utRangeInside(editor,r))editor._utSavedRange=r.cloneRange()}}
@@ -2445,6 +2464,8 @@ function makeToolbar(bar,editor){
   ["I","Kursiv",()=>richCmd(editor,"italic")],
   ["U","Understreg",()=>richCmd(editor,"underline")],
   ["•","Punktliste",()=>richCmd(editor,"insertUnorderedList")],
+  ["↳","Ryk punkt ind – lav underpunkt",()=>richListLevel(editor,"indent")],
+  ["↰","Ryk punkt ud – et niveau tilbage",()=>richListLevel(editor,"outdent")],
   ["→","Indsæt →",()=>insertSymbol(editor," → ")],
   ["←","Indsæt ←",()=>insertSymbol(editor," ← ")],
   ["↔","Indsæt ↔",()=>insertSymbol(editor," ↔ ")],
@@ -3520,7 +3541,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
 
       <h4>📌 Besked og ✏️ Tavlenoter</h4>
       <p>Brug en besked til information, der skal stå tydeligt for eleverne. Tavlenoter kan bruges til stikord eller tekst, der skal være synlig på selve tavlen.</p>
-      <p>I tekstfelter med værktøjslinje kan du bruge <strong>😊</strong> til at indsætte en emoji præcis dér, hvor markøren står.</p>
+      <p>I tekstfelter med værktøjslinje kan du bruge <strong>😊</strong> til at indsætte en emoji præcis dér, hvor markøren står. I punktopstillinger kan du bruge <strong>↳</strong> til at lave et underpunkt og <strong>↰</strong> til at rykke punktet et niveau tilbage.</p>
 
       <h4>▶️ YouTube-video</h4>
       <p>Indsæt et almindeligt YouTube- eller youtu.be-link. Videoen afspilles inde i Undervisningstavlen og kan gemmes i <strong>Mine forløb</strong>.</p>
