@@ -1533,14 +1533,36 @@ function utAgendaTransferItem(item){
  let back=document.getElementById('utAgendaTransferBack');
  if(!back){
   back=document.createElement('div');back.id='utAgendaTransferBack';back.className='modalback';back.style.zIndex='10035';
-  back.innerHTML='<div class="modal" style="width:min(680px,95vw)"><h2 style="margin-bottom:8px">Kopiér eller flyt programpunkt</h2><div id="utAgendaTransferSource" class="sub" style="margin-bottom:14px"></div><div class="field"><label for="utAgendaTransferTarget">Til tavle</label><select id="utAgendaTransferTarget"></select><div id="utAgendaTransferTargetInfo" class="sub" style="margin-top:6px"></div></div><div class="field" id="utAgendaTransferScopeWrap"><label>Hvad skal med?</label><label style="display:flex;align-items:center;gap:8px;font-weight:500;margin:6px 0"><input type="radio" name="utAgendaTransferScope" value="one" checked style="width:auto;min-height:auto"> Kun dette punkt</label><label id="utAgendaTransferBlockLabel" style="display:flex;align-items:center;gap:8px;font-weight:500;margin:6px 0"><input type="radio" name="utAgendaTransferScope" value="block" style="width:auto;min-height:auto"> Hele den sammenkoblede blok</label></div><div class="sub" style="margin-top:10px">Indhold, lærernote, materialer, tid og arbejdsform følger med. Punktet bliver ikke markeret som gennemført på den nye tavle, og eventuelle tilfældigt trukne grupper nulstilles.</div><div class="mactions"><button class="btn primary" type="button" id="utAgendaTransferCopy">⧉ Kopiér</button><button class="btn" type="button" id="utAgendaTransferMove">⇢ Flyt</button><button class="btn" type="button" id="utAgendaTransferClose">Fortryd</button></div></div>';
+  back.innerHTML='<div class="modal" style="width:min(760px,95vw)"><h2 style="margin-bottom:8px">Kopiér eller flyt programpunkt</h2><div id="utAgendaTransferSource" class="sub" style="margin-bottom:14px"></div><div class="field"><label>Kopiér til én eller flere tavler</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin:7px 0 9px"><button class="btn" type="button" id="utAgendaSelectFutureSame">✓ Vælg alle kommende med samme klasse og fag</button><button class="btn" type="button" id="utAgendaClearTargets">Ryd valg</button></div><div id="utAgendaTransferMulti" style="border:1px solid var(--line);border-radius:12px;max-height:300px;overflow:auto;padding:6px"></div><div id="utAgendaTransferCount" class="sub" style="margin-top:7px"></div></div><div class="field" style="margin-top:16px"><label for="utAgendaTransferTarget">Flyt til én tavle</label><select id="utAgendaTransferTarget"></select><div id="utAgendaTransferTargetInfo" class="sub" style="margin-top:6px"></div></div><div class="field" id="utAgendaTransferScopeWrap"><label>Hvad skal med?</label><label style="display:flex;align-items:center;gap:8px;font-weight:500;margin:6px 0"><input type="radio" name="utAgendaTransferScope" value="one" checked style="width:auto;min-height:auto"> Kun dette punkt</label><label id="utAgendaTransferBlockLabel" style="display:flex;align-items:center;gap:8px;font-weight:500;margin:6px 0"><input type="radio" name="utAgendaTransferScope" value="block" style="width:auto;min-height:auto"> Hele den sammenkoblede blok</label></div><div class="sub" style="margin-top:10px">Indhold, lærernote, materialer, tid og arbejdsform følger med. Kopier kan sendes til flere tavler på én gang. Punktet bliver ikke markeret som gennemført på de nye tavler, og eventuelle tilfældigt trukne grupper nulstilles.</div><div class="mactions"><button class="btn primary" type="button" id="utAgendaTransferCopy">⧉ Kopiér til valgte tavler</button><button class="btn" type="button" id="utAgendaTransferMove">⇢ Flyt</button><button class="btn" type="button" id="utAgendaTransferClose">Fortryd</button></div></div>';
   document.body.append(back);back.querySelector('#utAgendaTransferClose').onclick=()=>hide(back);back.onclick=e=>{if(e.target===back)hide(back)};
  }
- const select=back.querySelector('#utAgendaTransferTarget'),source=back.querySelector('#utAgendaTransferSource'),scopeWrap=back.querySelector('#utAgendaTransferScopeWrap'),blockLabel=back.querySelector('#utAgendaTransferBlockLabel'),info=back.querySelector('#utAgendaTransferTargetInfo');
+ const select=back.querySelector('#utAgendaTransferTarget'),source=back.querySelector('#utAgendaTransferSource'),scopeWrap=back.querySelector('#utAgendaTransferScopeWrap'),blockLabel=back.querySelector('#utAgendaTransferBlockLabel'),info=back.querySelector('#utAgendaTransferTargetInfo'),multi=back.querySelector('#utAgendaTransferMulti'),countEl=back.querySelector('#utAgendaTransferCount'),copyBtn=back.querySelector('#utAgendaTransferCopy');
  source.textContent='Fra '+utAgendaTargetTimeLabel(src)+' · “'+(item.title||'Uden titel')+'”';
+ const selectedTargets=new Set();
+ const sourceKey=String(src.date||'')+'|'+String(boardSlots(src)[0]??999).padStart(3,'0');
+ const sameClassSubject=b=>!!src.classId&&b.classId===src.classId&&!!String(src.subject||'').trim()&&String(b.subject||'').trim().toLocaleLowerCase('da-DK')===String(src.subject||'').trim().toLocaleLowerCase('da-DK');
+ const isUpcoming=b=>(String(b.date||'')+'|'+String(boardSlots(b)[0]??999).padStart(3,'0'))>sourceKey;
+ const renderMulti=()=>{
+  multi.replaceChildren();
+  let pastStarted=false;
+  targets.forEach(b=>{
+   const past=String(b.date||'')<String(src.date||'');
+   if(past&&!pastStarted){const div=document.createElement('div');div.className='sub';div.textContent='Tidligere tavler';div.style.cssText='padding:8px 8px 5px;border-top:1px solid var(--line);margin-top:4px';multi.append(div);pastStarted=true}
+   const lab=document.createElement('label');lab.style.cssText='display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start;padding:9px 8px;border-radius:9px;cursor:pointer';
+   const cb=document.createElement('input');cb.type='checkbox';cb.value=b.id;cb.checked=selectedTargets.has(b.id);cb.style.cssText='width:auto;min-height:auto;margin-top:3px';
+   const txt=document.createElement('div');const title=document.createElement('div');title.style.fontWeight='700';title.textContent=(sameClassSubject(b)?'★ ':'')+utAgendaTargetTimeLabel(b);txt.append(title);
+   const meta=[];if(src.classId&&b.classId===src.classId)meta.push('samme klasse');if(String(src.subject||'').trim()&&String(b.subject||'').trim().toLocaleLowerCase('da-DK')===String(src.subject||'').trim().toLocaleLowerCase('da-DK'))meta.push('samme fag');if(meta.length){const sm=document.createElement('div');sm.className='sub';sm.textContent=meta.join(' · ');txt.append(sm)}
+   cb.onchange=()=>{cb.checked?selectedTargets.add(b.id):selectedTargets.delete(b.id);updateCount()};lab.onmouseenter=()=>lab.style.background='#f6f8f6';lab.onmouseleave=()=>lab.style.background='';lab.append(cb,txt);multi.append(lab)
+  });
+  updateCount();
+ };
+ const updateCount=()=>{const n=selectedTargets.size;countEl.textContent=n?n+' tavle'+(n===1?'':'r')+' valgt':'Ingen tavler valgt endnu';copyBtn.disabled=!n;copyBtn.textContent=n?'⧉ Kopiér til '+n+' tavle'+(n===1?'':'r'):'⧉ Kopiér til valgte tavler'};
+ back.querySelector('#utAgendaSelectFutureSame').onclick=()=>{targets.filter(b=>sameClassSubject(b)&&isUpcoming(b)).forEach(b=>selectedTargets.add(b.id));renderMulti()};
+ back.querySelector('#utAgendaClearTargets').onclick=()=>{selectedTargets.clear();renderMulti()};
+ renderMulti();
  select.replaceChildren();
  const today=iso(new Date());let insertedPast=false;
- targets.forEach((b,idx)=>{
+ targets.forEach(b=>{
   const past=String(b.date||'')<today;
   if(past&&!insertedPast){const divider=new Option('──────── Tidligere tavler ────────','');divider.disabled=true;select.add(divider);insertedPast=true}
   const sameClass=src.classId&&b.classId===src.classId,sameSubject=String(src.subject||'').trim()&&String(b.subject||'').trim().toLocaleLowerCase('da-DK')===String(src.subject||'').trim().toLocaleLowerCase('da-DK');
@@ -1549,23 +1571,22 @@ function utAgendaTransferItem(item){
  if(!select.value){const first=[...select.options].find(o=>!o.disabled&&o.value);if(first)select.value=first.value}
  const updateInfo=()=>{const b=state.boards.find(x=>x.id===select.value);if(!b){info.textContent='';return}const bits=[];if(src.classId&&b.classId===src.classId)bits.push('samme klasse');if(String(src.subject||'').trim()&&String(b.subject||'').trim().toLocaleLowerCase('da-DK')===String(src.subject||'').trim().toLocaleLowerCase('da-DK'))bits.push('samme fag');info.textContent=bits.length?'★ '+bits.join(' · '):''};select.onchange=updateInfo;updateInfo();
  scopeWrap.style.display=hasBlock?'block':'none';blockLabel.lastChild.textContent=' Hele den sammenkoblede blok ('+block.items.length+' punkter)';back.querySelector('input[name="utAgendaTransferScope"][value="one"]').checked=true;
- const perform=move=>{
-  const dest=state.boards.find(x=>x.id===select.value);if(!dest)return alert('Vælg først en tavle.');
-  const scope=hasBlock&&back.querySelector('input[name="utAgendaTransferScope"]:checked')?.value==='block'?'block':'one';
-  const selected=scope==='block'?block.items:[item];
-  const clones=selected.map((it,i)=>utAgendaCloneForTransfer(it,scope==='block'&&i<selected.length-1));
-  if(scope==='block'&&clones.length)delete clones[clones.length-1].utLinkedNext;
-  dest.items=dest.items||[];dest.items.push(...clones);
-  if(!(dest.tags||[]).length){const linkedCourse=clones.find(x=>String(x.utCourse||'').trim())?.utCourse;if(linkedCourse)dest.tags=[linkedCourse]}
-  if(move){
-   const ids=new Set(selected.map(x=>x.id));src.items=src.items.filter(x=>!ids.has(x.id));
-   const gw=src.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;
-  }
+ const selectedItems=()=>{const scope=hasBlock&&back.querySelector('input[name="utAgendaTransferScope"]:checked')?.value==='block'?'block':'one';return {scope,selected:scope==='block'?block.items:[item]}};
+ const addClonesToBoard=(dest,scope,selected)=>{const clones=selected.map((it,i)=>utAgendaCloneForTransfer(it,scope==='block'&&i<selected.length-1));if(scope==='block'&&clones.length)delete clones[clones.length-1].utLinkedNext;dest.items=dest.items||[];dest.items.push(...clones);if(!(dest.tags||[]).length){const linkedCourse=clones.find(x=>String(x.utCourse||'').trim())?.utCourse;if(linkedCourse)dest.tags=[linkedCourse]}return clones.length};
+ copyBtn.onclick=()=>{
+  if(!selectedTargets.size)return alert('Vælg mindst én tavle at kopiere til.');
+  const {scope,selected}=selectedItems();let boards=0,total=0;
+  for(const id of selectedTargets){const dest=state.boards.find(x=>x.id===id);if(!dest)continue;total+=addClonesToBoard(dest,scope,selected);boards++}
   save();hide(back);renderAgenda();
-  const verb=move?'flyttet':'kopieret',count=clones.length;
-  alert((count===1?'Punktet':count+' punkter')+' er '+verb+' til “'+dest.name+'”.');
+  if(boards)alert((selected.length===1?'Punktet':'De '+selected.length+' punkter')+' er kopieret til '+boards+' tavle'+(boards===1?'':'r')+'.');
  };
- back.querySelector('#utAgendaTransferCopy').onclick=()=>perform(false);back.querySelector('#utAgendaTransferMove').onclick=()=>perform(true);show(back);select.focus();
+ back.querySelector('#utAgendaTransferMove').onclick=()=>{
+  const dest=state.boards.find(x=>x.id===select.value);if(!dest)return alert('Vælg først en tavle.');
+  const {scope,selected}=selectedItems();const count=addClonesToBoard(dest,scope,selected);
+  const ids=new Set(selected.map(x=>x.id));src.items=src.items.filter(x=>!ids.has(x.id));const gw=src.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;
+  save();hide(back);renderAgenda();alert((count===1?'Punktet':count+' punkter')+' er flyttet til “'+dest.name+'”.');
+ };
+ show(back);
 }
 // Genbrug tidligere programpunkter uden at åbne den gamle tavle.
 function utReusePlainText(html){
@@ -3463,7 +3484,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
       <p>Klik på <strong>✓</strong> ved et gennemført punkt eller <strong>↷</strong> ved et punkt, I springer over. Brug <strong>↶</strong> for at fortryde. Ved koblede punkter følger underpunkterne hovedpunktets fremdrift.</p>
 
       <h4>Kopiér eller flyt et enkelt punkt</h4>
-      <p>Klik på <strong>⧉</strong> ved punktet. Vælg derefter en anden tavle og enten <strong>Kopiér</strong> eller <strong>Flyt</strong>. Hvis punktet indgår i en koblet blok, kan du vælge kun punktet eller hele blokken. Materialer, indstillinger og punktets lærernote følger med.</p>
+      <p>Klik på <strong>⧉</strong> ved punktet. Ved <strong>Kopiér</strong> kan du markere flere tavler på én gang, og du kan hurtigt vælge alle kommende tavler med samme klasse og fag. <strong>Flyt</strong> går fortsat kun til én tavle. Hvis punktet indgår i en koblet blok, kan du vælge kun punktet eller hele blokken. Materialer, indstillinger og punktets lærernote følger med.</p>
 
       <h4>♻️ Genbrug gamle punkter uden at åbne den gamle tavle</h4>
       <ol>
@@ -3701,7 +3722,7 @@ utSyncAllBoardCourseTags();
       <p>Kopierne bliver selvstændige tavler. Tavlens overordnede lærernote kopieres ikke automatisk.</p>
 
       <h4>Kopiér eller flyt et enkelt programpunkt</h4>
-      <p>Klik på <strong>⧉</strong> ved punktet. Du kan vælge en anden tavle og enten kopiere eller flytte. Kommende tavler og tavler med samme klasse/fag prioriteres i listen. Hvis punktet er koblet med underpunkter, kan hele blokken tages med.</p>
+      <p>Klik på <strong>⧉</strong> ved punktet. Ved kopiering kan du vælge én eller flere tavler på samme tid; tavler med samme klasse/fag prioriteres, og knappen <strong>Vælg alle kommende med samme klasse og fag</strong> kan markere dem på én gang. Flytning går fortsat kun til én tavle. Hvis punktet er koblet med underpunkter, kan hele blokken tages med.</p>
     `],
 
     ['Tilpas tavlens udseende', `
