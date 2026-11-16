@@ -968,7 +968,20 @@ function utItemModes(item){const raw=Array.isArray(item?.modes)?item.modes:(item
 let utWorkModesDraft=[];
 const utWorkModeOptions=['👩‍🏫 Fælles','👤 Individuelt','👥 Makker','👥👥 Gruppe','🚶 Bevægelse'];
 function utEditorHasMode(re){return utWorkModesDraft.some(m=>re.test(m))}
-function utAfterWorkModeChange(){itMode.value=utWorkModesDraft.at(-1)||'';const wrap=document.getElementById('utAgendaGroupFields');if(wrap)wrap.style.display=utEditorHasMode(/Makker|Gruppe/i)?'block':'none';utRefreshGroupPhasePicker();utAgendaEditorRefresh();utRefreshIndividualOutdoorPrep()}
+function utNormalizeOutdoorDraftForModes(){
+ if(!utAgendaDraft)return;
+ const hasIndividual=utEditorHasMode(/Individuelt/i),hasGroup=utEditorHasMode(/Makker|Gruppe/i);
+ if(!hasIndividual&&!hasGroup){
+  utAgendaDraft.outdoorEnabled=false;utAgendaDraft.meetingEnabled=false;utAgendaDraft.outdoor=[];utAgendaDraft.outdoorMeetings=[];utAgendaDraft.outdoorStudents=[];utAgendaDraft.meetings=[];utAgendaDraft.registered=false;
+  return;
+ }
+ if(!hasIndividual)utAgendaDraft.outdoorStudents=[];
+ if(!hasGroup){utAgendaDraft.outdoor=[];utAgendaDraft.outdoorMeetings=[];utAgendaDraft.meetings=[];utAgendaDraft.meetingEnabled=false;}
+ // Hvis udearbejde ikke længere har noget gyldigt valg, skal det ikke blive hængende som en skjult funktion.
+ const hasOutdoorSelection=(hasIndividual&&utAgendaDraft.outdoorStudents?.length)||(hasGroup&&((utAgendaDraft.outdoor||[]).length||(utAgendaDraft.outdoorMeetings||[]).length));
+ if(!hasOutdoorSelection&&!hasIndividual&&!hasGroup)utAgendaDraft.outdoorEnabled=false;
+}
+function utAfterWorkModeChange(){itMode.value=utWorkModesDraft.at(-1)||'';utNormalizeOutdoorDraftForModes();const wrap=document.getElementById('utAgendaGroupFields');if(wrap)wrap.style.display=utEditorHasMode(/Makker|Gruppe/i)?'block':'none';utRefreshGroupPhasePicker();utAgendaEditorRefresh();utRefreshIndividualOutdoorPrep()}
 function utRenderWorkModePicker(){const box=document.getElementById('utModePicker'),seq=document.getElementById('utModeSequenceEditor');if(!box)return;box.replaceChildren();for(const mode of utWorkModeOptions){const btn=document.createElement('button');btn.type='button';btn.className='ut-mode-choice';const count=utWorkModesDraft.filter(x=>x===mode).length;if(count){const n=document.createElement('span');n.className='ut-mode-count';n.textContent=String(count);btn.append(n)}const tx=document.createElement('span');tx.textContent=mode;btn.append(tx);btn.onclick=()=>{utWorkModesDraft.push(mode);utRenderWorkModePicker();utAfterWorkModeChange()};box.append(btn)}if(seq){seq.replaceChildren();utWorkModesDraft.forEach((mode,i)=>{if(i){const arrow=document.createElement('span');arrow.className='ut-mode-arrow';arrow.textContent='→';seq.append(arrow)}const step=document.createElement('span');step.className='ut-mode-step';const num=document.createElement('span');num.className='ut-mode-step-num';num.textContent=String(i+1);const label=document.createElement('span');label.textContent=mode;const remove=document.createElement('button');remove.type='button';remove.className='ut-mode-step-remove';remove.textContent='×';remove.title='Fjern dette trin';remove.onclick=()=>{utWorkModesDraft.splice(i,1);utRenderWorkModePicker();utAfterWorkModeChange()};step.append(num,label,remove);seq.append(step)})}}
 function utGroupPhasePreference(cfg,modes=utWorkModesDraft){
  if(!cfg||cfg.kind==='none')return '';
@@ -1729,6 +1742,7 @@ async function utSaveAgendaItem(){
   let existing=editingItem?board().items.find(x=>x.id===editingItem):null;
   {const links=utAgendaReadGroupLinks();if(links.some(g=>g.kind==='manual'&&!g.sourceItemId&&!(g.groups||[]).length)){alert('Fordel først eleverne i alle manuelle inddelinger, eller vælg en anden inddeling.');return}}
   if(!utCommitPendingLink())return;
+  utNormalizeOutdoorDraftForModes();
   let o={title,desc:cleanRich(itDesc.innerHTML),need:itNeed.value.trim(),modes:[...utWorkModesDraft],mode:utWorkModesDraft.at(-1)||'',mins:utAgendaMinutesFromParts(minEl?.value,secEl?.value),...utAgendaReadGroupPayload(),utGroupExtras:utAgendaReadExtras(),utShowGroupDraw:!!document.getElementById('utAgendaDrawEnabled')?.checked,utShowStudentDraw:!!document.getElementById('utAgendaStudentDrawEnabled')?.checked,utStudentDrawShowCount:document.getElementById('utAgendaStudentDrawShowCount')?.checked!==false,utStudentDrawExcluded:[...utStudentDrawExcludeDraft],link:'',linkOpenInTab:false,material:null,attachments:utAttachmentDraft.map(a=>({...a}))};
   if(existing){Object.assign(existing,o);const gw=board().widgets?.find(w=>w.type==='groups');if(gw&&utAgendaActiveItem()?.id===existing.id)gw.utAgendaToken=null;}else board().items.push({id:uid(),...o,status:'open'});
   save();
