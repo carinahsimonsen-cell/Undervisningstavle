@@ -1033,7 +1033,7 @@ function utNormalizeOutdoorDraftForModes(){
  const hasOutdoorSelection=(hasIndividual&&utAgendaDraft.outdoorStudents?.length)||(hasGroup&&((utAgendaDraft.outdoor||[]).length||(utAgendaDraft.outdoorMeetings||[]).length));
  if(!hasOutdoorSelection&&!hasIndividual&&!hasGroup)utAgendaDraft.outdoorEnabled=false;
 }
-function utAfterWorkModeChange(){itMode.value=utWorkModesDraft.at(-1)||'';utNormalizeOutdoorDraftForModes();const wrap=document.getElementById('utAgendaGroupFields');if(wrap)wrap.style.display=utEditorHasMode(/Makker|Gruppe/i)?'block':'none';utRefreshGroupPhasePicker();utAgendaEditorRefresh();utRefreshIndividualOutdoorPrep()}
+function utAfterWorkModeChange(){utRefreshWorkModeDependentUI()}
 function utRemapWorkModePhases(oldOrder,newOrder){
  const item=editingItem?board()?.items?.find(x=>x.id===editingItem):null;utCaptureCurrentGroupPhase(item);
  const newIndexByOld=new Map(newOrder.map((oldIndex,newIndex)=>[oldIndex,newIndex]));
