@@ -4145,7 +4145,51 @@ body.ut-student-window #boardTagButton{display:none!important}
 <!-- v73: slideshow-timer kan justeres direkte; dagsordenstid synkroniseres ved auto-timer -->
 <!-- v74: udearbejde følger aktiv arbejdsfase; gammel enkelt-inddeling-læser fjernet -->
 <div style="display:none" id="ut-v75-note">Individuelt udearbejde initialiseres også på punkter uden makker- eller gruppeinddeling.</div>
-<div class="ut-help-note" style="display:none">I visningstilstand kan du klikke direkte på et dagsordenspunkt for at gøre det aktivt uden at markere det forrige som gennemført eller sprunget over.</div></body></html>
+<div class="ut-help-note" style="display:none">I visningstilstand kan du klikke direkte på et dagsordenspunkt for at gøre det aktivt uden at markere det forrige som gennemført eller sprunget over.</div>
+<style id="ut-v97-board-more-menu">
+/* v97: Tavleheaderen viser kun de daglige funktioner. Sjældnere værktøjer samles under Mere. */
+#boardView .ut-board-more-wrap{position:relative;display:inline-flex;flex:0 0 auto}
+#boardView .ut-board-more-menu{position:absolute;right:0;top:calc(100% + 7px);z-index:1200;display:none;min-width:230px;padding:7px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18)}
+#boardView .ut-board-more-menu.open{display:grid;gap:5px}
+#boardView .ut-board-more-menu .btn{width:100%!important;text-align:left;justify-content:flex-start!important;white-space:nowrap}
+body.viewing #boardView .ut-board-more-wrap{display:none!important}
+@media(min-width:1101px){
+  #boardView .ut-board-tools{gap:7px!important}
+  #boardView .ut-board-tools .btn{padding-inline:11px!important}
+}
+</style>
+<script id="ut-v97-board-more-menu-script">
+(function(){
+  const tools=document.querySelector('#boardView .ut-board-tools');
+  if(!tools || document.getElementById('utBoardMoreWrap')) return;
+  const wrap=document.createElement('div');
+  wrap.className='ut-board-more-wrap editonly';
+  wrap.id='utBoardMoreWrap';
+  const open=document.createElement('button');
+  open.className='btn editonly';
+  open.type='button';
+  open.id='utBoardMoreBtn';
+  open.textContent='⚙️ Mere';
+  open.setAttribute('aria-expanded','false');
+  const menu=document.createElement('div');
+  menu.className='ut-board-more-menu';
+  menu.id='utBoardMoreMenu';
+  wrap.append(open,menu);
+  const view=document.getElementById('viewBtn');
+  tools.insertBefore(wrap,view||null);
+  ['renameBoard','appearance','backupBtn','helpBtnBoard','utPresenterBtn'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b) menu.appendChild(b);
+  });
+  function close(){menu.classList.remove('open');open.setAttribute('aria-expanded','false')}
+  open.addEventListener('click',e=>{e.stopPropagation();const willOpen=!menu.classList.contains('open');close();if(willOpen){menu.classList.add('open');open.setAttribute('aria-expanded','true')}});
+  menu.addEventListener('click',e=>{if(e.target.closest('button')) close()});
+  document.addEventListener('click',e=>{if(!wrap.contains(e.target)) close()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape') close()});
+})();
+</script>
+
+</body></html>
 
 <style id="ut-v81-need-separation">
 /* v81: Gør "Du skal bruge" visuelt adskilt fra beskrivelsen på det aktive punkt. */
