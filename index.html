@@ -4203,6 +4203,91 @@ body.viewing #boardView .ut-board-more-wrap{display:none!important}
   #boardView .ut-board-tools{gap:6px!important;}
 }
 </style>
+
+<style id="ut-v99-adaptive-topic-fit">
+/* v99: Lange emner skalerer først ned, før de får lov at bruge to linjer. */
+@media(min-width:1101px){
+  #boardView .ut-board-topic-label{
+    font-size:clamp(16px,1.05vw,20px)!important;
+    flex:0 0 auto;
+  }
+  #boardView .ut-board-topic-pill{
+    max-width:none!important;
+    white-space:nowrap!important;
+    display:block!important;
+    -webkit-line-clamp:unset!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    line-height:1.08!important;
+    padding:5px 11px!important;
+  }
+  #boardView .ut-board-topic.ut-topic-wrap .ut-board-topic-pill{
+    white-space:normal!important;
+    display:-webkit-box!important;
+    -webkit-box-orient:vertical!important;
+    -webkit-line-clamp:2!important;
+    overflow:hidden!important;
+  }
+}
+</style>
+<script id="ut-v99-adaptive-topic-fit-script">
+(function(){
+  function fit(){
+    if(innerWidth<1101) return;
+    const row=document.querySelector('#boardView .ut-board-heading-row');
+    const topic=document.getElementById('boardTopic');
+    if(!row||!topic||topic.classList.contains('hidden')) return;
+    const pills=[...topic.querySelectorAll('.ut-board-topic-pill')];
+    if(!pills.length) return;
+    topic.classList.remove('ut-topic-wrap');
+    pills.forEach(p=>p.style.fontSize='22px');
+    let size=22;
+    const fits=()=>row.scrollWidth<=row.clientWidth+1;
+    while(size>15 && !fits()){
+      size-=1;
+      pills.forEach(p=>p.style.fontSize=size+'px');
+    }
+    if(!fits()) topic.classList.add('ut-topic-wrap');
+  }
+  let raf=0;
+  const schedule=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{fit();setTimeout(fit,40)})};
+  addEventListener('resize',schedule);
+  addEventListener('fullscreenchange',schedule);
+  const target=document.getElementById('boardTopicValues');
+  if(target) new MutationObserver(schedule).observe(target,{childList:true,subtree:true,characterData:true});
+  const boardView=document.getElementById('boardView');
+  if(boardView) new MutationObserver(schedule).observe(boardView,{attributes:true,attributeFilter:['class','style']});
+  setTimeout(schedule,0);
+})();
+</script>
+
+<style id="ut-v100-clock-adjacent-topic">
+/* v100: Emnet må kun bruge den plads, teksten behøver; uret skal ligge lige efter emnet. */
+@media(min-width:1101px){
+  #boardView .ut-board-topic{
+    flex:0 1 auto!important;
+    max-width:min(46vw,720px)!important;
+  }
+  #boardView .ut-board-topic-values{
+    flex:0 1 auto!important;
+    min-width:0!important;
+  }
+  #boardView .ut-board-topic-pill{
+    max-width:min(42vw,680px)!important;
+  }
+  #boardView .clock{
+    flex:0 0 auto!important;
+    margin-left:clamp(2px,.35vw,7px)!important;
+  }
+  body.viewing #boardView .ut-board-topic{
+    flex:0 1 auto!important;
+    max-width:min(50vw,760px)!important;
+  }
+  body.viewing #boardView .ut-board-topic-pill{
+    max-width:min(46vw,720px)!important;
+  }
+}
+</style>
 </body></html>
 
 <style id="ut-v81-need-separation">
