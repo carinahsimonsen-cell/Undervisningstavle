@@ -880,6 +880,63 @@ body.viewing #boardView .ut-board-topic-pill{
 }
 </style>
 
+
+<style id="ut-v96-compact-header-flow">
+/* v96: Headeren skal blive på én kompakt række på brede skærme.
+   Værktøjerne må først bryde ned, når der reelt ikke er plads. */
+@media(min-width:1101px){
+  #boardView .top{
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+  }
+  #boardView .ut-board-back{align-self:center!important}
+  #boardView .identity{
+    flex:1 1 auto!important;
+    min-width:0!important;
+  }
+  #boardView .ut-board-heading-row{
+    min-width:0!important;
+    flex-wrap:nowrap!important;
+  }
+  #boardView .ut-board-topic{
+    flex:1 1 auto!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  #boardView .ut-board-topic-values{
+    flex:1 1 auto!important;
+    min-width:0!important;
+  }
+  #boardView .ut-board-topic-pill{
+    max-width:min(34vw,620px)!important;
+  }
+  #boardView .clock{
+    flex:0 0 auto!important;
+    margin-left:0!important;
+  }
+  #boardView .ut-board-tools{
+    flex:0 1 auto!important;
+    flex-wrap:nowrap!important;
+    justify-content:flex-end!important;
+    width:auto!important;
+    min-width:0!important;
+  }
+  #boardView .ut-board-tools .btn{
+    flex:0 0 auto!important;
+    white-space:nowrap!important;
+  }
+  #boardView .ut-board-status{
+    flex:0 0 auto!important;
+    order:0!important;
+  }
+}
+@media(min-width:1101px) and (max-width:1380px){
+  #boardView .ut-board-tools{gap:6px!important}
+  #boardView .ut-board-tools .btn{padding-inline:10px!important;font-size:14px!important}
+  #boardView .ut-board-topic-pill{max-width:min(29vw,500px)!important}
+}
+</style>
+
 </head>
 <body>
 <section id="scheduleView">
@@ -1742,7 +1799,7 @@ function utOpenReuseAgenda(){
     <p class="sub">Vælg en tidligere undervisningstime og markér de punkter, du vil kopiere til denne tavle.</p>
     <div class="grid2">
       <div class="field"><label for="utReuseBoardSelect">Fra undervisningstime</label><select id="utReuseBoardSelect"></select></div>
-      <div class="field"><label for="utReuseSearch">Søg i tidligere punkter</label><input id="utReuseSearch" type="search" placeholder="Fx Britain, Hitman eller retskrivning…" autocomplete="off"></div>
+      <div class="field"><label for="utReuseSearch">Søg i alle tidligere punkter</label><input id="utReuseSearch" type="search" placeholder="Fx Britain, Hitman eller retskrivning…" autocomplete="off"><div class="sub">Når du søger, søges der på tværs af alle tidligere tavler. Uden søgning vises den valgte undervisningstime.</div></div>
     </div>
     <div id="utReuseAgendaResults" style="max-height:48vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:8px"></div>
     <div id="utReuseAgendaChosen" class="sub" style="margin-top:9px"></div>
@@ -1755,10 +1812,10 @@ function utOpenReuseAgenda(){
  const curSubject=String(curB.subject||'').trim().toLocaleLowerCase('da-DK');boards.forEach(b=>{const sameClass=!!curB.classId&&b.classId===curB.classId,sameSubject=!!curSubject&&String(b.subject||'').trim().toLocaleLowerCase('da-DK')===curSubject;select.add(new Option((sameClass&&sameSubject?'★ ':sameClass?'• ':'')+utReuseBoardLabel(b),b.id))});
  select.value=boards[0]?.id||'__all__';search.value='';
  const updateChosen=()=>{const n=selected.size;chosen.textContent=n?(n===1?'1 punkt valgt':n+' punkter valgt'):'Ingen punkter valgt endnu.';copyBtn.disabled=!n};
- const visibleBoards=()=>{const id=select.value;return id==='__all__'?boards:boards.filter(b=>b.id===id)};
+ const visibleBoards=(q='')=>{if(q)return boards;const id=select.value;return id==='__all__'?boards:boards.filter(b=>b.id===id)};
  const render=()=>{
   const q=String(search.value||'').trim().toLocaleLowerCase('da-DK');results.replaceChildren();let count=0;
-  visibleBoards().forEach(src=>{const items=(src.items||[]).filter(x=>x&&x.type!=='pause').filter(item=>{if(!q)return true;const hay=[item.title,utReusePlainText(item.desc),item.need,utWorkSequenceText(item,src),...(utItemAttachmentList(item).map(a=>utAttachmentName(a)))].join(' ').toLocaleLowerCase('da-DK');return hay.includes(q)});if(!items.length)return;
+  visibleBoards(q).forEach(src=>{const items=(src.items||[]).filter(x=>x&&x.type!=='pause').filter(item=>{if(!q)return true;const hay=[item.title,utReusePlainText(item.desc),item.need,utWorkSequenceText(item,src),...(utItemAttachmentList(item).map(a=>utAttachmentName(a)))].join(' ').toLocaleLowerCase('da-DK');return hay.includes(q)});if(!items.length)return;
    const section=document.createElement('section');section.style.cssText='padding:5px 3px 10px';const h=document.createElement('div');h.style.cssText='font-weight:750;margin:3px 4px 7px';h.textContent=utReuseBoardLabel(src);section.append(h);
    items.forEach(item=>{count++;const key=src.id+'|'+item.id;const row=document.createElement('label');row.style.cssText='display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px;margin:5px 0;border:1px solid var(--line);border-radius:10px;background:var(--paper);cursor:pointer';const cb=document.createElement('input');cb.type='checkbox';cb.style.cssText='width:auto;min-height:auto;margin-top:3px';cb.checked=selected.has(key);cb.onchange=()=>{if(cb.checked)selected.set(key,{sourceBoard:src,item});else selected.delete(key);updateChosen()};const body=document.createElement('div');const t=document.createElement('div');t.style.fontWeight='700';t.textContent=item.title||'Uden titel';body.append(t);const desc=utReusePlainText(item.desc||'');if(desc){const d=document.createElement('div');d.className='sub';d.textContent=desc.length>180?desc.slice(0,177)+'…':desc;body.append(d)}const meta=document.createElement('div');meta.className='sub';meta.style.marginTop='4px';const bits=[];if(item.mode)bits.push(utWorkSequenceText(item,src));const mats=utItemAttachmentList(item);if(mats.length)bits.push(mats.length+' materiale'+(mats.length===1?'':'r'));if(item.teacherNote)bits.push('📝 lærernote');meta.textContent=bits.join(' · ');if(bits.length)body.append(meta);row.append(cb,body);section.append(row)});results.append(section)
   });
