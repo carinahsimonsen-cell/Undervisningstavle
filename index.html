@@ -4177,7 +4177,7 @@ body.viewing #boardView .ut-board-more-wrap{display:none!important}
   wrap.append(open,menu);
   const view=document.getElementById('viewBtn');
   tools.insertBefore(wrap,view||null);
-  ['renameBoard','appearance','backupBtn','helpBtnBoard','utPresenterBtn'].forEach(id=>{
+  ['addWidget','renameBoard','appearance','backupBtn','helpBtnBoard','utPresenterBtn'].forEach(id=>{
     const b=document.getElementById(id);
     if(b) menu.appendChild(b);
   });
@@ -4189,6 +4189,20 @@ body.viewing #boardView .ut-board-more-wrap{display:none!important}
 })();
 </script>
 
+
+<style id="ut-v98-header-cleanup">
+/* v98: færre synlige knapper og ingen ordbrud midt i emnenavnet. */
+#boardView .ut-board-topic-pill{
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  hyphens:none!important;
+}
+@media(min-width:1101px){
+  #boardView .ut-board-topic{min-width:0!important;flex:1 1 auto!important;}
+  #boardView .ut-board-topic-pill{max-width:min(40vw,680px)!important;}
+  #boardView .ut-board-tools{gap:6px!important;}
+}
+</style>
 </body></html>
 
 <style id="ut-v81-need-separation">
