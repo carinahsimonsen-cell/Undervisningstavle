@@ -169,30 +169,49 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 .yearFilters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.yearContent{max-height:52vh;overflow:auto;display:grid;gap:12px}.yearMonth{font-weight:800;font-size:18px;margin:14px 0 3px}.yearRow{border:1px solid var(--line);border-radius:11px;background:#f9faf8;padding:11px}.yearRow button{border:0;background:transparent;text-align:left;cursor:pointer;color:var(--ink);font-weight:700;text-decoration:underline;padding:3px 0}.yearStats{display:flex;flex-wrap:wrap;gap:8px;margin:9px 0}.yearStats span{border-radius:8px;background:#edf3ed;padding:8px 11px}.yearTopicHead{display:flex;justify-content:space-between;gap:10px;align-items:center}.yearTopicHead strong{font-size:17px}.yearDates{font-size:13px;color:var(--muted)}.yearTopicDetail{margin-top:10px;display:grid;gap:7px}.yearTopicDetail .yearRow{background:white}.yearTopicDetails{margin-top:8px}.yearEmpty{padding:15px;border:1px dashed var(--line);border-radius:10px;color:var(--muted)}@media(max-width:600px){.yearFilters{grid-template-columns:1fr}.apphead{flex-wrap:wrap}.weeknav{flex-wrap:wrap}}
 
 
-/* Årsoversigtens halvårskalender (alternativ visning, ingen ekstra dataregistrering). */
+/* Årsoversigt: kompakt halvårskalender med måneder som kolonner og forløb ned over datoerne. */
 .ut-year-modal{width:min(1050px,100%);max-width:none;transition:width .15s ease}
-.ut-year-modal.ut-year-calendar-active{width:min(1460px,calc(100vw - 28px));max-height:96dvh}
-.ut-year-half-picker{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 11px}
-.ut-year-half-picker .btn{min-height:36px;font-size:13px}
-.ut-year-calendar-content{max-height:65dvh!important;display:block!important;overflow:auto}
-.ut-year-calendar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:3px 2px 10px}
-.ut-year-month{min-width:0;background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}
-.ut-year-month-name{font-size:16px;font-weight:800;margin:0;padding:11px 11px 8px;text-transform:capitalize}
-.ut-year-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;padding:0 5px 6px}
-.ut-year-weekdays span{font-size:10px;color:var(--muted);text-align:center;font-weight:700}
-.ut-year-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:relative;border-top:1px solid var(--line);margin:0 5px;min-height:52px}
-.ut-year-day{min-width:0;font-size:11px;display:block;padding:4px 0 0 4px;border-right:1px solid #edf0ed;color:#344038}
-.ut-year-day:nth-child(7){border-right:0}
-.ut-year-day.ut-weekend{background:#f6f7f5}
-.ut-year-day.ut-outside{color:#a8afa9;background:#f8f9f8}
-.ut-year-course-bar{position:absolute;z-index:2;display:block;box-sizing:border-box;height:19px;padding:2px 4px;border:1px solid;border-radius:2px;font-size:10px;line-height:13px;font-weight:800;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;box-shadow:0 1px 2px #0001}
-.ut-year-course-bar.ut-year-begin{border-left-width:3px;border-top-left-radius:8px;border-bottom-left-radius:8px}
-.ut-year-course-bar.ut-year-finish{border-right-width:3px;border-top-right-radius:8px;border-bottom-right-radius:8px}
+#yearOverviewBack.ut-year-calendar-overlay{padding:7px}
+.ut-year-modal.ut-year-calendar-active{width:100%;height:100%;max-height:none;display:flex;flex-direction:column;overflow:hidden;padding:11px 14px 9px;border-radius:12px}
+.ut-year-modal.ut-year-calendar-active>h2{font-size:20px;margin:0 0 3px;flex:none}
+.ut-year-modal.ut-year-calendar-active>p.sub:first-of-type{display:none}
+.ut-year-modal.ut-year-calendar-active .yearFilters{gap:9px;flex:none}
+.ut-year-modal.ut-year-calendar-active .yearFilters .field{margin:3px 0}
+.ut-year-modal.ut-year-calendar-active .yearFilters .field label{margin:0 0 2px;font-size:12px}
+.ut-year-modal.ut-year-calendar-active .yearFilters select{min-height:34px;padding:5px 9px;font-size:13px}
+.ut-year-modal.ut-year-calendar-active>.toolrow{margin-top:6px;flex:none}
+.ut-year-modal.ut-year-calendar-active>.toolrow .btn{min-height:31px;padding:3px 11px;font-size:13px}
+.ut-year-half-picker{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 5px;flex:none}
+.ut-year-half-picker .btn{min-height:31px;padding:3px 11px;font-size:13px}
+.ut-year-modal.ut-year-calendar-active #yearSummary{font-size:12px;margin:2px 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.ut-year-modal.ut-year-calendar-active>.mactions{flex:none;margin-top:7px}
+.ut-year-modal.ut-year-calendar-active>.mactions .btn{min-height:30px;font-size:13px}
+.ut-year-calendar-content{flex:1 1 auto;max-height:none!important;min-height:0;display:block!important;overflow-x:auto!important;overflow-y:hidden!important}
+.ut-year-calendar-grid{display:grid;grid-template-columns:repeat(var(--ut-year-month-count,6),minmax(0,1fr));gap:5px;padding:0;height:100%;min-height:0;min-width:850px}
+.ut-year-month{min-width:0;height:100%;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.ut-year-month-name{font-size:15px;line-height:1.1;font-weight:800;margin:0;padding:7px 5px;text-align:center;text-transform:capitalize;background:#f1f5f1;border-bottom:1px solid var(--line);flex:none}
+.ut-year-month-days{position:relative;display:grid;grid-template-rows:repeat(31,minmax(0,1fr));flex:1 1 auto;min-height:0;--ut-year-day-label-width:50px}
+.ut-year-day-row{position:relative;min-height:0;border-bottom:1px solid #e2e8e2;padding:0 2px;display:flex;align-items:center;background:#fff}
+.ut-year-day-row.ut-weekend{background:#f3f5f4}
+.ut-year-day-row.ut-week-start{border-top:1px solid #becfc2}
+.ut-year-day-row.ut-outside{background:#f7f8f8}
+.ut-year-day-row .ut-year-date-label{flex:0 0 var(--ut-year-day-label-width);font-size:clamp(9px,.76vw,11px);color:#425047;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.02;padding-left:3px}
+.ut-year-day-row.ut-weekend .ut-year-date-label{color:#82918a}
+.ut-year-day-row.ut-outside .ut-year-date-label{color:transparent}
+.ut-year-day-row .ut-year-week-number{position:absolute;right:4px;top:0;font-size:9px;color:#bac4be}
+.ut-year-course-bar{position:absolute;z-index:2;display:flex;align-items:flex-start;box-sizing:border-box;min-width:0;padding:3px 3px;border:1px solid;border-radius:3px;font-size:clamp(9px,.75vw,12px);line-height:1.12;font-weight:800;text-align:left;white-space:normal;overflow:hidden;overflow-wrap:anywhere;cursor:pointer;box-shadow:0 1px 2px #0001}
+.ut-year-course-bar.ut-year-begin{border-top-width:3px;border-top-left-radius:7px;border-top-right-radius:7px}
+.ut-year-course-bar.ut-year-finish{border-bottom-width:3px;border-bottom-left-radius:7px;border-bottom-right-radius:7px}
+.ut-year-course-bar.ut-year-single-date{border-radius:4px;white-space:nowrap;text-overflow:ellipsis;display:block;padding:1px 3px;line-height:1;box-shadow:0 1px 2px #0002}
+.ut-year-calendar-setting{display:grid;gap:6px;margin:12px 0 18px;padding:12px 13px;background:#f4f7f4;border:1px solid var(--line);border-radius:10px}
+.ut-year-calendar-setting label{display:grid;gap:7px;font-size:13px;font-weight:750}
+.ut-year-calendar-setting select{width:100%;max-width:460px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:9px 11px;font:inherit;font-size:13px;font-weight:400}
+.ut-year-calendar-setting .yearTopicNote{margin:0}
 .ut-year-course-bar:hover{filter:brightness(.96);box-shadow:0 0 0 2px #324b4340;z-index:4}
 .ut-year-course-bar:focus-visible{outline:3px solid #154d6b;outline-offset:1px;z-index:5}
 .ut-year-topic-from-calendar{outline:3px solid #729989;outline-offset:2px}
-@media(max-width:1080px){.ut-year-calendar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){.ut-year-calendar-grid{grid-template-columns:1fr;gap:9px}.ut-year-modal.ut-year-calendar-active{width:calc(100vw - 20px);padding:12px}.ut-year-month-name{font-size:14px}.ut-year-week{min-height:52px}.ut-year-course-bar{font-size:10px}}
+@media(max-width:1080px){.ut-year-calendar-grid{min-width:980px}}
+@media(max-width:640px){#yearOverviewBack.ut-year-calendar-overlay{padding:4px}.ut-year-modal.ut-year-calendar-active{padding:7px}.ut-year-month-name{font-size:13px}.ut-year-course-bar{font-size:10px}.ut-year-modal.ut-year-calendar-active .yearFilters{gap:4px}.ut-year-modal.ut-year-calendar-active #yearSummary{font-size:11px}}
 
 /* Kopiér tavle: udnyt skærmen, så hele arbejdsugen normalt er synlig. */
 .modal.copyModal{width:min(1400px,calc(100vw - 36px));max-width:none;max-height:calc(100dvh - 36px);display:flex;flex-direction:column;overflow:hidden}
@@ -2730,6 +2749,22 @@ function yearTopicSummary(group){
  explanation+=' Lektioner og planlagt tid er opgjort ud fra de tilknyttede tavler. Har en tavle flere emner, kan systemet ikke fordele lektionerne eller tiden præcist mellem dem.';
  if(counts.knownMinutesBoards<bs.length)explanation+=' *Den planlagte tid er ufuldstændig, fordi der mangler ringetider på nogle tavler.';
  body.append(yearEl('p','yearTopicNote',explanation));
+ const calendarSetting=yearEl('div','ut-year-calendar-setting');
+ const label=yearEl('label','','🗓️ Visning i undervisningskalenderen');
+ const select=document.createElement('select');
+ const suggested=yearCalendarAutoMode(group);
+ for(const [value,text] of [
+  ['auto','Automatisk ('+(suggested==='dates'?'enkelte datoer':'sammenhængende forløb')+')'],
+  ['span','Sammenhængende forløb – fra start til slut'],
+  ['dates','Kun registrerede undervisningsdatoer'],
+  ['hide','Vis ikke i kalenderen']
+ ])select.add(new Option(text,value));
+ select.value=yearCalendarReadPref(group.key);
+ select.setAttribute('aria-label','Kalendervisning for '+group.name);
+ select.onchange=()=>{if(!yearCalendarSavePref(group.key,select.value))select.value=yearCalendarReadPref(group.key)};
+ label.append(select);calendarSetting.append(label);
+ calendarSetting.append(yearEl('div','yearTopicNote','Indstillingen påvirker kun kalenderen, ikke tavlerne eller undervisningsstatistikken.'));
+ body.append(calendarSetting);
  const noteDetails=yearNoteDetails(bs,group.name);if(noteDetails)body.append(noteDetails);
  body.append(yearEl('div','yearLessonTitle','Tavler i forløbet'));
  const lessons=yearEl('div','yearTopicLessonList');for(const b of bs)lessons.append(yearBoardRow(b));
@@ -2745,6 +2780,40 @@ function yearTopicGroups(bs){
  }
  return [...map.values()].sort((a,b)=>a.boards[0].date.localeCompare(b.boards[0].date)||a.name.localeCompare(b.name,'da'));
 }
+// Kalenderen skelner mellem sammenhængende forløb og lejlighedsvise emner.
+// Indstillingen gælder kun kalenderens visning; hverken tavler, emneord eller årsstatistik ændres.
+const yearCalendarDisplayKey='undervisningstavle.calendarDisplay.v1';
+function yearCalendarPrefId(key){return [yearSchool.value,yearClass.value,yearSubject.value,key].join('|')}
+function yearCalendarReadPref(key){
+ try{const data=JSON.parse(localStorage.getItem(yearCalendarDisplayKey)||'{}');const value=data?.[yearCalendarPrefId(key)];return ['span','dates','hide'].includes(value)?value:'auto'}catch(e){return 'auto'}
+}
+function yearCalendarSavePref(key,value){
+ try{
+  const data=JSON.parse(localStorage.getItem(yearCalendarDisplayKey)||'{}');
+  const next=data&&typeof data==='object'&&!Array.isArray(data)?data:{};
+  if(value==='auto')delete next[yearCalendarPrefId(key)];else next[yearCalendarPrefId(key)]=value;
+  localStorage.setItem(yearCalendarDisplayKey,JSON.stringify(next));
+  return true;
+ }catch(e){alert('Kalendervisningen kunne ikke gemmes i denne browser.');return false}
+}
+function yearCalendarDays(group){return [...new Set(group.boards.map(b=>b.date).filter(Boolean))].sort()}
+function yearCalendarAutoMode(group){
+ const dates=yearCalendarDays(group);
+ // Et emne, der aktivt er koblet til Mine forløb på en tavles programpunkter,
+ // er som udgangspunkt et sammenhængende forløb - også ved få registreringer.
+ const courseKey=String(group.key||'').toLocaleLowerCase('da-DK');
+ const linkedCourse=group.boards.some(b=>(b.items||[]).some(item=>item&&item.type!=='pause'&&(
+  utTagNorm(item.utCourse)===courseKey||(item.utCourseId&&utTagNorm(utCourseNameById(item.utCourseId))===courseKey)
+ )));
+ if(linkedCourse)return 'span';
+ if(dates.length<=1)return 'dates';
+ const gaps=dates.slice(1).map((d,i)=>(Date.parse(d+'T12:00:00Z')-Date.parse(dates[i]+'T12:00:00Z'))/86400000);
+ // Når alle registreringer ligger flere uger fra hinanden, er det sandsynligvis
+ // tilbagevendende enkelthændelser (fx prøver), ikke et ubrudt forløb.
+ // Ved tvivl kan læreren vælge visningen eksplicit under "Efter emne".
+ return gaps.every(n=>n>=18)?'dates':'span';
+}
+function yearCalendarModeFor(group){const saved=yearCalendarReadPref(group.key);return saved==='auto'?yearCalendarAutoMode(group):saved}
 const yearCalendarPalette=[
  ['#d9eae1','#28654e'],['#f9e2b8','#895613'],['#e5def6','#63478b'],
  ['#d9e8fb','#335d94'],['#f4dce5','#8c3e62'],['#e0ebcc','#577234'],
@@ -2772,45 +2841,44 @@ function yearCalendarOpenTopic(key){
 function yearCalendarMonth(y,m,events){
  const card=yearEl('section','ut-year-month');
  card.append(yearEl('h3','ut-year-month-name',new Date(Date.UTC(y,m,1)).toLocaleDateString('da-DK',{month:'long',year:'numeric'})));
- const days=yearEl('div','ut-year-weekdays');
- for(const d of ['Man','Tir','Ons','Tor','Fre','Lør','Søn'])days.append(yearEl('span','',d));
- card.append(days);
- const first=Date.UTC(y,m,1),last=Date.UTC(y,m+1,0);
+ const first=Date.UTC(y,m,1),last=Date.UTC(y,m+1,0),daysInMonth=new Date(last).getUTCDate();
  const monthEvents=events.filter(e=>e.end>=first&&e.start<=last).sort((a,b)=>a.start-b.start||a.end-b.end||a.name.localeCompare(b.name,'da'));
- // Faste spor i den enkelte måned gør samtidige forløb lette at adskille.
+ // Flere samtidige emner får hver deres lodrette spor i den samme måned.
  const usedUntil=[];
- for(const e of monthEvents){let lane=usedUntil.findIndex(end=>end<e.start);if(lane<0)lane=usedUntil.length;usedUntil[lane]=e.end;e.lanesByMonth.set(y+'-'+m,lane)}
- const mondayOffset=(new Date(first).getUTCDay()+6)%7,start=first-mondayOffset*yearCalendarDay;
- const weeks=Math.ceil((mondayOffset+new Date(last).getUTCDate())/7);
- for(let w=0;w<weeks;w++){
-  const weekStart=start+w*7*yearCalendarDay,weekEnd=weekStart+6*yearCalendarDay;
-  const active=monthEvents.filter(e=>e.start<=weekEnd&&e.end>=weekStart&&e.start<=last&&e.end>=first);
-  const lanes=active.length?Math.max(...active.map(e=>e.lanesByMonth.get(y+'-'+m)))+1:0;
-  const week=yearEl('div','ut-year-week');week.style.height=Math.max(52,28+lanes*22)+'px';
-  for(let i=0;i<7;i++){
-   const date=weekStart+i*yearCalendarDay,dt=new Date(date),isOutside=dt.getUTCMonth()!==m;
-   const day=yearEl('span','ut-year-day'+(isOutside?' ut-outside':'')+(i>=5?' ut-weekend':''),String(dt.getUTCDate()));
-   day.title=yearCalendarDateLabel(yearCalendarDate(date));week.append(day);
-  }
-  for(const e of active){
-   const from=Math.max(weekStart,first,e.start),to=Math.min(weekEnd,last,e.end);
-   const d0=Math.round((from-weekStart)/yearCalendarDay),count=Math.round((to-from)/yearCalendarDay)+1;
-   if(count<1)continue;
-   const bar=yearEl('button','ut-year-course-bar');bar.type='button';
-   if(from===e.start)bar.classList.add('ut-year-begin');
-   if(to===e.end)bar.classList.add('ut-year-finish');
-   const lane=e.lanesByMonth.get(y+'-'+m),palette=yearCalendarPalette[e.colorIndex%yearCalendarPalette.length];
-   bar.style.left='calc('+(d0/7*100)+'% + 1px)';bar.style.width='calc('+(count/7*100)+'% - 2px)';bar.style.top=(25+lane*22)+'px';
-   bar.style.backgroundColor=palette[0];bar.style.color=palette[1];bar.style.borderColor=palette[1];
-   // Gentag navnet ved ny uge/måned, så lange forløb kan følges uden farveforklaring.
-   if(from===e.start||d0===0||from===first)bar.textContent=e.name;
-   bar.title=e.name+' · Kalenderperiode: '+yearCalendarDateLabel(e.first)+' – '+yearCalendarDateLabel(e.last)+' · '+e.counts.occasions+' undervisningsgange på '+e.counts.activeWeeks+' uger · Klik for at åbne forløbet';
-   bar.setAttribute('aria-label','Åbn '+e.name+' i årsoversigten, '+yearCalendarDateLabel(e.first)+' til '+yearCalendarDateLabel(e.last));
-   bar.onclick=()=>yearCalendarOpenTopic(e.key);
-   week.append(bar);
-  }
-  card.append(week);
+ for(const e of monthEvents){const starts=Math.max(first,e.start);let lane=usedUntil.findIndex(end=>end<starts);if(lane<0)lane=usedUntil.length;usedUntil[lane]=Math.min(last,e.end);e.lanesByMonth.set(y+'-'+m,lane)}
+ const totalLanes=Math.max(1,usedUntil.length);
+ const days=yearEl('div','ut-year-month-days');
+ for(let d=1;d<=31;d++){
+  const exists=d<=daysInMonth,stamp=Date.UTC(y,m,d),dt=new Date(stamp),dow=dt.getUTCDay();
+  const weekday=['Sø','Ma','Ti','On','To','Fr','Lø'][dow];
+  const row=yearEl('div','ut-year-day-row'+(!exists?' ut-outside':'')+(exists&&(dow===0||dow===6)?' ut-weekend':'')+(exists&&dow===1?' ut-week-start':''));
+  if(exists){row.title=yearCalendarDateLabel(yearCalendarDate(stamp));row.append(yearEl('span','ut-year-date-label',weekday+' '+d))}
+  else row.append(yearEl('span','ut-year-date-label',''));
+  days.append(row);
  }
+ for(const e of monthEvents){
+  const from=Math.max(first,e.start),to=Math.min(last,e.end);
+  const startDay=new Date(from).getUTCDate(),endDay=new Date(to).getUTCDate();
+  const count=endDay-startDay+1;if(count<1)continue;
+  const bar=yearEl('button','ut-year-course-bar',e.name);bar.type='button';
+  if(e.displayMode==='dates')bar.classList.add('ut-year-single-date');
+  if(from===e.start)bar.classList.add('ut-year-begin');
+  if(to===e.end)bar.classList.add('ut-year-finish');
+  const lane=e.lanesByMonth.get(y+'-'+m),palette=yearCalendarPalette[e.colorIndex%yearCalendarPalette.length];
+  // CSS calc() med kun procent, plus og minus fungerer også i ældre browsere.
+  const labelWidth=50,segment=lane/totalLanes;
+  bar.style.left='calc('+(segment*100)+'% + '+(labelWidth*(1-segment)+1)+'px)';
+  bar.style.width='calc('+(100/totalLanes)+'% - '+(labelWidth/totalLanes+3)+'px)';
+  bar.style.top='calc('+((startDay-1)/31*100)+'% + 1px)';
+  bar.style.height='calc('+(count/31*100)+'% - 2px)';
+  bar.style.backgroundColor=palette[0];bar.style.color=palette[1];bar.style.borderColor=palette[1];
+  const when=e.displayMode==='dates'?'Registreret undervisning: '+yearCalendarDateLabel(e.segmentDate):'Forløbsperiode: '+yearCalendarDateLabel(e.first)+' – '+yearCalendarDateLabel(e.last);
+  bar.title=e.name+' · '+when+' · '+e.counts.occasions+' undervisningsgange på '+e.counts.activeWeeks+' uger · Klik for at åbne emnet';
+  bar.setAttribute('aria-label','Åbn '+e.name+' i årsoversigten, '+yearCalendarDateLabel(e.displayMode==='dates'?e.segmentDate:e.first)+(e.displayMode==='dates'?'':' til '+yearCalendarDateLabel(e.last)));
+  bar.onclick=()=>yearCalendarOpenTopic(e.key);
+  days.append(bar);
+ }
+ card.append(days);
  return card;
 }
 function yearRenderCalendar(bs){
@@ -2820,14 +2888,28 @@ function yearRenderCalendar(bs){
   return;
  }
  const groups=yearTopicGroups(bs),startYear=Number(yearSchool.value),isAutumn=yearCalendarHalf==='autumn';
- yearSummary.textContent=groups.length+' emner · '+yearClass.value+' · '+yearSubject.value+' · '+yearName(startYear)+'. Bjælkerne viser kalenderperioden mellem første og sidste tavle, ikke antallet af undervisningsuger. Klik på et emne for at se undervisningsgangene under ”Efter emne”.';
- const events=groups.map((g,i)=>({key:g.key,name:g.name,first:g.boards[0].date,last:g.boards[g.boards.length-1].date,start:yearCalendarTimestamp(g.boards[0].date),end:yearCalendarTimestamp(g.boards[g.boards.length-1].date),counts:yearTopicCounts(g.boards),colorIndex:i,lanesByMonth:new Map()}));
+ const events=[];let displayed=0;
+ groups.forEach((g,i)=>{
+  const displayMode=yearCalendarModeFor(g);
+  if(displayMode==='hide')return;
+  displayed++;
+  const first=g.boards[0].date,last=g.boards[g.boards.length-1].date;
+  const dates=displayMode==='dates'?yearCalendarDays(g):[first];
+  for(const date of dates){
+   const segmentEnd=displayMode==='dates'?date:last;
+   events.push({key:g.key,name:g.name,first,last,segmentDate:date,displayMode,
+    start:yearCalendarTimestamp(date),end:yearCalendarTimestamp(segmentEnd),
+    counts:yearTopicCounts(g.boards),colorIndex:i,lanesByMonth:new Map()});
+  }
+ });
+ yearSummary.textContent=displayed+' emner · '+yearClass.value+' · '+yearSubject.value+' · '+yearName(startYear)+'. Sammenhængende forløb vises fra første til sidste tavle; spredte aktiviteter vises på de registrerede datoer. Du kan ændre visningen for hvert emne under ”Efter emne”. Klik på en bjælke for at åbne emnet.';
  const grid=yearEl('div','ut-year-calendar-grid');
+ grid.style.setProperty('--ut-year-month-count',isAutumn?'5':'6');
  for(const month of (isAutumn?[7,8,9,10,11]:[0,1,2,3,4,5]))grid.append(yearCalendarMonth(startYear+(isAutumn?0:1),month,events));
  yearContent.append(grid);
  if(!groups.length)yearContent.append(yearEl('p','yearEmpty','Der er endnu ingen forløb med emneord for denne årgang og dette fag. Tilknyt dine tavler til forløb eller giv dem emneord for at få vist perioderne.'));
 }
-function renderYear(){let bs=yearBoards();const cal=yearMode==='calendar';yearChrono.classList.toggle('primary',yearMode==='chrono');yearTopics.classList.toggle('primary',yearMode==='topics');yearCalendarBtn.classList.toggle('primary',cal);yearCalendarHalfRow.classList.toggle('hidden',!cal);yearHalfAutumn.classList.toggle('primary',yearCalendarHalf==='autumn');yearHalfSpring.classList.toggle('primary',yearCalendarHalf==='spring');yearBackCalendar.classList.toggle('hidden',!yearCalendarReturn||cal);yearOverviewBack.querySelector('.ut-year-modal').classList.toggle('ut-year-calendar-active',cal);yearContent.classList.toggle('ut-year-calendar-content',cal);yearSummary.textContent=bs.length+' tavler i det valgte skoleår, årgang og fag. Tidsangivelser er planlagte lektionstider – ikke registreret fremmøde eller faktisk undervisning.';yearContent.replaceChildren();if(cal){yearRenderCalendar(bs);return}if(!bs.length){yearContent.append(yearEl("p","yearEmpty","Ingen tavler passer til filtrene. Du kan tilføje klasse, fag og tags til gamle tavler via ✎ Tavle."));return}if(yearMode==="chrono"){yearContent.append(yearStats(bs));let last="";for(let b of bs){let month=b.date.slice(0,7);if(month!==last){last=month;yearContent.append(yearEl("div","yearMonth",new Date(b.date+"T12:00").toLocaleDateString("da-DK",{month:"long",year:"numeric"})))}yearContent.append(yearBoardRow(b))}return}const groups=yearTopicGroups(bs);if(!groups.length){yearContent.append(yearEl('p','yearEmpty','Ingen tavler har tags endnu. Tilføj dem via 🏷️ ved tavlens overskrift – også på tidligere tavler.'));return}for(const group of groups){let d=yearEl('details','yearTopicCard'),summary=yearEl('summary','');d.dataset.yearTopicKey=group.key;summary.tabIndex=0;summary.append(yearEl('strong','',group.name));d.append(summary,yearTopicSummary(group));yearContent.append(d)}}
+function renderYear(){let bs=yearBoards();const cal=yearMode==='calendar';yearChrono.classList.toggle('primary',yearMode==='chrono');yearTopics.classList.toggle('primary',yearMode==='topics');yearCalendarBtn.classList.toggle('primary',cal);yearCalendarHalfRow.classList.toggle('hidden',!cal);yearHalfAutumn.classList.toggle('primary',yearCalendarHalf==='autumn');yearHalfSpring.classList.toggle('primary',yearCalendarHalf==='spring');yearBackCalendar.classList.toggle('hidden',!yearCalendarReturn||cal);yearOverviewBack.querySelector('.ut-year-modal').classList.toggle('ut-year-calendar-active',cal);yearOverviewBack.classList.toggle('ut-year-calendar-overlay',cal);yearContent.classList.toggle('ut-year-calendar-content',cal);yearSummary.textContent=bs.length+' tavler i det valgte skoleår, årgang og fag. Tidsangivelser er planlagte lektionstider – ikke registreret fremmøde eller faktisk undervisning.';yearContent.replaceChildren();if(cal){yearRenderCalendar(bs);return}if(!bs.length){yearContent.append(yearEl("p","yearEmpty","Ingen tavler passer til filtrene. Du kan tilføje klasse, fag og tags til gamle tavler via ✎ Tavle."));return}if(yearMode==="chrono"){yearContent.append(yearStats(bs));let last="";for(let b of bs){let month=b.date.slice(0,7);if(month!==last){last=month;yearContent.append(yearEl("div","yearMonth",new Date(b.date+"T12:00").toLocaleDateString("da-DK",{month:"long",year:"numeric"})))}yearContent.append(yearBoardRow(b))}return}const groups=yearTopicGroups(bs);if(!groups.length){yearContent.append(yearEl('p','yearEmpty','Ingen tavler har tags endnu. Tilføj dem via 🏷️ ved tavlens overskrift – også på tidligere tavler.'));return}for(const group of groups){let d=yearEl('details','yearTopicCard'),summary=yearEl('summary','');d.dataset.yearTopicKey=group.key;summary.tabIndex=0;summary.append(yearEl('strong','',group.name));d.append(summary,yearTopicSummary(group));yearContent.append(d)}}
 yearOverviewBtn.onclick=()=>{yearMode='chrono';yearCalendarReturn=false;yearCalendarHalf=new Date().getMonth()<=6?'spring':'autumn';yearFiltersFill();renderYear();show(yearOverviewBack)};
 yearSchool.onchange=()=>{yearCalendarReturn=false;yearFilterOptions();if(yearMode==='calendar')yearCalendarNarrowFilters();renderYear()};
 yearClass.onchange=()=>{yearCalendarReturn=false;yearFilterOptions();if(yearMode==='calendar')yearCalendarNarrowFilters();renderYear()};
@@ -4149,7 +4231,7 @@ utSyncAllBoardCourseTags();
       <p>Tidligere tavler findes via <strong>📅 Årsoversigt</strong>, mens konkrete aktiviteter kan hentes igen med <strong>♻️ Genbrug punkt</strong>.</p>
 
       <h4>Årsoversigt</h4>
-      <p>Klik på <strong>📅 Årsoversigt</strong> og filtrér efter skoleår, årgang og fag. Du kan vælge <strong>Kronologisk</strong>, <strong>Efter emne</strong> eller <strong>🗓️ Kalender</strong>. Kalenderen viser ét fag og én årgang ad gangen, med farvede forløb direkte over datoerne. Skift mellem august–december og januar–juni. Klik på en farvet forløbsbjælke for at åbne forløbet under <strong>Efter emne</strong>; brug <strong>Tilbage til kalenderen</strong> for at komme tilbage. Bjælken viser perioden fra første til sidste tavle med emnet, inklusive dagene imellem. Under <strong>Efter emne</strong> vises i stedet antal undervisningsgange, lektioner på tilknyttede tavler og uger med registreret undervisning (mellemliggende uger tæller ikke med).</p>
+      <p>Klik på <strong>📅 Årsoversigt</strong> og filtrér efter skoleår, årgang og fag. Du kan vælge <strong>Kronologisk</strong>, <strong>Efter emne</strong> eller <strong>🗓️ Kalender</strong>. Kalenderen viser ét fag og én årgang ad gangen, med måneder som kolonner og farvede forløb, der går lodret fra startdato til slutdato. Skift mellem august–december og januar–juni. Klik på en farvet forløbsbjælke for at åbne forløbet under <strong>Efter emne</strong>; brug <strong>Tilbage til kalenderen</strong> for at komme tilbage. Bjælken viser perioden fra første til sidste tavle med emnet, inklusive dagene imellem. Under <strong>Efter emne</strong> vises i stedet antal undervisningsgange, lektioner på tilknyttede tavler og uger med registreret undervisning (mellemliggende uger tæller ikke med).</p>
       <p>Efter emne samler tavler med samme tag og viser bl.a. periode, antal tavler/lektioner, planlagt tid og ugefordeling. Forløbets lærer-noter kan foldes ud i en særskilt <strong>📝 Noter</strong>-sektion.</p>
       <p class="ut-help-important"><strong>Vigtigt:</strong> Årsoversigtens tidsberegninger er planlægningsoverslag baseret på tavlernes valgte skemalektioner og ringetider – ikke en registrering af faktisk undervisningstid.</p>
     `],
