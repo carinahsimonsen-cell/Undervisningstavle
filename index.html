@@ -27,6 +27,36 @@ body.viewing .item.current .ut-item-thumb img{max-width:156px;max-height:118px}
 body.viewing #boardView.ut-agenda-dense .ut-item-thumb{max-width:92px}
 body.viewing #boardView.ut-agenda-dense .ut-item-thumb img{max-width:82px;max-height:62px}
 @media(max-width:760px){.ut-item-thumb{max-width:90px}.ut-item-thumb img{max-width:80px;max-height:60px}body.viewing .item.current .ut-item-thumb{max-width:112px}body.viewing .item.current .ut-item-thumb img{max-width:100px;max-height:78px}}
+/* v94: aktiv miniature har en fast, tydelig billedramme; kortet vokser efter billedet */
+body.viewing #boardView .agenda .item.current .ut-item-thumb{
+  align-self:flex-start;
+  width:clamp(300px,30vw,440px);
+  height:clamp(230px,31vh,300px);
+  max-width:38%;
+  flex:0 0 auto;
+  padding:7px;
+  border-radius:15px;
+}
+body.viewing #boardView .agenda .item.current .ut-item-thumb img{
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:contain;
+}
+body.viewing #boardView.ut-agenda-dense .agenda .item.current .ut-item-thumb{
+  width:clamp(260px,27vw,390px);
+  height:clamp(210px,28vh,270px);
+  max-width:35%;
+}
+@media(max-width:760px){
+  body.viewing #boardView .agenda .item.current .ut-item-thumb{
+    width:clamp(150px,38vw,230px);
+    height:clamp(125px,24vh,180px);
+    max-width:40%;
+  }
+}
+
 body.viewing .item.current{padding:22px 20px;border-width:3px;box-shadow:0 7px 22px #26302924;background:#f1f8f3}
 body.viewing .item.current .title{font-size:clamp(28px,3vw,38px);line-height:1.15}
 body.viewing .item.current .desc{font-size:clamp(19px,2vw,25px);line-height:1.42;margin-top:10px}
@@ -3613,7 +3643,7 @@ const tagInput=document.getElementById('tagPickerInput');if(tagInput){const labe
     `],
 
     ['Tilføj og omdøb materialer på et punkt', `
-      <p>Et programpunkt kan have flere materialer, fx links og filer.</p><p><strong>Miniaturebillede:</strong> I punkteditoren kan du også tilføje et lille billede, som vises direkte ved punktet. Du kan uploade et billede, indsætte et direkte billedlink eller genbruge et billedmateriale fra punktet. Klik på miniaturen i elevvisning for at åbne billedet stort.</p>
+      <p>Et programpunkt kan have flere materialer, fx links og filer.</p><p><strong>Miniaturebillede:</strong> I punkteditoren kan du også tilføje et lille billede, som vises direkte ved punktet. Du kan uploade et billede, indsætte et direkte billedlink eller genbruge et billedmateriale fra punktet. Klik på miniaturen i elevvisning for at åbne billedet stort. På det aktive punkt vises miniaturen i en fast, større ramme uden at forvrænge billedets proportioner.</p>
 
       <h4>Tilføj et link</h4>
       <ol>
