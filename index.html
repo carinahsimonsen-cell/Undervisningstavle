@@ -982,6 +982,62 @@ body.viewing #boardView .ut-board-topic-pill{
 }
 </style>
 
+
+<style id="ut-v-theme-packs">
+/* Udseendet er stadig et tilvalg. Kun de nye 8 stemningstemaer får denne overfladestil. */
+#boardView.ut-designed-theme .boardname,#boardView.ut-designed-theme #boardWhen,#boardView.ut-designed-theme .clock{color:var(--ut-theme-title)!important;text-shadow:0 1px 2px rgba(0,0,0,.12)}
+#boardView.ut-designed-theme #saveIndicator{color:var(--ut-theme-title)!important;opacity:.9}
+#boardView.ut-designed-theme .boardname{font-family:var(--ut-theme-font);letter-spacing:.015em}
+#boardView.ut-designed-theme .panel,#boardView.ut-designed-theme .widget{background:var(--ut-theme-panel)!important;border:1px solid var(--ut-theme-panel-line)!important;box-shadow:0 6px 18px #07151a20!important}
+#boardView.ut-designed-theme .panel>.agendaHead .agendaTitle,#boardView.ut-designed-theme .widget .whead h3{font-family:var(--ut-theme-font);letter-spacing:.01em}
+#boardView.ut-designed-theme .item:not(.ut-pause-item){background:var(--agenda-card);border-color:var(--agenda-card-border);color:var(--agenda-card-ink)}
+#boardView.ut-designed-theme .item.current:not(.ut-pause-item){background:var(--agenda-card-current);border-color:var(--agenda-card-border)}
+#boardView.ut-designed-theme .item:not(.ut-pause-item) .title{color:var(--agenda-card-ink)}
+#boardView.ut-designed-theme .item:not(.ut-pause-item) .desc{color:var(--agenda-card-ink);opacity:.82}
+#boardView.ut-designed-theme .widget{border-top:3px solid var(--ut-theme-accent)!important}
+#boardView.ut-designed-theme .panel{border-top:3px solid var(--ut-theme-accent)!important}
+#boardView.ut-designed-theme .btn.primary{background:var(--agenda-card-current);color:var(--agenda-card-ink);border-color:var(--agenda-card-border)}
+#boardView.ut-designed-theme .ut-board-topic-pill{border:1px solid var(--ut-theme-panel-line);background:var(--ut-theme-panel);color:#26312c}
+#boardView.theme-newsroom .boardname,#boardView.theme-newsroom .agendaTitle{font-family:Georgia,'Times New Roman',serif!important;letter-spacing:.025em}
+#boardView.theme-newsroom .item{border-radius:4px!important}
+#boardView.theme-chalkschool .item{border-radius:8px!important}
+#boardView.theme-digital .item,#boardView.theme-cosmos .item{border-radius:16px!important}
+#boardView.theme-horror .agendaTitle{font-family:Georgia,'Times New Roman',serif!important}
+#boardView.theme-retro .agendaTitle{font-family:'Trebuchet MS',Arial,sans-serif!important}
+/* Temavælger – små rigtige tavlevisninger og større forhåndsvisning. */
+.ut-appearance-modal{width:min(1020px,97vw)!important;padding:20px 24px!important}
+.ut-appearance-modal h2{margin:0 0 11px}
+.ut-appearance-modal .field{margin:9px 0}
+.ut-appearance-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(245px,.73fr);gap:20px;align-items:start;margin:12px 0 8px}
+.ut-theme-options{min-width:0}
+.ut-theme-section-title{margin:5px 0 9px;font-size:15px}
+.ut-theme-section-title:not(:first-child){margin-top:18px}
+.ut-appearance-modal .themes{display:block}
+.ut-theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.ut-theme-choice{display:flex;flex-direction:column;gap:4px;background:#fff;border:2px solid #dde3df;border-radius:11px;padding:5px;min-width:0;text-align:left;cursor:pointer;color:#28332c}
+.ut-theme-choice:hover{border-color:#8ca99b}
+.ut-theme-choice.sel,.ut-theme-choice[aria-pressed="true"]{border-color:#315f4e;box-shadow:0 0 0 2px #b9d9c8}
+.ut-theme-choice-name{font-size:12px;font-weight:750;line-height:1.2;padding:1px 3px 3px;white-space:normal}
+.ut-theme-scene{overflow:hidden;position:relative;padding:9px;border-radius:7px;min-width:0}
+.ut-theme-swatch{height:90px;width:100%;pointer-events:none}
+.ut-mini-heading{font-size:10px;font-weight:900;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ut-mini-panel{border:1px solid;border-radius:5px;padding:5px;box-shadow:0 1px 3px #0002}
+.ut-mini-label{font-size:9px;font-weight:750;margin-bottom:4px}
+.ut-mini-card{font-size:8px;font-weight:750;border:1px solid;border-radius:4px;line-height:1.2;padding:4px 6px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ut-theme-side{position:sticky;top:0;border:1px solid #d9dfd8;border-radius:14px;padding:13px;background:#fafbf9;min-width:0}
+.ut-theme-side h3{font-size:15px;margin:0 0 10px}
+.ut-preview-scene{height:205px;border-radius:10px;padding:17px}
+.ut-preview-scene .ut-mini-heading{font-size:20px;margin-bottom:12px}
+.ut-preview-scene .ut-mini-panel{padding:12px;border-radius:10px}
+.ut-preview-scene .ut-mini-label{font-size:13px;margin-bottom:7px}
+.ut-preview-scene .ut-mini-card{font-size:13px;padding:10px 11px;margin-top:8px;border-radius:8px}
+.ut-theme-side>strong{display:block;margin-top:12px;font-size:15px}
+.ut-theme-side>.sub{margin:8px 0 10px;line-height:1.4}
+.ut-theme-side #utThemeApply{width:100%}
+.ut-appearance-more{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;margin-top:10px;border-top:1px solid var(--line);padding-top:12px}
+.ut-appearance-more .field:last-child{grid-column:1 / -1}
+@media(max-width:720px){.ut-appearance-layout{grid-template-columns:1fr}.ut-theme-side{position:static;grid-row:1}.ut-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ut-appearance-more{grid-template-columns:1fr}.ut-preview-scene{height:170px}}
+</style>
 </head>
 <body>
 <section id="scheduleView">
@@ -1065,7 +1121,16 @@ body.viewing #boardView .ut-board-topic-pill{
 <div class="modalback" id="findBoardsBack"><div class="modal" style="width:min(850px,100%)"><h2>Find tidligere tavler</h2><div class="field"><label>Søg efter tag, tavlenavn eller indhold</label><input id="findBoardsInput" type="search" placeholder="Fx Hitman" autocomplete="off"></div><div class="sub" id="findBoardsCount" aria-live="polite"></div><div id="findBoardsResults" class="tagResults"></div><div class="mactions"><button class="btn" type="button" data-close>Luk</button></div></div></div>
 <div class="modalback" id="deleteBoardBack"><div class="modal"><h2>Slet tavle?</h2><p id="deleteBoardText">Er du sikker på, at du vil slette tavlen?</p><div class="mactions"><button class="btn" type="button" id="cancelDeleteBoard">Nej</button><button class="btn danger" type="button" id="confirmDeleteBoard">Ja, slet tavlen</button></div></div></div>
 
-<div class="modalback" id="appearanceBack"><div class="modal"><h2>Tavleudseende</h2><div class="themes" id="themes"></div><div class="field"><label for="agendaStyle">Dagsordenens visning</label><select id="agendaStyle"><option value="standard">Standard</option><option value="simple">Enkel · større arbejdsform og tid</option></select><div class="sub">Enkel visning er især tænkt til yngre elever. Tavlens funktioner og indhold er de samme.</div></div><div class="field"><label>Eget baggrundsbillede</label><input id="bgUpload" type="file" accept="image/*"><div class="sub">Billedet gemmes lokalt sammen med tavlen. Brug rolige billeder, så dagsordenen stadig er tydelig.</div></div><div class="field"><label>Baggrundens styrke</label><input id="bgStrength" type="range" min="15" max="100" value="45"></div><div class="mactions"><button class="btn" data-close>Luk</button><button class="btn danger" id="removeBg" type="button">Fjern eget billede</button></div></div></div>
+<div class="modalback" id="appearanceBack"><div class="modal ut-appearance-modal">
+<h2>🎨 Tavleudseende</h2>
+<div class="field"><label for="utAppearanceScope">Hvor skal udseendet huskes?</label><select id="utAppearanceScope"><option value="group">Samme klasse og fag – alle nuværende og nye tavler</option><option value="board">Kun denne tavle</option></select><div class="sub" id="utAppearanceScopeNote"></div></div>
+<div class="ut-appearance-layout">
+<section class="ut-theme-options" aria-label="Vælg tema"><div class="themes" id="themes"></div></section>
+<aside class="ut-theme-side"><h3>Forhåndsvisning</h3><div id="utThemePreview" class="ut-theme-preview" aria-live="polite"></div><strong id="utThemeSelectedName"></strong><p class="sub" id="utThemeDescription"></p><button class="btn primary" type="button" id="utThemeApply">✓ Brug dette tema</button><p class="sub" id="utThemeImageNote"></p></aside>
+</div>
+<div class="ut-appearance-more"><div class="field"><label for="agendaStyle">Dagsordenens visning</label><select id="agendaStyle"><option value="standard">Standard</option><option value="simple">Enkel · større arbejdsform og tid</option></select><div class="sub">Enkel visning er især tænkt til yngre elever.</div></div><div class="field"><label>Eget baggrundsbillede (valgfrit)</label><input id="bgUpload" type="file" accept="image/*"><div class="sub">Et eget baggrundsbillede er fortsat knyttet til den enkelte tavle og vises oven på temaets baggrund.</div></div><div class="field"><label>Baggrundens styrke</label><input id="bgStrength" type="range" min="15" max="100" value="45"></div></div>
+<div class="mactions"><button class="btn" type="button" data-close>Luk</button><button class="btn danger" id="removeBg" type="button">Fjern eget billede</button></div>
+</div></div>
 
 
 
@@ -1265,20 +1330,64 @@ function selectedBoardSlots(host,fallback){let picked=[...host.querySelectorAll(
 function renderBoardSlotChoices(host,date,selected,excludeId="",originSlot=null){host.replaceChildren();const chosen=new Set(selected||[]);state.times.forEach((t,i)=>{const busy=boardAt(date,i,excludeId);let lab=document.createElement('label');lab.className='ut-slot-choice'+(i===originSlot?' is-origin':'')+(busy?' is-busy':'');let cb=document.createElement('input');cb.type='checkbox';cb.value=String(i);cb.checked=chosen.has(i);cb.disabled=!!busy;let text=document.createElement('span');text.textContent=(t[0]||((i+1)+'. lektion'))+((t[1]||t[2])?' · '+(t[1]||'')+'–'+(t[2]||''):'')+(busy?' · optaget':'');lab.append(cb,text);host.append(lab)})}
 
 function newBoard(date,slot){pendingSlot={date,slot};createName.value="Ny tavle";createSubject.value="";createBoardLanguage.value="auto";document.getElementById("createAutoName").checked=true;createName.readOnly=true;classOptions(createClass);renderBoardSlotChoices(createBoardSlots,date,[slot],"",slot);createInfo.textContent=niceDate(date)+(state.times[slot][1]||state.times[slot][2]?" · "+(state.times[slot][1]||"")+"–"+(state.times[slot][2]||""):"");show(createBack);utRefreshBoardNameFields("create");createClass.focus()}
-createForm.onsubmit=e=>{e.preventDefault();let slots=selectedBoardSlots(createBoardSlots,pendingSlot.slot);if(slots.some(n=>boardAt(pendingSlot.date,n))){alert("En af de valgte lektioner har allerede en tavle.");renderBoardSlotChoices(createBoardSlots,pendingSlot.date,slots,"",pendingSlot.slot);return}const autoName=document.getElementById("createAutoName").checked;let b={id:uid(),name:autoName?utBoardAutoName(createClass.value,createSubject.value.trim()):createName.value.trim(),autoName,date:pendingSlot.date,slot:slots[0],slots,classId:createClass.value,subject:createSubject.value.trim(),displayLanguage:createBoardLanguage.value||"auto",excluded:[],birthdayDismissed:false,theme:"light",bgImage:"",bgStrength:45,agendaTitle:"",tags:[],items:[],widgets:[],utTopicMode:"auto",utVisibleTopics:[],timer:{seconds:600,initial:600,running:false}};state.boards.push(b);save();hide(createBack);openBoard(b.id)}
+createForm.onsubmit=e=>{e.preventDefault();let slots=selectedBoardSlots(createBoardSlots,pendingSlot.slot);if(slots.some(n=>boardAt(pendingSlot.date,n))){alert("En af de valgte lektioner har allerede en tavle.");renderBoardSlotChoices(createBoardSlots,pendingSlot.date,slots,"",pendingSlot.slot);return}const autoName=document.getElementById("createAutoName").checked;let b={id:uid(),name:autoName?utBoardAutoName(createClass.value,createSubject.value.trim()):createName.value.trim(),autoName,date:pendingSlot.date,slot:slots[0],slots,classId:createClass.value,subject:createSubject.value.trim(),displayLanguage:createBoardLanguage.value||"auto",excluded:[],birthdayDismissed:false,theme:"light",bgImage:"",bgStrength:45,agendaTitle:"",tags:[],items:[],widgets:[],utTopicMode:"auto",utVisibleTopics:[],timer:{seconds:600,initial:600,running:false}};utInheritAppearance(b);state.boards.push(b);save();hide(createBack);openBoard(b.id)}
 function setBoardEditMode(){document.body.classList.remove("viewing");viewBtn.textContent="👁 Visning"}
 function openBoard(id){setBoardEditMode();currentId=id;let bb=state.boards.find(x=>x.id===id);bb.excluded=bb.excluded||[];bb.classId=bb.classId||"";if(bb.classId&&bb.date)utDailyExcluded(bb);scheduleView.classList.add("hidden");boardView.classList.remove("hidden");syncAttendanceGroups();renderBoard()}
 backSchedule.onclick=()=>{closeTagPicker();stopTimer();setBoardEditMode();currentId=null;boardView.classList.add("hidden");scheduleView.classList.remove("hidden");renderSchedule()}
 function renderBoard(){let b=board();if(!b)return;utNormalizeBoardAutoName(b);if(b.autoName)b.name=utBoardAutoName(b.classId,b.subject);refreshBoardTagButton();boardName.textContent=b.name;utRenderBoardTopic();agendaTitle.textContent=b.agendaTitle||"";agendaTitlePlaceholder.classList.toggle("hidden",!!b.agendaTitle);editAgendaTitleBtn.classList.toggle("hidden",!b.agendaTitle);const teacherBanner=document.getElementById("boardTeacherNoteBanner");if(teacherBanner){const note=String(b.teacherNote||"").trim();teacherBanner.classList.toggle("hidden",!note);teacherBanner.replaceChildren();if(note){const strong=document.createElement("strong");strong.textContent="📝 Lærernote til tavlen";teacherBanner.append(strong,document.createTextNode(note));teacherBanner.onclick=()=>document.getElementById("renameBoard")?.click()}else teacherBanner.onclick=null}let range=boardTimeRange(b);boardWhen.textContent=niceDate(b.date)+(range?" · "+range:"")+(boardSlots(b).length>1?" · "+boardSlots(b).length+" lektioner":"");applyTheme();renderAgenda();renderBirthday();renderWidgets()}
-function applyTheme(){let b=board(),v=document.getElementById("boardView");v.className=v.className.replace(/\btheme-\S+/g,"");v.classList.toggle("agenda-simple",b.agendaStyle==="simple");let colors={light:"#edf0ea",white:"#f7f7f7",warm:"#eee9df",dark:"#667a71",grid:"#f7f7f4",lines:"#f8f8f5",botanical:"#f4f0e6",forest:"#244b3b",organic:"#e9f0ed",colorful:"#f5efe7"};v.style.setProperty("--boardbg",colors[b.theme]||colors.light);let cardColors={light:["#eef7ff","#e1f1ff","#a9d3f1","#111111"],white:["#f5f0ff","#ece3ff","#c7b5ee","#111111"],warm:["#fff1e9","#ffe5d8","#f1b99f","#111111"],dark:["#e8f8f1","#d9f1e6","#9fd2bc","#111111"],grid:["#eef6ff","#e2efff","#aecded","#111111"],lines:["#fff8dc","#fff0b8","#efd681","#111111"],botanical:["#edf8ee","#e1f3e3","#add7b3","#111111"],forest:["#e6f8f4","#d6f1ea","#9ed5c8","#111111"],organic:["#edf5ff","#deecff","#a9c9ed","#111111"],colorful:["#fff0f5","#ffe1eb","#efb1c7","#111111"]};let cc=cardColors[b.theme]||cardColors.light;v.style.setProperty("--agenda-card",cc[0]);v.style.setProperty("--agenda-card-current",cc[1]);v.style.setProperty("--agenda-card-border",cc[2]);v.style.setProperty("--agenda-card-ink",cc[3]);v.style.backgroundSize="cover";v.style.backgroundPosition="center";
- if(b.theme==="grid")v.style.backgroundImage="linear-gradient(#dfe4df 1px,transparent 1px),linear-gradient(90deg,#dfe4df 1px,transparent 1px)",v.style.backgroundSize="24px 24px";
- else if(b.theme==="lines")v.style.backgroundImage="repeating-linear-gradient(#f8f8f5 0,#f8f8f5 23px,#dfe4df 24px)";
- else if(b.theme==="botanical")v.style.backgroundImage="radial-gradient(ellipse at 4% 8%,#789779 0 8%,transparent 8.5%),radial-gradient(ellipse at 10% 2%,#a8b99a 0 7%,transparent 7.5%),radial-gradient(ellipse at 96% 92%,#789779 0 9%,transparent 9.5%),radial-gradient(ellipse at 90% 100%,#b2c2a4 0 8%,transparent 8.5%)";
- else if(b.theme==="forest")v.style.backgroundImage="linear-gradient(135deg,#244b3b,#17392f 58%,#2f5a47)";
- else if(b.theme==="organic")v.style.backgroundImage="radial-gradient(circle at 0 100%,#b7d1c7 0 17%,transparent 17.5%),radial-gradient(circle at 100% 0,#d7c6a7 0 15%,transparent 15.5%),radial-gradient(circle at 94% 92%,#b8c7df 0 12%,transparent 12.5%)";
- else if(b.theme==="colorful")v.style.backgroundImage="radial-gradient(circle at 2% 7%,#e8b9a7 0 8%,transparent 8.5%),radial-gradient(circle at 98% 10%,#e6d38f 0 9%,transparent 9.5%),radial-gradient(circle at 5% 96%,#a9c9bd 0 10%,transparent 10.5%),radial-gradient(circle at 98% 94%,#b7bedb 0 8%,transparent 8.5%)";
- else v.style.backgroundImage="none";
- if(b.bgImage){let strength=(100-b.bgStrength)/100;v.style.backgroundImage=`linear-gradient(rgba(255,255,255,${strength}),rgba(255,255,255,${strength})),url("${b.bgImage}")`;v.style.backgroundSize="cover";v.style.backgroundPosition="center"}
+const utThemeCatalog = {"light":{"name":"Lys","base":"#edf0ea","cards":["#eef7ff","#e1f1ff","#a9d3f1","#111111"],"bg":"none","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"white":{"name":"Hvid","base":"#f7f7f7","cards":["#f5f0ff","#ece3ff","#c7b5ee","#111111"],"bg":"none","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"warm":{"name":"Varm","base":"#eee9df","cards":["#fff1e9","#ffe5d8","#f1b99f","#111111"],"bg":"none","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"dark":{"name":"Kridttavle","base":"#667a71","cards":["#e8f8f1","#d9f1e6","#9fd2bc","#111111"],"bg":"none","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"grid":{"name":"Tern","base":"#f7f7f4","cards":["#eef6ff","#e2efff","#aecded","#111111"],"bg":"linear-gradient(#dfe4df 1px,transparent 1px),linear-gradient(90deg,#dfe4df 1px,transparent 1px)","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"lines":{"name":"Linjer","base":"#f8f8f5","cards":["#fff8dc","#fff0b8","#efd681","#111111"],"bg":"repeating-linear-gradient(#f8f8f5 0,#f8f8f5 23px,#dfe4df 24px)","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"botanical":{"name":"Botanisk","base":"#f4f0e6","cards":["#edf8ee","#e1f3e3","#add7b3","#111111"],"bg":"radial-gradient(ellipse at 4% 8%,#789779 0 8%,transparent 8.5%),radial-gradient(ellipse at 10% 2%,#a8b99a 0 7%,transparent 7.5%),radial-gradient(ellipse at 96% 92%,#789779 0 9%,transparent 9.5%),radial-gradient(ellipse at 90% 100%,#b2c2a4 0 8%,transparent 8.5%)","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"forest":{"name":"Mørkegrøn tavle","base":"#244b3b","cards":["#e6f8f4","#d6f1ea","#9ed5c8","#111111"],"bg":"linear-gradient(135deg,#244b3b,#17392f 58%,#2f5a47)","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"organic":{"name":"Organisk","base":"#e9f0ed","cards":["#edf5ff","#deecff","#a9c9ed","#111111"],"bg":"radial-gradient(circle at 0 100%,#b7d1c7 0 17%,transparent 17.5%),radial-gradient(circle at 100% 0,#d7c6a7 0 15%,transparent 15.5%),radial-gradient(circle at 94% 92%,#b8c7df 0 12%,transparent 12.5%)","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"colorful":{"name":"Farverig","base":"#f5efe7","cards":["#fff0f5","#ffe1eb","#efb1c7","#111111"],"bg":"radial-gradient(circle at 2% 7%,#e8b9a7 0 8%,transparent 8.5%),radial-gradient(circle at 98% 10%,#e6d38f 0 9%,transparent 9.5%),radial-gradient(circle at 5% 96%,#a9c9bd 0 10%,transparent 10.5%),radial-gradient(circle at 98% 94%,#b7bedb 0 8%,transparent 8.5%)","panel":"#fffdf8","line":"#d6d8d4","title":"#25332b","accent":"#45645b","desc":"","font":"Arial, sans-serif"},"chalkschool":{"name":"Klassisk skoletavle","base":"#244c3e","cards":["#e4f0dc","#d1e4cd","#84b29a","#18372a"],"bg":"radial-gradient(ellipse at 18% 18%,#ffffff15 0,transparent 35%),repeating-linear-gradient(4deg,transparent 0 14px,#ffffff07 15px 16px),linear-gradient(135deg,#2e5b4b,#17382d)","panel":"#eff2e7","line":"#9eb5a5","title":"#f5f4e8","accent":"#abdbba","desc":"Grøn kridttavle med varme, lyse kort.","font":"Georgia, serif"},"newsroom":{"name":"Avisredaktion","base":"#e7dfcb","cards":["#faf6ec","#f0e8d9","#9b978e","#242726"],"bg":"repeating-linear-gradient(0deg,transparent 0 25px,#6e665412 26px),radial-gradient(circle at 86% 10%,#ffffff99,transparent 48%),linear-gradient(125deg,#e3dac5,#eee7d9)","panel":"#f9f5e8","line":"#c6bbab","title":"#302d2a","accent":"#565047","desc":"Avispapir, typografi og redaktionelle skillelinjer.","font":"Georgia, serif"},"horror":{"name":"Gyser","base":"#192131","cards":["#f2e7eb","#e6d6df","#a96c7f","#342532"],"bg":"radial-gradient(ellipse at 12% 87%,#9c415138,transparent 47%),radial-gradient(ellipse at 96% 8%,#8696b02a,transparent 38%),linear-gradient(145deg,#111824,#2a2434 55%,#121622)","panel":"#f1e9ed","line":"#c1aab5","title":"#f7eef2","accent":"#b45b75","desc":"Dunkle toner med diskret tåge og bordeaux detaljer.","font":"Georgia, serif"},"library":{"name":"Bibliotek","base":"#78563e","cards":["#fbf0df","#efdfc6","#b18b5b","#463122"],"bg":"repeating-linear-gradient(90deg,#ffffff08 0 1px,transparent 1px 54px),radial-gradient(circle at 8% 4%,#e7c59252,transparent 45%),linear-gradient(125deg,#6c4b35,#947052 65%,#554030)","panel":"#faf0df","line":"#cbb59c","title":"#fff7e7","accent":"#b98e51","desc":"Læsesalsstemning, trætoner og varmt papir.","font":"Georgia, serif"},"explorer":{"name":"Opdagelsesrejse","base":"#e5d5b4","cards":["#f5ebd4","#e9d8b5","#b29d6d","#4a402e"],"bg":"repeating-radial-gradient(circle at 85% 20%,transparent 0 34px,#8f7f5c21 35px 36px),linear-gradient(130deg,#efdfc0,#d9c5a1)","panel":"#fcf6e9","line":"#cfbf9d","title":"#493d2e","accent":"#8e754c","desc":"Historiske kort, kompaslinjer og pergament.","font":"Georgia, serif"},"cosmos":{"name":"Universet","base":"#101936","cards":["#e6edff","#d9e5fc","#92a8d4","#172954"],"bg":"radial-gradient(circle at 6% 14%,#ffffffab 0 1px,transparent 1.6px),radial-gradient(circle at 38% 68%,#c1d8ff88 0 1px,transparent 1.7px),radial-gradient(circle at 85% 35%,#ffffffa5 0 1.3px,transparent 2px),radial-gradient(ellipse at 90% 80%,#4157a854,transparent 40%),linear-gradient(145deg,#0e1731,#263763)","panel":"#eef2fd","line":"#b7c8ea","title":"#f4f7ff","accent":"#90bff8","desc":"Stjerner, dybblåt rum og klare kort.","font":"Arial, sans-serif"},"retro":{"name":"Retro skoleplakat","base":"#eddbbc","cards":["#faedd3","#f1dfa9","#b4905d","#463525"],"bg":"radial-gradient(circle at 5% 10%,#d8735790 0 6%,transparent 6.5%),radial-gradient(circle at 93% 90%,#72a59a90 0 12%,transparent 12.5%),linear-gradient(135deg,#f1e0b9,#e5caa3)","panel":"#fff4dc","line":"#cbae7f","title":"#4b4032","accent":"#aa664b","desc":"Undervisningsplancher og afdæmpet retrofarver.","font":"Trebuchet MS, Arial, sans-serif"},"digital":{"name":"Digital fremtid","base":"#102e43","cards":["#dbf5fb","#c6eefa","#68bad2","#133b51"],"bg":"linear-gradient(90deg,#53c6e616 1px,transparent 1px),linear-gradient(#53c6e616 1px,transparent 1px),radial-gradient(ellipse at 92% 12%,#1b7ca85e,transparent 48%),linear-gradient(125deg,#102e43,#091e34)","panel":"#e9f4f8","line":"#9bc7d5","title":"#f2fcff","accent":"#64cde6","desc":"Blå digitale linjer og lyse accenter.","font":"Arial, sans-serif"}};
+const utDesignedThemeIds = new Set(["chalkschool", "newsroom", "horror", "library", "explorer", "cosmos", "retro", "digital"]);
+function utAppearanceGroupKey(b){
+ const subject=String(b?.subject||'').trim().toLocaleLowerCase('da-DK');
+ return b?.classId&&subject?JSON.stringify([String(b.classId),subject]):'';
+}
+function utAppearanceGroupName(b){
+ const c=state.classes.find(c=>c.id===b?.classId);
+ return [c?.name,String(b?.subject||'').trim()].filter(Boolean).join(' · ');
+}
+function utGetAppearancePreference(b){
+ const key=utAppearanceGroupKey(b);
+ return key?state.utAppearancePreferences?.[key]||null:null;
+}
+function utInheritAppearance(b){
+ const pref=utGetAppearancePreference(b);
+ if(pref){if(utThemeCatalog[pref.theme])b.theme=pref.theme;if(pref.agendaStyle)b.agendaStyle=pref.agendaStyle;}
+}
+function utSaveGroupAppearance(b){
+ const key=utAppearanceGroupKey(b);if(!key)return;
+ state.utAppearancePreferences=state.utAppearancePreferences||{};
+ const pref={theme:b.theme||'light',agendaStyle:b.agendaStyle||'standard'};
+ state.utAppearancePreferences[key]=pref;
+ b.utAppearanceLocal=false;
+ // Fællesvalget påvirker alle matchende tavler, undtagen bevidste individuelle temaer.
+ for(const other of state.boards||[]){if(utAppearanceGroupKey(other)!==key||other.utAppearanceLocal===true)continue;other.theme=pref.theme;other.agendaStyle=pref.agendaStyle;}
+}
+function applyTheme(){
+ const b=board(),v=document.getElementById('boardView');if(!b||!v)return;
+ const id=utThemeCatalog[b.theme]?b.theme:'light',spec=utThemeCatalog[id],cc=spec.cards,designed=utDesignedThemeIds.has(id);
+ for(const name of [...v.classList])if(name.startsWith('theme-'))v.classList.remove(name);
+ v.classList.add('theme-'+id);
+ v.classList.toggle('ut-designed-theme',designed);
+ v.classList.toggle('agenda-simple',b.agendaStyle==='simple');
+ v.style.setProperty('--boardbg',spec.base);
+ v.style.setProperty('--agenda-card',cc[0]);
+ v.style.setProperty('--agenda-card-current',cc[1]);
+ v.style.setProperty('--agenda-card-border',cc[2]);
+ v.style.setProperty('--agenda-card-ink',cc[3]);
+ for(const [name,value] of Object.entries({
+  '--ut-theme-panel':spec.panel,'--ut-theme-panel-line':spec.line,
+  '--ut-theme-title':spec.title,'--ut-theme-accent':spec.accent,
+  '--ut-theme-font':spec.font
+ }))v.style.setProperty(name,value);
+ if(designed){v.style.setProperty('--ut-agenda',cc[0]);v.style.setProperty('--ut-agenda-current',cc[1]);v.style.setProperty('--ut-agenda-border',cc[2]);}
+ else for(const prop of ['--ut-agenda','--ut-agenda-current','--ut-agenda-border'])v.style.removeProperty(prop);
+ v.style.backgroundImage=spec.bg;
+ v.style.backgroundSize=id==='grid'?'24px 24px':id==='digital'?'38px 38px,38px 38px,auto,auto':'cover';
+ v.style.backgroundPosition='center';
+ if(b.bgImage){const strength=(100-(Number(b.bgStrength)??45))/100;
+  v.style.backgroundImage=`linear-gradient(rgba(255,255,255,${strength}),rgba(255,255,255,${strength})),url("${b.bgImage}")`;
+  v.style.backgroundSize='cover';v.style.backgroundPosition='center';
+ }
 }
 function utAgendaActiveItem(){const b=board();if(!b?.items?.length)return null;if(b.utActiveItemId){const active=b.items.find(x=>x.id===b.utActiveItemId);if(active)return active}return b.items.find(x=>x.status==='open')||null}
 // Mødegrupper gemmes som {members:[gruppeindekser...],dir}. Gamle parvise {a,b,dir}-data
@@ -2920,7 +3029,7 @@ yearCalendarBtn.onclick=()=>{yearMode='calendar';yearCalendarReturn=false;yearCa
 yearHalfAutumn.onclick=()=>{yearCalendarHalf='autumn';renderYear()};
 yearHalfSpring.onclick=()=>{yearCalendarHalf='spring';renderYear()};
 yearBackCalendar.onclick=()=>{yearMode='calendar';yearCalendarReturn=false;renderYear();yearContent.scrollTop=yearCalendarPreviousScroll};
-renameBoard.onclick=()=>{closeTagPicker();let b=board();utNormalizeBoardAutoName(b);editBoardName.value=b.name;editBoardSubject.value=b.subject||"";editBoardLanguage.value=b.displayLanguage||"auto";document.getElementById("editBoardAutoName").checked=!!b.autoName;editBoardName.readOnly=!!b.autoName;editAgendaTitle.value=b.agendaTitle||"";const boardNoteInput=document.getElementById("editBoardTeacherNote");if(boardNoteInput)boardNoteInput.value=b.teacherNote||"";classOptions(editBoardClass,b.classId);utApplyClassSubjectSuggestions("edit");renderBoardSlotChoices(editBoardSlots,b.date,boardSlots(b),b.id,b.slot);show(boardEdit)};boardForm.onsubmit=e=>{e.preventDefault();let b=board(),slots=selectedBoardSlots(editBoardSlots,b.slot);if(slots.some(n=>boardAt(b.date,n,b.id))){alert("En af de valgte lektioner har allerede en anden tavle.");renderBoardSlotChoices(editBoardSlots,b.date,slots,b.id,b.slot);return}b.autoName=document.getElementById("editBoardAutoName").checked;b.classId=editBoardClass.value;b.subject=editBoardSubject.value.trim();b.name=b.autoName?utBoardAutoName(b.classId,b.subject):editBoardName.value.trim();b.agendaTitle=editAgendaTitle.value.trim();b.teacherNote=(document.getElementById("editBoardTeacherNote")?.value||"").trim();b.displayLanguage=editBoardLanguage.value||"auto";b.slots=slots;b.slot=slots[0];b.birthdayDismissed=false;delete b.birthdayDismissedSignature;if(!b.classId)b.excluded=[];save();hide(boardEdit);renderBoard();renderSchedule()}
+renameBoard.onclick=()=>{closeTagPicker();let b=board();utNormalizeBoardAutoName(b);editBoardName.value=b.name;editBoardSubject.value=b.subject||"";editBoardLanguage.value=b.displayLanguage||"auto";document.getElementById("editBoardAutoName").checked=!!b.autoName;editBoardName.readOnly=!!b.autoName;editAgendaTitle.value=b.agendaTitle||"";const boardNoteInput=document.getElementById("editBoardTeacherNote");if(boardNoteInput)boardNoteInput.value=b.teacherNote||"";classOptions(editBoardClass,b.classId);utApplyClassSubjectSuggestions("edit");renderBoardSlotChoices(editBoardSlots,b.date,boardSlots(b),b.id,b.slot);show(boardEdit)};boardForm.onsubmit=e=>{e.preventDefault();let b=board(),slots=selectedBoardSlots(editBoardSlots,b.slot);if(slots.some(n=>boardAt(b.date,n,b.id))){alert("En af de valgte lektioner har allerede en anden tavle.");renderBoardSlotChoices(editBoardSlots,b.date,slots,b.id,b.slot);return}const oldAppearanceKey=utAppearanceGroupKey(b);b.autoName=document.getElementById("editBoardAutoName").checked;b.classId=editBoardClass.value;b.subject=editBoardSubject.value.trim();if(oldAppearanceKey!==utAppearanceGroupKey(b)&&b.utAppearanceLocal!==true)utInheritAppearance(b);b.name=b.autoName?utBoardAutoName(b.classId,b.subject):editBoardName.value.trim();b.agendaTitle=editAgendaTitle.value.trim();b.teacherNote=(document.getElementById("editBoardTeacherNote")?.value||"").trim();b.displayLanguage=editBoardLanguage.value||"auto";b.slots=slots;b.slot=slots[0];b.birthdayDismissed=false;delete b.birthdayDismissedSignature;if(!b.classId)b.excluded=[];save();hide(boardEdit);renderBoard();renderSchedule()}
 createClass.onchange=()=>{createSubject.value='';utApplyClassSubjectSuggestions('create')};createSubject.oninput=()=>utRefreshBoardNameFields('create');document.getElementById('createAutoName').onchange=()=>{createName.readOnly=document.getElementById('createAutoName').checked;utRefreshBoardNameFields('create')};createName.oninput=()=>{if(document.getElementById('createAutoName').checked)document.getElementById('createAutoName').checked=false};
 editBoardClass.onchange=()=>{editBoardSubject.value='';utApplyClassSubjectSuggestions('edit')};editBoardSubject.oninput=()=>utRefreshBoardNameFields('edit');document.getElementById('editBoardAutoName').onchange=()=>{editBoardName.readOnly=document.getElementById('editBoardAutoName').checked;utRefreshBoardNameFields('edit')};editBoardName.oninput=()=>{if(document.getElementById('editBoardAutoName').checked)document.getElementById('editBoardAutoName').checked=false};
 document.getElementById('boardTopic').onclick=utOpenTopicPicker;
@@ -2934,11 +3043,87 @@ function askDeleteBoard(id){let b=state.boards.find(x=>x.id===id);if(!b)return;p
 cancelDeleteBoard.onclick=()=>{pendingDeleteBoardId=null;hide(deleteBoardBack)};
 confirmDeleteBoard.onclick=()=>{if(!pendingDeleteBoardId)return;let id=pendingDeleteBoardId;state.boards=state.boards.filter(x=>x.id!==id);save();pendingDeleteBoardId=null;hide(deleteBoardBack);hide(boardEdit);if(currentId===id){currentId=null;boardView.classList.add("hidden");scheduleView.classList.remove("hidden")}renderSchedule()};
 deleteBoard.onclick=()=>askDeleteBoard(currentId)
-appearance.onclick=()=>{renderThemes();bgStrength.value=board().bgStrength||45;if(agendaStyle)agendaStyle.value=board().agendaStyle||"standard";show(appearanceBack)}
-const themeDefs=[["light","Lys"],["white","Hvid"],["warm","Varm"],["dark","Kridttavle"],["grid","Tern"],["lines","Linjer"],["botanical","Botanisk"],["forest","Mørkegrøn tavle"],["organic","Organisk"],["colorful","Farverig"]];
-function renderThemes(){themes.innerHTML="";themeDefs.forEach(([id,n])=>{let x=document.createElement("button");x.className="theme t-"+id+(board().theme===id?" sel":"");x.title=n;x.onclick=()=>{board().theme=id;save();applyTheme();renderThemes()};themes.append(x)})}
-const agendaStyle=document.getElementById("agendaStyle");if(agendaStyle)agendaStyle.onchange=()=>{board().agendaStyle=agendaStyle.value;save();applyTheme()};
-bgStrength.oninput=()=>{board().bgStrength=+bgStrength.value;save();applyTheme()};bgUpload.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{board().bgImage=r.result;save();applyTheme()};r.readAsDataURL(f)};removeBg.onclick=()=>{board().bgImage="";save();applyTheme()}
+const themeDefs=Object.entries(utThemeCatalog).map(([id,spec])=>[id,spec.name]);
+let utPendingThemeId='light';
+const utAppearanceScope=document.getElementById('utAppearanceScope');
+const utAppearanceScopeNote=document.getElementById('utAppearanceScopeNote');
+const utThemePreview=document.getElementById('utThemePreview');
+const utThemeApply=document.getElementById('utThemeApply');
+const utThemeDescription=document.getElementById('utThemeDescription');
+const utThemeSelectedName=document.getElementById('utThemeSelectedName');
+const utThemeImageNote=document.getElementById('utThemeImageNote');
+function utAppearanceScopeValue(){return utAppearanceScope.value==='group'&&utAppearanceGroupKey(board())?'group':'board'}
+function utAppearanceScopeSetup(){
+ const b=board(),hasGroup=!!utAppearanceGroupKey(b),grp=utAppearanceGroupName(b);
+ utAppearanceScope.querySelector('[value="group"]').disabled=!hasGroup;
+ utAppearanceScope.value=hasGroup?'group':'board';
+ utAppearanceScopeNote.textContent=hasGroup?'Klasse og fag: '+grp+'. Et fællesvalg opdaterer tavler for samme klasse og fag, undtagen tavler med individuelt tema.':'Vælg både klasse og fag på tavlen for at kunne huske udseendet på tværs af tavler.';
+}
+function utMiniBoard(spec,large=false){
+ const root=document.createElement('div');root.className=large?'ut-theme-scene ut-preview-scene':'ut-theme-scene ut-theme-swatch';
+ root.style.backgroundColor=spec.base;root.style.backgroundImage=spec.bg;root.style.backgroundSize='cover';
+ const head=document.createElement('div');head.className='ut-mini-heading';head.style.color=spec.title;head.style.fontFamily=spec.font;
+ head.textContent=large?'Dagens undervisning':'Dagens plan';
+ const panel=document.createElement('div');panel.className='ut-mini-panel';panel.style.background=spec.panel;panel.style.borderColor=spec.line;
+ const label=document.createElement('div');label.className='ut-mini-label';label.textContent=large?'Dagsorden':'Program';label.style.color=spec.cards[3];label.style.fontFamily=spec.font;
+ panel.append(label);
+ for(let i=0;i<2;i++){
+  const card=document.createElement('div');card.className='ut-mini-card';
+  card.style.background=i===0?spec.cards[1]:spec.cards[0];card.style.borderColor=spec.cards[2];card.style.color=spec.cards[3];
+  card.textContent=large?['1. Introduktion','2. Arbejd med opgaverne'][i]:['1. Intro','2. Opgaver'][i];
+  panel.append(card);
+ }
+ root.append(head,panel);return root;
+}
+function utRenderThemePreview(){
+ const spec=utThemeCatalog[utPendingThemeId]||utThemeCatalog.light;
+ utThemePreview.replaceChildren(utMiniBoard(spec,true));
+ utThemeSelectedName.textContent=spec.name;
+ utThemeDescription.textContent=spec.desc||'Eksisterende baggrund, bevaret som før.';
+ const unchanged=board().theme===utPendingThemeId;
+ utThemeApply.textContent=unchanged?'✓ Brug dette tema':'✓ Anvend tema';
+ utThemeImageNote.textContent=board().bgImage?'Bemærk: Denne tavle har et eget baggrundsbillede, som dækker temaets baggrund. Du kan fjerne billedet nedenfor.':'';
+}
+function renderThemes(){
+ themes.replaceChildren();
+ const groups=[['Eksisterende temaer',themeDefs.filter(([id])=>!utDesignedThemeIds.has(id))],['Nye stemningstemaer',themeDefs.filter(([id])=>utDesignedThemeIds.has(id))]];
+ for(const [name,entries] of groups){
+  const title=document.createElement('h3');title.className='ut-theme-section-title';title.textContent=name;themes.append(title);
+  const grid=document.createElement('div');grid.className='ut-theme-grid';
+  for(const [id,label] of entries){
+   const tile=document.createElement('button');tile.type='button';tile.className='ut-theme-choice'+(utPendingThemeId===id?' sel':'');tile.setAttribute('aria-pressed',String(utPendingThemeId===id));
+   tile.title='Se temaet '+label;tile.append(utMiniBoard(utThemeCatalog[id]));
+   const caption=document.createElement('span');caption.className='ut-theme-choice-name';caption.textContent=label;tile.append(caption);
+   tile.onclick=()=>{utPendingThemeId=id;renderThemes();utRenderThemePreview()};grid.append(tile);
+  }
+  themes.append(grid);
+ }
+}
+appearance.onclick=()=>{
+ utPendingThemeId=utThemeCatalog[board().theme]?board().theme:'light';
+ utAppearanceScopeSetup();
+ bgStrength.value=board().bgStrength??45;
+ if(agendaStyle)agendaStyle.value=board().agendaStyle||'standard';
+ renderThemes();utRenderThemePreview();show(appearanceBack);
+};
+utAppearanceScope.onchange=()=>{utAppearanceScopeNote.textContent=utAppearanceScopeValue()==='group'?'Fælles tema for '+utAppearanceGroupName(board())+'. Tavler med individuelt udseende bevares.':'Kun denne tavle – et individuelt udseende, som ikke overskrives af klassens fælles tema.'};
+utThemeApply.onclick=()=>{
+ const b=board();if(!b)return;
+ b.theme=utPendingThemeId;
+ if(utAppearanceScopeValue()==='group')utSaveGroupAppearance(b);
+ else b.utAppearanceLocal=true;
+ save();applyTheme();renderThemes();utRenderThemePreview();
+ utThemeApply.textContent='✓ Tema anvendt';
+};
+const agendaStyle=document.getElementById('agendaStyle');if(agendaStyle)agendaStyle.onchange=()=>{
+ const b=board();b.agendaStyle=agendaStyle.value;
+ if(utAppearanceScopeValue()==='group')utSaveGroupAppearance(b);
+ else b.utAppearanceLocal=true;
+ save();applyTheme();
+};
+bgStrength.oninput=()=>{board().bgStrength=+bgStrength.value;save();applyTheme()};
+bgUpload.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{board().bgImage=r.result;save();applyTheme();utRenderThemePreview()};r.readAsDataURL(f)};
+removeBg.onclick=()=>{board().bgImage='';bgUpload.value='';save();applyTheme();utRenderThemePreview()};
 viewBtn.onclick=()=>{closeTagPicker();document.body.classList.toggle("viewing");viewBtn.textContent=document.body.classList.contains("viewing")?"✎ Redigering":"👁 Visning";renderAgenda();renderBirthday();renderWidgets()}
 fullBtn.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(e){}};document.addEventListener("fullscreenchange",()=>fullBtn.textContent=document.fullscreenElement?"⛶ Afslut fuld skærm":"⛶ Fuld skærm")
 function show(x){x.style.display="flex"}function hide(x){x.style.display="none"}document.querySelectorAll("[data-close]").forEach(x=>x.onclick=()=>hide(x.closest(".modalback")));document.querySelectorAll(".modalback").forEach(x=>x.onclick=e=>{if(e.target===x)hide(x)})
