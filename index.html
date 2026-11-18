@@ -148,7 +148,13 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 .bigpick{text-align:center;font-size:32px;font-weight:800;padding:20px 8px}.toolrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
 
 .richbar{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}.richbar button{min-width:36px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px}.richbar .sep{width:1px;background:var(--line);margin:3px}
-.ut-emoji-wrap{position:relative;display:inline-flex}.ut-emoji-picker{position:absolute;left:0;top:calc(100% + 6px);z-index:2147483000;display:none;width:min(330px,82vw);grid-template-columns:repeat(8,1fr);gap:4px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 12px 30px #0002}.ut-emoji-picker.open{display:grid}.ut-emoji-picker button{min-width:34px!important;width:34px;height:34px;font-size:21px;padding:0;border:0;background:transparent}.ut-emoji-picker button:hover{background:#f1f5f2}.ut-emoji-picker .ut-emoji-close{grid-column:1/-1;width:auto!important;min-width:0!important;font-size:13px!important;border:1px solid var(--line)!important;background:#fff!important;padding:0 8px!important}
+.ut-emoji-wrap{position:relative;display:inline-flex}.ut-emoji-picker{position:absolute;left:auto;right:0;top:calc(100% + 6px);z-index:2147483000;display:none;width:min(330px,82vw);grid-template-columns:repeat(8,1fr);gap:4px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 12px 30px #0002}.ut-emoji-picker.open{display:grid}
+/* Et bredere redigeringsvindue giver plads til tekstværktøjer og ikonvælgeren. */
+#itemBack #itemForm{width:min(980px,100%);max-width:none;min-width:0}
+/* Ikonvælgeren åbner inden for redigeringsvinduet i stedet for at udvide det vandret. */
+#itemBack .ut-emoji-picker{left:auto;right:0;max-width:min(330px,calc(100vw - 80px));box-sizing:border-box}
+@media(max-width:640px){#itemBack #itemForm{padding:16px}#itemBack .ut-emoji-picker{width:min(240px,calc(100vw - 80px));max-width:none;grid-template-columns:repeat(6,minmax(0,1fr))}#itemBack .ut-emoji-picker button:not(.ut-emoji-close){min-width:0!important;width:100%}}
+.ut-emoji-picker button{min-width:34px!important;width:34px;height:34px;font-size:21px;padding:0;border:0;background:transparent}.ut-emoji-picker button:hover{background:#f1f5f2}.ut-emoji-picker .ut-emoji-close{grid-column:1/-1;width:auto!important;min-width:0!important;font-size:13px!important;border:1px solid var(--line)!important;background:#fff!important;padding:0 8px!important}
 .richedit{width:100%;min-height:95px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;line-height:1.45;overflow:auto}.richedit ul{margin:5px 0;padding-left:23px}.richedit ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richedit ul ul ul{list-style-type:square}
 .richdisplay ul{margin:5px 0;padding-left:23px}.richdisplay ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richdisplay ul ul ul{list-style-type:square}.richdisplay p{margin:4px 0}.notesrich{min-height:220px;resize:vertical}.notesrich:focus{min-height:360px}
 
@@ -3340,7 +3346,21 @@ function utAddEmojiPicker(bar,editor){
  const emojis=["😊","😄","😂","😉","🤔","😮","😅","🙃","👍","👎","👏","🙌","❤️","⭐","✨","💡","✅","❌","❗","❓","🎉","🔥","👀","💬","🧠","📚","✏️","📝","⏱️","🚪","👥","🎯"];
  emojis.forEach(em=>{const b=document.createElement("button");b.type="button";b.textContent=em;b.title="Indsæt "+em;b.onmousedown=e=>{e.preventDefault();utInsertEmoji(editor,em);picker.classList.remove("open")};picker.append(b)});
  const close=document.createElement("button");close.type="button";close.className="ut-emoji-close";close.textContent="Luk";close.onmousedown=e=>{e.preventDefault();picker.classList.remove("open");utRestoreEditorRange(editor)};picker.append(close);
- trigger.onmousedown=e=>{e.preventDefault();utSaveEditorRange(editor);document.querySelectorAll(".ut-emoji-picker.open").forEach(x=>{if(x!==picker)x.classList.remove("open")});picker.classList.toggle("open")};
+ trigger.onmousedown=e=>{
+  e.preventDefault();utSaveEditorRange(editor);
+  document.querySelectorAll(".ut-emoji-picker.open").forEach(x=>{if(x!==picker)x.classList.remove("open")});
+  picker.classList.toggle("open");
+  if(picker.classList.contains("open")){
+   // Hold menuen inde i redigeringsvinduet, også når værktøjslinjen ombrydes.
+   const host=wrap.closest(".modal"),hr=host?.getBoundingClientRect();
+   const anchor=wrap.getBoundingClientRect(),box=picker.getBoundingClientRect();
+   const minX=Math.max(8,(hr?.left??0)+10);
+   const maxX=Math.min(innerWidth-8,(hr?.right??innerWidth)-10);
+   const desiredX=Math.min(anchor.right-box.width,maxX-box.width);
+   picker.style.right="auto";
+   picker.style.left=(Math.max(minX,desiredX)-anchor.left)+"px";
+  }
+ };
  wrap.append(trigger,picker);bar.append(wrap);
  editor.addEventListener("keyup",()=>utSaveEditorRange(editor));editor.addEventListener("mouseup",()=>utSaveEditorRange(editor));editor.addEventListener("input",()=>utSaveEditorRange(editor));editor.addEventListener("focus",()=>utSaveEditorRange(editor));
 }
