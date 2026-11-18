@@ -156,6 +156,25 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 @media(max-width:640px){#itemBack #itemForm{padding:16px}#itemBack .ut-emoji-picker{width:min(240px,calc(100vw - 80px));max-width:none;grid-template-columns:repeat(6,minmax(0,1fr))}#itemBack .ut-emoji-picker button:not(.ut-emoji-close){min-width:0!important;width:100%}}
 .ut-emoji-picker button{min-width:34px!important;width:34px;height:34px;font-size:21px;padding:0;border:0;background:transparent}.ut-emoji-picker button:hover{background:#f1f5f2}.ut-emoji-picker .ut-emoji-close{grid-column:1/-1;width:auto!important;min-width:0!important;font-size:13px!important;border:1px solid var(--line)!important;background:#fff!important;padding:0 8px!important}
 .richedit{width:100%;min-height:95px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;line-height:1.45;overflow:auto}.richedit ul{margin:5px 0;padding-left:23px}.richedit ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richedit ul ul ul{list-style-type:square}
+/* Del kun det valgte afsnit i to kolonner; resten af beskrivelsen er i fuld bredde. */
+.ut-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,1.6vw,22px);align-items:start;width:100%;max-width:100%;margin:12px 0;box-sizing:border-box}
+.ut-column{min-width:0;max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}
+.ut-column>p:first-child,.ut-column>div:first-child{margin-top:0}
+.ut-column>p:last-child,.ut-column>div:last-child{margin-bottom:0}
+#itemBack .richedit .ut-columns{padding:6px;border:1px dashed #b4c7bf;border-radius:12px;background:#f6f9f7;gap:7px}
+#itemBack .richedit .ut-column{min-height:105px;padding:10px;border:1px solid #cbd9d0;border-radius:9px;background:#fff;outline-offset:-2px}
+#itemBack .richedit .ut-column:focus-within{outline:2px solid #7fae99}
+#itemBack .richedit .ut-column::before{content:'Venstre kolonne';display:block;font-size:11px;color:#64776b;font-weight:700;margin:0 0 6px;pointer-events:none}
+#itemBack .richedit .ut-column:nth-child(2)::before{content:'Højre kolonne'}
+#itemBack .richbar .ut-columns-tool{padding:0 10px;font-size:13px;font-weight:700;white-space:nowrap;background:#eef6f0;border-color:#b7cbbc}
+#itemBack .richbar .ut-columns-remove{padding:0 9px;font-size:13px;white-space:nowrap}
+.richdisplay .ut-columns>.ut-column + .ut-column{border-left:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:clamp(10px,1vw,16px)}
+/* Sidepaneler og smalle kort har ikke tilstrækkelig bredde til 2 læsbare kolonner. */
+#boardView .desc.richdisplay{container-type:inline-size}
+@container (max-width:590px){.richdisplay .ut-columns{grid-template-columns:1fr}.richdisplay .ut-columns>.ut-column + .ut-column{border-left:0;border-top:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:0;padding-top:10px}}
+.withSide .richdisplay .ut-columns{grid-template-columns:1fr}
+.withSide .richdisplay .ut-columns>.ut-column + .ut-column{border-left:0;border-top:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:0;padding-top:10px}
+@media(max-width:720px){#itemBack .richedit .ut-columns{grid-template-columns:1fr}#itemBack .richedit .ut-column{min-height:75px}}
 .richdisplay ul{margin:5px 0;padding-left:23px}.richdisplay ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richdisplay ul ul ul{list-style-type:square}.richdisplay p{margin:4px 0}.notesrich{min-height:220px;resize:vertical}.notesrich:focus{min-height:360px}
 
 .birthday{position:relative;background:#fff;border:2px solid #d9b9b9;border-radius:16px;padding:18px 46px 18px 18px;box-shadow:var(--shadow);font-size:18px;overflow:hidden;margin-bottom:12px}
@@ -1118,7 +1137,7 @@ body.viewing #boardView .ut-board-topic-pill{
 
 <div class="modalback" id="itemBack"><form class="modal" id="itemForm"><h2 id="itemHead">Nyt programpunkt</h2>
 <div class="field"><label>Aktivitet</label><input id="itTitle" required></div>
-<div class="field"><label>Beskrivelse <span style="font-weight:400">(valgfri)</span></label><div id="itDescBar" class="richbar"></div><div id="itDesc" class="richedit" contenteditable="true"></div></div>
+<div class="field"><label>Beskrivelse <span style="font-weight:400">(valgfri)</span></label><div id="itDescBar" class="richbar"></div><div id="itDesc" class="richedit" contenteditable="true"></div><div class="sub" style="margin-top:5px">Brug <strong>▥ 2 kolonner</strong> til fx stationer eller grupper ved siden af hinanden. Skriv i hver kolonne og fortsæt under dem i fuld bredde.</div></div>
 <div class="field"><label>🎒 Du skal bruge… <span style="font-weight:400">(valgfri)</span></label><input id="itNeed" placeholder="Fx computer, lineal, bog, idrætstøj…"></div>
 <div class="grid2"><div class="field"><label>Arbejdsform <span class="sub">(vælg gerne flere i rækkefølge)</span></label><select id="itMode" class="hidden" aria-hidden="true" tabindex="-1"><option value="">Ingen</option><option>👩‍🏫 Fælles</option><option>👤 Individuelt</option><option>👥 Makker</option><option>👥👥 Gruppe</option><option>🚶 Bevægelse</option></select><div id="utModePicker" class="ut-mode-picker"></div><div id="utModeSequenceEditor" class="ut-mode-sequence-editor"></div><div class="sub" style="margin-top:6px">Klik på en arbejdsform for at tilføje den som næste trin. Træk de valgte trin for at ændre rækkefølgen. Den samme arbejdsform kan bruges flere gange. Fjern et enkelt trin med ×.</div></div><div class="field"><label>Forventet tid (valgfri)</label><div class="grid2" style="gap:8px"><div><label class="sub" for="itMinutes">Minutter</label><input id="itMinutes" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="0"></div><div><label class="sub" for="itSeconds">Sekunder</label><input id="itSeconds" type="number" min="0" max="59" step="1" inputmode="numeric" placeholder="0"></div></div></div></div><div id="utAgendaGroupFields" class="field" style="display:none;border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0"><label style="font-weight:650">👥 Inddeling til dette dagsordenspunkt (valgfrit)</label><div class="grid2" style="margin-top:8px"><div class="field"><label>Inddeling</label><select id="utAgendaGroupKind"><option value="none">Ingen kobling</option><option value="random">Dan tilfældige grupper/makkere</option><option value="manual">✏️ Opret inddeling selv</option></select></div><div class="field" id="utAgendaGroupPhaseWrap"><label>Koblingen hører til</label><select id="utAgendaGroupPhase"></select><div class="sub">Vælg det trin i arbejdsforløbet, hvor inddelingen skal bruges.</div></div><div class="field" id="utAgendaSavedWrap" style="display:none"></div><div class="field" id="utAgendaRandomWrap" style="display:none"><div class="grid2"><div class="field"><label>Fordel efter</label><select id="utAgendaRandomMode"><option value="size">Elever pr. gruppe</option><option value="count">Antal grupper</option></select></div><div class="field"><label id="utAgendaRandomNumberLabel">Elever pr. gruppe (2 = makkere)</label><input id="utAgendaGroupSize" type="number" min="2" max="30" value="2"></div></div><div id="utAgendaRandomHint" class="sub">Systemet fordeler en eventuel rest, så en elev ikke står alene.</div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><label style="display:flex;gap:8px;align-items:center"><input id="utAgendaGenderEnabled" type="checkbox" style="width:auto;min-height:auto"> Fordel efter køn</label><div id="utAgendaGenderModeWrap" style="display:none;margin:7px 0 0 26px"><select id="utAgendaGenderMode"><option value="same">Piger med piger og drenge med drenge</option><option value="mix">Bland kønnene så vidt muligt</option></select><div class="sub">Elever uden registreret køn behandles neutralt.</div></div></div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><label style="font-weight:650">⚠️ Elever der ikke må være sammen</label><div class="sub">Tilføj kun de kombinationer, du vil undgå på dette punkt.</div><div class="toolrow" style="margin-top:7px"><select id="utAgendaAvoidA" style="min-width:140px"></select><select id="utAgendaAvoidB" style="min-width:140px"></select><button class="btn" id="utAgendaAvoidAdd" type="button">+ Tilføj</button></div><div id="utAgendaAvoidList" style="margin-top:7px"></div></div></div></div><div id="utManualTools" style="display:none;margin:8px 0"><button class="btn" id="utManualOpen" type="button">✏️ Fordel eleverne</button><button class="btn" id="utManualSave" type="button" style="margin-left:6px">💾 Gem som fast inddeling</button><span id="utManualSummary" class="sub" style="margin-left:8px"></span></div><div class="sub">Inddelingen aktiveres, når punktet bliver det næste på dagsordenen. Du kan stadig skifte manuelt i gruppeværktøjet.</div>
 <div id="utAgendaExtras" style="display:none;border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
@@ -3290,7 +3309,18 @@ prevWeek.onclick=()=>{weekStart.setDate(weekStart.getDate()-7);renderSchedule()}
 function cleanRich(html){
  let t=document.createElement("template");t.innerHTML=html;
  t.content.querySelectorAll("script,style,iframe,object,embed,img,a").forEach(x=>x.remove());
- t.content.querySelectorAll("*").forEach(el=>{[...el.attributes].forEach(a=>el.removeAttribute(a.name));});
+ // Tidligere fjernede rensningen alle klasser. Bevar KUN de to godkendte
+ // layoutklasser, ellers forsvinder kolonneopstillingen når punktet gemmes.
+ const allowed=new Map();
+ t.content.querySelectorAll('div.ut-columns').forEach(group=>{
+  const columns=[...group.children].filter(c=>c.tagName==='DIV'&&c.classList.contains('ut-column'));
+  if(columns.length!==2||group.children.length!==2)return;
+  allowed.set(group,'ut-columns');columns.forEach(c=>allowed.set(c,'ut-column'));
+ });
+ t.content.querySelectorAll("*").forEach(el=>{
+  [...el.attributes].forEach(a=>el.removeAttribute(a.name));
+  if(allowed.has(el))el.className=allowed.get(el);
+ });
  return t.innerHTML.trim();
 }
 function richCmd(editor,cmd,val=null){editor.focus();document.execCommand(cmd,false,val)}
@@ -3364,6 +3394,58 @@ function utAddEmojiPicker(bar,editor){
  wrap.append(trigger,picker);bar.append(wrap);
  editor.addEventListener("keyup",()=>utSaveEditorRange(editor));editor.addEventListener("mouseup",()=>utSaveEditorRange(editor));editor.addEventListener("input",()=>utSaveEditorRange(editor));editor.addEventListener("focus",()=>utSaveEditorRange(editor));
 }
+function utColumnsCaret(editor,node,atStart=true){
+ const r=document.createRange(),sel=getSelection();
+ r.selectNodeContents(node);r.collapse(atStart);
+ editor.focus();sel.removeAllRanges();sel.addRange(r);
+ utSaveEditorRange(editor);
+}
+function utInsertTwoColumns(editor){
+ // Brug det senest gemte markørsted (toolbar-knappen tager ellers fokus).
+ utRestoreEditorRange(editor);
+ const sel=getSelection(),r=sel&&sel.rangeCount?sel.getRangeAt(0):null;
+ let focusNode=r?.startContainer||editor;
+ if(focusNode.nodeType!==1)focusNode=focusNode.parentElement;
+ const already=focusNode.closest?.('.ut-columns');
+ if(already&&editor.contains(already)){
+  const next=already.querySelector('.ut-column:nth-child(2)');
+  if(next)utColumnsCaret(editor,next);return;
+ }
+ // Indsæt efter afsnittet, hvor markøren står. Så forbliver tekst før/efter
+ // i fuld bredde, og vi undgår at sætte et grid IND i en punktopstilling.
+ let after=focusNode;
+ while(after&&after!==editor&&after.parentElement!==editor)after=after.parentElement;
+ const grid=document.createElement('div');grid.className='ut-columns';
+ for(let k=0;k<2;k++){
+  const col=document.createElement('div');col.className='ut-column';
+  const para=document.createElement('p');para.append(document.createElement('br'));col.append(para);grid.append(col);
+ }
+ if(after&&after!==editor)after.after(grid);else editor.append(grid);
+ // Et normalt afsnit efter kolonnerne gør det muligt at fortsætte i fuld bredde.
+ if(!grid.nextElementSibling){const para=document.createElement('p');para.append(document.createElement('br'));grid.after(para)}
+ utColumnsCaret(editor,grid.firstElementChild.firstElementChild);
+ editor.dispatchEvent(new Event('input',{bubbles:true}));
+}
+function utRemoveTwoColumns(editor){
+ utRestoreEditorRange(editor);
+ const sel=getSelection(),r=sel&&sel.rangeCount?sel.getRangeAt(0):null;
+ let node=r?.startContainer;
+ if(node&&node.nodeType!==1)node=node.parentElement;
+ const grid=node?.closest?.('.ut-columns');
+ if(!grid||!editor.contains(grid)){
+  alert('Klik først i en af de to kolonner, du vil fjerne.');return;
+ }
+ // Fjern kun kolonneopstillingen: det indtastede indhold bevares i rækkefølge.
+ const fragment=document.createDocumentFragment();
+ grid.querySelectorAll(':scope > .ut-column').forEach(col=>{
+  while(col.firstChild)fragment.append(col.firstChild);
+ });
+ const after=grid.nextElementSibling;
+ const end=after&&after.matches('p,div')&&!after.textContent.trim()?after:document.createElement('p');
+ if(!end.isConnected){end.append(document.createElement('br'));fragment.append(end)}
+ grid.replaceWith(fragment);utColumnsCaret(editor,end);
+ editor.dispatchEvent(new Event('input',{bubbles:true}));
+}
 function makeToolbar(bar,editor){
  bar.innerHTML="";
  const specs=[
@@ -3383,6 +3465,14 @@ function makeToolbar(bar,editor){
  ];
  specs.forEach(([txt,title,fn])=>{let b=document.createElement("button");b.type="button";b.innerHTML=txt==="I"?"<i>I</i>":txt==="U"?"<u>U</u>":txt==="B"?"<b>B</b>":txt;b.title=title;b.onmousedown=e=>{e.preventDefault();utSaveEditorRange(editor);fn();utSaveEditorRange(editor)};bar.append(b)});
  utAddEmojiPicker(bar,editor);
+ if(editor===itDesc){
+  const two=document.createElement('button');two.type='button';two.className='ut-columns-tool';
+  two.textContent='▥ 2 kolonner';two.title='Indsæt et afsnit med to kolonner efter det aktuelle afsnit';
+  two.onmousedown=e=>{e.preventDefault();utInsertTwoColumns(editor)};bar.append(two);
+  const remove=document.createElement('button');remove.type='button';remove.className='ut-columns-remove';
+  remove.textContent='Fjern kolonner';remove.title='Fjern kolonneopstillingen, men behold teksten';
+  remove.onmousedown=e=>{e.preventDefault();utRemoveTwoColumns(editor)};bar.append(remove);
+ }
 }
 makeToolbar(itDescBar,itDesc);makeToolbar(wTextBar,wText);
 document.addEventListener("pointerdown",e=>{if(!e.target.closest(".ut-emoji-wrap"))document.querySelectorAll(".ut-emoji-picker.open").forEach(x=>x.classList.remove("open"))});
