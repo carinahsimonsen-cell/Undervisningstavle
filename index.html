@@ -156,25 +156,40 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 @media(max-width:640px){#itemBack #itemForm{padding:16px}#itemBack .ut-emoji-picker{width:min(240px,calc(100vw - 80px));max-width:none;grid-template-columns:repeat(6,minmax(0,1fr))}#itemBack .ut-emoji-picker button:not(.ut-emoji-close){min-width:0!important;width:100%}}
 .ut-emoji-picker button{min-width:34px!important;width:34px;height:34px;font-size:21px;padding:0;border:0;background:transparent}.ut-emoji-picker button:hover{background:#f1f5f2}.ut-emoji-picker .ut-emoji-close{grid-column:1/-1;width:auto!important;min-width:0!important;font-size:13px!important;border:1px solid var(--line)!important;background:#fff!important;padding:0 8px!important}
 .richedit{width:100%;min-height:95px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;line-height:1.45;overflow:auto}.richedit ul{margin:5px 0;padding-left:23px}.richedit ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richedit ul ul ul{list-style-type:square}
-/* Del kun det valgte afsnit i to kolonner; resten af beskrivelsen er i fuld bredde. */
-.ut-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,1.6vw,22px);align-items:start;width:100%;max-width:100%;margin:12px 0;box-sizing:border-box}
+/* Kolonneopstillinger har selvstændige skrivefelter og kan bestå af flere rækker. */
+.ut-columns{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(10px,1.3vw,17px);width:100%;max-width:100%;margin:12px 0;box-sizing:border-box;--ut-col-gap:clamp(12px,1.6vw,22px)}
+.ut-column-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ut-col-gap);align-items:start;min-width:0;box-sizing:border-box}
+.ut-columns[data-columns="3"]>.ut-column-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ut-columns[data-columns="4"]>.ut-column-row{grid-template-columns:repeat(4,minmax(0,1fr))}
+/* Ældre gemte opstillinger uden rækkeelementer bliver ved med at vises korrekt. */
+.ut-columns:not(:has(> .ut-column-row)){grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ut-col-gap)}
+.ut-columns[data-columns="3"]:not(:has(> .ut-column-row)){grid-template-columns:repeat(3,minmax(0,1fr))}
+.ut-columns[data-columns="4"]:not(:has(> .ut-column-row)){grid-template-columns:repeat(4,minmax(0,1fr))}
 .ut-column{min-width:0;max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}
 .ut-column>p:first-child,.ut-column>div:first-child{margin-top:0}
 .ut-column>p:last-child,.ut-column>div:last-child{margin-bottom:0}
-#itemBack .richedit .ut-columns{padding:6px;border:1px dashed #b4c7bf;border-radius:12px;background:#f6f9f7;gap:7px}
-#itemBack .richedit .ut-column{min-height:105px;padding:10px;border:1px solid #cbd9d0;border-radius:9px;background:#fff;outline-offset:-2px}
-#itemBack .richedit .ut-column:focus-within{outline:2px solid #7fae99}
-#itemBack .richedit .ut-column::before{content:'Venstre kolonne';display:block;font-size:11px;color:#64776b;font-weight:700;margin:0 0 6px;pointer-events:none}
-#itemBack .richedit .ut-column:nth-child(2)::before{content:'Højre kolonne'}
-#itemBack .richbar .ut-columns-tool{padding:0 10px;font-size:13px;font-weight:700;white-space:nowrap;background:#eef6f0;border-color:#b7cbbc}
-#itemBack .richbar .ut-columns-remove{padding:0 9px;font-size:13px;white-space:nowrap}
-.richdisplay .ut-columns>.ut-column + .ut-column{border-left:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:clamp(10px,1vw,16px)}
-/* Sidepaneler og smalle kort har ikke tilstrækkelig bredde til 2 læsbare kolonner. */
+#itemBack .richedit .ut-columns{counter-reset:ut-row;padding:8px;border:1px dashed #b4c7bf;border-radius:12px;background:#f6f9f7;gap:14px}
+#itemBack .richedit .ut-column-row{position:relative;counter-increment:ut-row;counter-reset:ut-col;gap:7px;padding-top:17px}
+#itemBack .richedit .ut-column-row::before{content:'Række ' counter(ut-row);position:absolute;left:2px;top:0;font-size:11px;font-weight:700;color:#566e61;pointer-events:none}
+#itemBack .richedit .ut-column{min-height:105px;padding:10px;border:1px solid #cbd9d0;border-radius:9px;background:#fff;outline-offset:-2px;cursor:text}
+#itemBack .richedit .ut-column:focus{outline:2px solid #7fae99}
+#itemBack .richedit .ut-column-row>.ut-column::before{counter-increment:ut-col;content:'Kolonne ' counter(ut-col);display:block;font-size:11px;color:#64776b;font-weight:700;margin:0 0 6px;pointer-events:none}
+#itemBack .richbar .ut-columns-tool{width:auto!important;min-height:34px;height:34px;padding:0 9px;font-size:13px;font-weight:700;white-space:nowrap;background:#eef6f0;border:1px solid #b7cbbc;border-radius:8px;color:#203d30;cursor:pointer}
+#itemBack .richbar .ut-columns-remove,#itemBack .richbar .ut-columns-row-tool{padding:0 9px;font-size:13px;white-space:nowrap;min-height:34px}
+#itemBack .richbar .ut-columns-row-tool{background:#eef6f0;border:1px solid #b7cbbc;border-radius:8px;color:#203d30;font-weight:700}
+.richdisplay .ut-column-row>.ut-column + .ut-column,.richdisplay .ut-columns:not(:has(> .ut-column-row))>.ut-column + .ut-column{border-left:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:clamp(10px,1vw,16px)}
+.richdisplay .ut-column-row + .ut-column-row{border-top:1px solid color-mix(in srgb,currentColor 15%,transparent);padding-top:12px}
+/* Sidepaneler og smalle kort får færre kolonner, så teksten forbliver læsbar. */
 #boardView .desc.richdisplay{container-type:inline-size}
-@container (max-width:590px){.richdisplay .ut-columns{grid-template-columns:1fr}.richdisplay .ut-columns>.ut-column + .ut-column{border-left:0;border-top:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:0;padding-top:10px}}
-.withSide .richdisplay .ut-columns{grid-template-columns:1fr}
-.withSide .richdisplay .ut-columns>.ut-column + .ut-column{border-left:0;border-top:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:0;padding-top:10px}
-@media(max-width:720px){#itemBack .richedit .ut-columns{grid-template-columns:1fr}#itemBack .richedit .ut-column{min-height:75px}}
+@container (max-width:850px){.richdisplay .ut-columns[data-columns="4"]>.ut-column-row,.richdisplay .ut-columns[data-columns="4"]:not(:has(> .ut-column-row)){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container (max-width:650px){.richdisplay .ut-columns[data-columns="3"]>.ut-column-row,.richdisplay .ut-columns[data-columns="3"]:not(:has(> .ut-column-row)){grid-template-columns:1fr}}
+@container (max-width:590px){
+ .richdisplay .ut-column-row,.richdisplay .ut-columns:not(:has(> .ut-column-row)){grid-template-columns:1fr}
+ .richdisplay .ut-column-row>.ut-column + .ut-column,.richdisplay .ut-columns:not(:has(> .ut-column-row))>.ut-column + .ut-column{border-left:0;border-top:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:0;padding-top:10px}
+}
+.withSide .richdisplay .ut-column-row,.withSide .richdisplay .ut-columns:not(:has(> .ut-column-row)){grid-template-columns:1fr!important}
+.withSide .richdisplay .ut-column-row>.ut-column + .ut-column,.withSide .richdisplay .ut-columns:not(:has(> .ut-column-row))>.ut-column + .ut-column{border-left:0;border-top:1px solid color-mix(in srgb,currentColor 23%,transparent);padding-left:0;padding-top:10px}
+@media(max-width:720px){#itemBack .richedit .ut-column-row{grid-template-columns:1fr}#itemBack .richedit .ut-column{min-height:75px}}
 .richdisplay ul{margin:5px 0;padding-left:23px}.richdisplay ul ul{margin:3px 0;padding-left:28px;list-style-type:circle}.richdisplay ul ul ul{list-style-type:square}.richdisplay p{margin:4px 0}.notesrich{min-height:220px;resize:vertical}.notesrich:focus{min-height:360px}
 
 .birthday{position:relative;background:#fff;border:2px solid #d9b9b9;border-radius:16px;padding:18px 46px 18px 18px;box-shadow:var(--shadow);font-size:18px;overflow:hidden;margin-bottom:12px}
@@ -1137,7 +1152,7 @@ body.viewing #boardView .ut-board-topic-pill{
 
 <div class="modalback" id="itemBack"><form class="modal" id="itemForm"><h2 id="itemHead">Nyt programpunkt</h2>
 <div class="field"><label>Aktivitet</label><input id="itTitle" required></div>
-<div class="field"><label>Beskrivelse <span style="font-weight:400">(valgfri)</span></label><div id="itDescBar" class="richbar"></div><div id="itDesc" class="richedit" contenteditable="true"></div><div class="sub" style="margin-top:5px">Brug <strong>▥ 2 kolonner</strong> til fx stationer eller grupper ved siden af hinanden. Skriv i hver kolonne og fortsæt under dem i fuld bredde.</div></div>
+<div class="field"><label>Beskrivelse <span style="font-weight:400">(valgfri)</span></label><div id="itDescBar" class="richbar"></div><div id="itDesc" class="richedit" contenteditable="true"></div><div class="sub" style="margin-top:5px">Vælg <strong>2, 3 eller 4 kolonner</strong>. Klik i en celle og vælg <strong>+ Tilføj række</strong> for flere stationer nedenunder. <strong>Enter</strong> laver et nyt afsnit i samme celle. Du kan fjerne rækker eller ændre antal kolonner senere.</div></div>
 <div class="field"><label>🎒 Du skal bruge… <span style="font-weight:400">(valgfri)</span></label><input id="itNeed" placeholder="Fx computer, lineal, bog, idrætstøj…"></div>
 <div class="grid2"><div class="field"><label>Arbejdsform <span class="sub">(vælg gerne flere i rækkefølge)</span></label><select id="itMode" class="hidden" aria-hidden="true" tabindex="-1"><option value="">Ingen</option><option>👩‍🏫 Fælles</option><option>👤 Individuelt</option><option>👥 Makker</option><option>👥👥 Gruppe</option><option>🚶 Bevægelse</option></select><div id="utModePicker" class="ut-mode-picker"></div><div id="utModeSequenceEditor" class="ut-mode-sequence-editor"></div><div class="sub" style="margin-top:6px">Klik på en arbejdsform for at tilføje den som næste trin. Træk de valgte trin for at ændre rækkefølgen. Den samme arbejdsform kan bruges flere gange. Fjern et enkelt trin med ×.</div></div><div class="field"><label>Forventet tid (valgfri)</label><div class="grid2" style="gap:8px"><div><label class="sub" for="itMinutes">Minutter</label><input id="itMinutes" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="0"></div><div><label class="sub" for="itSeconds">Sekunder</label><input id="itSeconds" type="number" min="0" max="59" step="1" inputmode="numeric" placeholder="0"></div></div></div></div><div id="utAgendaGroupFields" class="field" style="display:none;border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0"><label style="font-weight:650">👥 Inddeling til dette dagsordenspunkt (valgfrit)</label><div class="grid2" style="margin-top:8px"><div class="field"><label>Inddeling</label><select id="utAgendaGroupKind"><option value="none">Ingen kobling</option><option value="random">Dan tilfældige grupper/makkere</option><option value="manual">✏️ Opret inddeling selv</option></select></div><div class="field" id="utAgendaGroupPhaseWrap"><label>Koblingen hører til</label><select id="utAgendaGroupPhase"></select><div class="sub">Vælg det trin i arbejdsforløbet, hvor inddelingen skal bruges.</div></div><div class="field" id="utAgendaSavedWrap" style="display:none"></div><div class="field" id="utAgendaRandomWrap" style="display:none"><div class="grid2"><div class="field"><label>Fordel efter</label><select id="utAgendaRandomMode"><option value="size">Elever pr. gruppe</option><option value="count">Antal grupper</option></select></div><div class="field"><label id="utAgendaRandomNumberLabel">Elever pr. gruppe (2 = makkere)</label><input id="utAgendaGroupSize" type="number" min="2" max="30" value="2"></div></div><div id="utAgendaRandomHint" class="sub">Systemet fordeler en eventuel rest, så en elev ikke står alene.</div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><label style="display:flex;gap:8px;align-items:center"><input id="utAgendaGenderEnabled" type="checkbox" style="width:auto;min-height:auto"> Fordel efter køn</label><div id="utAgendaGenderModeWrap" style="display:none;margin:7px 0 0 26px"><select id="utAgendaGenderMode"><option value="same">Piger med piger og drenge med drenge</option><option value="mix">Bland kønnene så vidt muligt</option></select><div class="sub">Elever uden registreret køn behandles neutralt.</div></div></div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><label style="font-weight:650">⚠️ Elever der ikke må være sammen</label><div class="sub">Tilføj kun de kombinationer, du vil undgå på dette punkt.</div><div class="toolrow" style="margin-top:7px"><select id="utAgendaAvoidA" style="min-width:140px"></select><select id="utAgendaAvoidB" style="min-width:140px"></select><button class="btn" id="utAgendaAvoidAdd" type="button">+ Tilføj</button></div><div id="utAgendaAvoidList" style="margin-top:7px"></div></div></div></div><div id="utManualTools" style="display:none;margin:8px 0"><button class="btn" id="utManualOpen" type="button">✏️ Fordel eleverne</button><button class="btn" id="utManualSave" type="button" style="margin-left:6px">💾 Gem som fast inddeling</button><span id="utManualSummary" class="sub" style="margin-left:8px"></span></div><div class="sub">Inddelingen aktiveres, når punktet bliver det næste på dagsordenen. Du kan stadig skifte manuelt i gruppeværktøjet.</div>
 <div id="utAgendaExtras" style="display:none;border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
@@ -2194,7 +2209,7 @@ function utRenderStudentDrawPrepOptions(){
  if(!students.length){const empty=document.createElement('div');empty.className='sub';empty.textContent=c?'Ingen elever er med under Dagens elever.':'Knyt en klasse til tavlen for at vælge elever.';list.append(empty);return}
  students.forEach(name=>{const label=document.createElement('label');label.style.cssText='display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper)';const cb=document.createElement('input');cb.type='checkbox';cb.style.width='auto';cb.checked=selected.has(name);cb.onchange=()=>{if(cb.checked){if(!utStudentDrawExcludeDraft.includes(name))utStudentDrawExcludeDraft.push(name)}else utStudentDrawExcludeDraft=utStudentDrawExcludeDraft.filter(n=>n!==name)};const tx=document.createElement('span');tx.textContent=name;label.append(cb,tx);list.append(label)})
 }
-function editItem(x=null){editingItem=x?.id||null;itemHead.textContent=x?"Redigér programpunkt":"Nyt programpunkt";itTitle.value=x?.title||"";itDesc.innerHTML=x?.desc||"";itNeed.value=x?.need||"";utWorkModesDraft=utItemModes(x);itMode.value=utWorkModesDraft.at(-1)||"";utRenderWorkModePicker();{const tp=utAgendaTimeParts(x?.mins);const minEl=document.getElementById("itMinutes"),secEl=document.getElementById("itSeconds");if(minEl)minEl.value=x?.mins?tp.minutes:"";if(secEl)secEl.value=x?.mins&&tp.seconds?tp.seconds:"";}itLink.value="";const slideStartInput=document.getElementById("utSlideStart");if(slideStartInput)slideStartInput.value="";utRefreshSlideStartField();const studentDraw=document.getElementById('utAgendaStudentDrawEnabled');if(studentDraw)studentDraw.checked=!!x?.utShowStudentDraw;const showCount=document.getElementById('utAgendaStudentDrawShowCount');if(showCount)showCount.checked=x?.utStudentDrawShowCount!==false;utStudentDrawExcludeDraft=[...(Array.isArray(x?.utStudentDrawExcluded)?x.utStudentDrawExcluded:(Array.isArray(x?.utStudentDraw?.excluded)?x.utStudentDraw.excluded:[]))];const materialNameInput=document.getElementById('utMaterialDisplayName');if(materialNameInput)materialNameInput.value="";pendingMaterialFile=null;materialFile.value="";materialFileName.textContent="";pdfStartPage.value=1;pdfStartField.classList.add("hidden");utAttachmentDraft=utItemAttachmentList(x).map(a=>({...a}));utItemThumbDraft=x?.thumbnail?{...x.thumbnail}:null;utRenderAttachmentDraft();utRenderThumbEditor();deleteItem.style.display=x?"block":"none";show(itemBack);utAgendaSetupFields(x);utRenderStudentDrawPrepOptions();itTitle.focus()}
+function editItem(x=null){editingItem=x?.id||null;itemHead.textContent=x?"Redigér programpunkt":"Nyt programpunkt";itTitle.value=x?.title||"";itDesc.innerHTML=x?.desc||"";itDesc._utSavedRange=null;utPrepareColumnEditors(itDesc);itNeed.value=x?.need||"";utWorkModesDraft=utItemModes(x);itMode.value=utWorkModesDraft.at(-1)||"";utRenderWorkModePicker();{const tp=utAgendaTimeParts(x?.mins);const minEl=document.getElementById("itMinutes"),secEl=document.getElementById("itSeconds");if(minEl)minEl.value=x?.mins?tp.minutes:"";if(secEl)secEl.value=x?.mins&&tp.seconds?tp.seconds:"";}itLink.value="";const slideStartInput=document.getElementById("utSlideStart");if(slideStartInput)slideStartInput.value="";utRefreshSlideStartField();const studentDraw=document.getElementById('utAgendaStudentDrawEnabled');if(studentDraw)studentDraw.checked=!!x?.utShowStudentDraw;const showCount=document.getElementById('utAgendaStudentDrawShowCount');if(showCount)showCount.checked=x?.utStudentDrawShowCount!==false;utStudentDrawExcludeDraft=[...(Array.isArray(x?.utStudentDrawExcluded)?x.utStudentDrawExcluded:(Array.isArray(x?.utStudentDraw?.excluded)?x.utStudentDraw.excluded:[]))];const materialNameInput=document.getElementById('utMaterialDisplayName');if(materialNameInput)materialNameInput.value="";pendingMaterialFile=null;materialFile.value="";materialFileName.textContent="";pdfStartPage.value=1;pdfStartField.classList.add("hidden");utAttachmentDraft=utItemAttachmentList(x).map(a=>({...a}));utItemThumbDraft=x?.thumbnail?{...x.thumbnail}:null;utRenderAttachmentDraft();utRenderThumbEditor();deleteItem.style.display=x?"block":"none";show(itemBack);utAgendaSetupFields(x);utRenderStudentDrawPrepOptions();itTitle.focus()}
 itMode.addEventListener('change',()=>{if(itMode.value)utWorkModesDraft.push(itMode.value);utRenderWorkModePicker();utAfterWorkModeChange()});document.getElementById('utAgendaStudentDrawEnabled')?.addEventListener('change',utRenderStudentDrawPrepOptions);newItem.onclick=()=>editItem();
 async function utSaveAgendaItem(){
  try{
@@ -3309,21 +3324,31 @@ prevWeek.onclick=()=>{weekStart.setDate(weekStart.getDate()-7);renderSchedule()}
 function cleanRich(html){
  let t=document.createElement("template");t.innerHTML=html;
  t.content.querySelectorAll("script,style,iframe,object,embed,img,a").forEach(x=>x.remove());
- // Tidligere fjernede rensningen alle klasser. Bevar KUN de to godkendte
- // layoutklasser, ellers forsvinder kolonneopstillingen når punktet gemmes.
+ // Bevar kun godkendte kolonne-/rækkestrukturer og deres antal. Contenteditable,
+ // inline styling og øvrige redigeringsattributter gemmes aldrig på elevtavlen.
  const allowed=new Map();
  t.content.querySelectorAll('div.ut-columns').forEach(group=>{
-  const columns=[...group.children].filter(c=>c.tagName==='DIV'&&c.classList.contains('ut-column'));
-  if(columns.length!==2||group.children.length!==2)return;
-  allowed.set(group,'ut-columns');columns.forEach(c=>allowed.set(c,'ut-column'));
+  const children=[...group.children];
+  const hasRows=children.length>0&&children.every(x=>x.tagName==='DIV'&&x.classList.contains('ut-column-row'));
+  const rows=hasRows?children:[group]; // Ældre indhold med direkte kolonner.
+  if(!rows.length)return;
+  const columns=rows.map(row=>hasRows?[...row.children]:children);
+  const count=columns[0]?.length;
+  if(count<2||count>4||columns.some(cols=>cols.length!==count||cols.some(c=>c.tagName!=='DIV'||!c.classList.contains('ut-column'))))return;
+  allowed.set(group,{name:'ut-columns',count});
+  rows.forEach((row,i)=>{
+   if(hasRows)allowed.set(row,{name:'ut-column-row'});
+   columns[i].forEach(col=>allowed.set(col,{name:'ut-column'}));
+  });
  });
- t.content.querySelectorAll("*").forEach(el=>{
+ t.content.querySelectorAll('*').forEach(el=>{
   [...el.attributes].forEach(a=>el.removeAttribute(a.name));
-  if(allowed.has(el))el.className=allowed.get(el);
+  const cfg=allowed.get(el);
+  if(cfg){el.className=cfg.name;if(cfg.count)el.dataset.columns=String(cfg.count)}
  });
  return t.innerHTML.trim();
 }
-function richCmd(editor,cmd,val=null){editor.focus();document.execCommand(cmd,false,val)}
+function richCmd(editor,cmd,val=null){utRestoreEditorRange(editor);document.execCommand(cmd,false,val)}
 function richListLevel(editor,direction){
  utRestoreEditorRange(editor);
  const sel=getSelection();if(!sel||!sel.rangeCount)return;
@@ -3364,10 +3389,17 @@ function richListLevel(editor,direction){
  }
  editor.dispatchEvent(new Event("input",{bubbles:true}));
 }
-function insertSymbol(editor,sym){editor.focus();document.execCommand("insertText",false,sym)}
+function insertSymbol(editor,sym){utRestoreEditorRange(editor);document.execCommand("insertText",false,sym)}
 function utRangeInside(editor,range){try{let n=range.commonAncestorContainer;return n===editor||editor.contains(n.nodeType===1?n:n.parentNode)}catch(e){return false}}
 function utSaveEditorRange(editor){const sel=getSelection();if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);if(utRangeInside(editor,r))editor._utSavedRange=r.cloneRange()}}
-function utRestoreEditorRange(editor){editor.focus();const sel=getSelection();if(editor._utSavedRange&&sel){sel.removeAllRanges();sel.addRange(editor._utSavedRange)}}
+function utRestoreEditorRange(editor){
+ const saved=editor._utSavedRange;
+ let node=saved?.startContainer;
+ if(node&&node.nodeType!==1)node=node.parentElement;
+ const col=node?.closest?.('.ut-column[contenteditable="true"]');
+ (col&&editor.contains(col)?col:editor).focus();
+ const sel=getSelection();if(saved&&sel&&utRangeInside(editor,saved)){sel.removeAllRanges();sel.addRange(saved)}
+}
 function utInsertEmoji(editor,emoji){utRestoreEditorRange(editor);document.execCommand("insertText",false,emoji);utSaveEditorRange(editor);editor.dispatchEvent(new Event("input",{bubbles:true}))}
 function utAddEmojiPicker(bar,editor){
  const wrap=document.createElement("span");wrap.className="ut-emoji-wrap";
@@ -3394,55 +3426,119 @@ function utAddEmojiPicker(bar,editor){
  wrap.append(trigger,picker);bar.append(wrap);
  editor.addEventListener("keyup",()=>utSaveEditorRange(editor));editor.addEventListener("mouseup",()=>utSaveEditorRange(editor));editor.addEventListener("input",()=>utSaveEditorRange(editor));editor.addEventListener("focus",()=>utSaveEditorRange(editor));
 }
+function utColumnEmptyParagraph(){const p=document.createElement('p');p.append(document.createElement('br'));return p}
+function utColumnCreate(){const col=document.createElement('div');col.className='ut-column';col.contentEditable='true';col.spellcheck=true;col.append(utColumnEmptyParagraph());return col}
+function utColumnRowCreate(count){
+ const row=document.createElement('div');row.className='ut-column-row';row.contentEditable='false';
+ for(let i=0;i<count;i++)row.append(utColumnCreate());
+ return row;
+}
+function utColumnRows(grid){return [...grid.children].filter(el=>el.matches('div.ut-column-row'))}
+function utPrepareColumnEditors(editor){
+ editor.querySelectorAll('.ut-columns').forEach(grid=>{
+  // Gammelt gemt indhold havde kolonner direkte i gruppen; pak dem i én række.
+  if([...grid.children].every(c=>c.matches('div.ut-column'))&&grid.children.length>=2&&grid.children.length<=4){
+   const row=document.createElement('div');row.className='ut-column-row';
+   while(grid.firstChild)row.append(grid.firstChild);
+   grid.append(row);
+  }
+  const rows=utColumnRows(grid),count=rows[0]?.children.length;
+  if(!rows.length||count<2||count>4||rows.some(row=>row.children.length!==count||[...row.children].some(col=>!col.matches('div.ut-column'))))return;
+  grid.dataset.columns=String(count);grid.contentEditable='false';
+  rows.forEach(row=>{
+   row.contentEditable='false';
+   [...row.children].forEach(col=>{
+    col.contentEditable='true';col.spellcheck=true;
+    if(!col.childNodes.length)col.append(utColumnEmptyParagraph());
+   });
+  });
+ });
+}
 function utColumnsCaret(editor,node,atStart=true){
  const r=document.createRange(),sel=getSelection();
- r.selectNodeContents(node);r.collapse(atStart);
- editor.focus();sel.removeAllRanges();sel.addRange(r);
- utSaveEditorRange(editor);
+ const col=node.closest?.('.ut-column[contenteditable="true"]');
+ (col||editor).focus();r.selectNodeContents(node);r.collapse(atStart);
+ sel.removeAllRanges();sel.addRange(r);utSaveEditorRange(editor);
 }
-function utInsertTwoColumns(editor){
- // Brug det senest gemte markørsted (toolbar-knappen tager ellers fokus).
- utRestoreEditorRange(editor);
- const sel=getSelection(),r=sel&&sel.rangeCount?sel.getRangeAt(0):null;
- let focusNode=r?.startContainer||editor;
- if(focusNode.nodeType!==1)focusNode=focusNode.parentElement;
- const already=focusNode.closest?.('.ut-columns');
- if(already&&editor.contains(already)){
-  const next=already.querySelector('.ut-column:nth-child(2)');
-  if(next)utColumnsCaret(editor,next);return;
- }
- // Indsæt efter afsnittet, hvor markøren står. Så forbliver tekst før/efter
- // i fuld bredde, og vi undgår at sætte et grid IND i en punktopstilling.
- let after=focusNode;
- while(after&&after!==editor&&after.parentElement!==editor)after=after.parentElement;
- const grid=document.createElement('div');grid.className='ut-columns';
- for(let k=0;k<2;k++){
-  const col=document.createElement('div');col.className='ut-column';
-  const para=document.createElement('p');para.append(document.createElement('br'));col.append(para);grid.append(col);
- }
- if(after&&after!==editor)after.after(grid);else editor.append(grid);
- // Et normalt afsnit efter kolonnerne gør det muligt at fortsætte i fuld bredde.
- if(!grid.nextElementSibling){const para=document.createElement('p');para.append(document.createElement('br'));grid.after(para)}
- utColumnsCaret(editor,grid.firstElementChild.firstElementChild);
- editor.dispatchEvent(new Event('input',{bubbles:true}));
-}
-function utRemoveTwoColumns(editor){
+function utSelectedColumns(editor){
  utRestoreEditorRange(editor);
  const sel=getSelection(),r=sel&&sel.rangeCount?sel.getRangeAt(0):null;
  let node=r?.startContainer;
  if(node&&node.nodeType!==1)node=node.parentElement;
  const grid=node?.closest?.('.ut-columns');
- if(!grid||!editor.contains(grid)){
-  alert('Klik først i en af de to kolonner, du vil fjerne.');return;
+ return grid&&editor.contains(grid)?{grid,row:node.closest('.ut-column-row')}:null;
+}
+function utInsertColumns(editor,count){
+ if(![2,3,4].includes(count))return;
+ const selected=utSelectedColumns(editor);
+ if(selected){
+  // Ændr antal kolonner i samtlige rækker; flyt overskydende tekst til
+  // sidste beholdte kolonne, så ændringen aldrig sletter brugerens indhold.
+  const grid=selected.grid,rows=utColumnRows(grid);
+  rows.forEach(row=>{
+   const cols=[...row.children];
+   if(count<cols.length){
+    const last=cols[count-1];
+    cols.slice(count).forEach(col=>{
+     if(col.textContent.trim()){
+      last.append(utColumnEmptyParagraph());
+      while(col.firstChild)last.append(col.firstChild);
+     }
+     col.remove();
+    });
+   }else if(count>cols.length){for(let i=cols.length;i<count;i++)row.append(utColumnCreate())}
+  });
+  grid.dataset.columns=String(count);
+  const row=selected.row&&grid.contains(selected.row)?selected.row:rows[0];
+  const focus=row.firstElementChild;
+  utColumnsCaret(editor,focus.querySelector('p')||focus);
+  editor.dispatchEvent(new Event('input',{bubbles:true}));return;
  }
- // Fjern kun kolonneopstillingen: det indtastede indhold bevares i rækkefølge.
- const fragment=document.createDocumentFragment();
- grid.querySelectorAll(':scope > .ut-column').forEach(col=>{
+ const sel=getSelection(),r=sel&&sel.rangeCount?sel.getRangeAt(0):null;
+ let focusNode=r?.startContainer||editor;
+ if(focusNode.nodeType!==1)focusNode=focusNode.parentElement;
+ let after=focusNode;
+ while(after&&after!==editor&&after.parentElement!==editor)after=after.parentElement;
+ const grid=document.createElement('div');grid.className='ut-columns';grid.dataset.columns=String(count);grid.contentEditable='false';
+ const row=utColumnRowCreate(count);grid.append(row);
+ if(after&&after!==editor)after.after(grid);else editor.append(grid);
+ if(!grid.nextElementSibling)grid.after(utColumnEmptyParagraph());
+ utColumnsCaret(editor,row.firstElementChild.firstElementChild);
+ editor.dispatchEvent(new Event('input',{bubbles:true}));
+}
+function utAddColumnRow(editor){
+ const selected=utSelectedColumns(editor);
+ if(!selected){alert('Klik først i en celle i opstillingen, hvor du vil tilføje en række.');return}
+ const {grid,row}=selected,count=Number(grid.dataset.columns)||utColumnRows(grid)[0].children.length;
+ const newRow=utColumnRowCreate(count);
+ if(row)row.after(newRow);else grid.append(newRow);
+ utColumnsCaret(editor,newRow.firstElementChild.firstElementChild);
+ editor.dispatchEvent(new Event('input',{bubbles:true}));
+}
+function utRemoveColumnRow(editor){
+ const selected=utSelectedColumns(editor);
+ if(!selected||!selected.row){alert('Klik først i en celle i den række, du vil fjerne.');return}
+ const {grid,row}=selected,rows=utColumnRows(grid);
+ if(rows.length<=1){alert('Dette er den eneste række. Brug »Fjern kolonner« for at opløse opstillingen uden at miste teksten.');return}
+ if(row.textContent.trim()&&!confirm('Vil du fjerne rækken og dens indhold?'))return;
+ const next=row.nextElementSibling||row.previousElementSibling;
+ row.remove();
+ if(next){const col=next.querySelector('.ut-column');utColumnsCaret(editor,col.querySelector('p')||col)}
+ editor.dispatchEvent(new Event('input',{bubbles:true}));
+}
+function utRemoveColumns(editor){
+ const selected=utSelectedColumns(editor);
+ if(!selected){alert('Klik først i en af kolonnerne, du vil fjerne.');return}
+ const grid=selected.grid,fragment=document.createDocumentFragment();
+ // Læs alle rækker fra venstre mod højre, og bevar samtlige tekstafsnit.
+ const cols=utColumnRows(grid).flatMap(row=>[...row.children]);
+ cols.forEach((col,i)=>{
+  if(i>0)fragment.append(utColumnEmptyParagraph());
   while(col.firstChild)fragment.append(col.firstChild);
  });
  const after=grid.nextElementSibling;
- const end=after&&after.matches('p,div')&&!after.textContent.trim()?after:document.createElement('p');
- if(!end.isConnected){end.append(document.createElement('br'));fragment.append(end)}
+ const end=after&&after.matches('p,div')&&!after.textContent.trim()?after:utColumnEmptyParagraph();
+ if(!end.isConnected)fragment.append(end);
  grid.replaceWith(fragment);utColumnsCaret(editor,end);
  editor.dispatchEvent(new Event('input',{bubbles:true}));
 }
@@ -3466,12 +3562,23 @@ function makeToolbar(bar,editor){
  specs.forEach(([txt,title,fn])=>{let b=document.createElement("button");b.type="button";b.innerHTML=txt==="I"?"<i>I</i>":txt==="U"?"<u>U</u>":txt==="B"?"<b>B</b>":txt;b.title=title;b.onmousedown=e=>{e.preventDefault();utSaveEditorRange(editor);fn();utSaveEditorRange(editor)};bar.append(b)});
  utAddEmojiPicker(bar,editor);
  if(editor===itDesc){
-  const two=document.createElement('button');two.type='button';two.className='ut-columns-tool';
-  two.textContent='▥ 2 kolonner';two.title='Indsæt et afsnit med to kolonner efter det aktuelle afsnit';
-  two.onmousedown=e=>{e.preventDefault();utInsertTwoColumns(editor)};bar.append(two);
+  const picker=document.createElement('select');picker.className='ut-columns-tool';
+  picker.title='Indsæt 2, 3 eller 4 kolonner, eller ændr antallet i den valgte opstilling';
+  picker.setAttribute('aria-label','Vælg antal kolonner');
+  picker.add(new Option('▥ Kolonner…',''));
+  [2,3,4].forEach(n=>picker.add(new Option(n+' kolonner',String(n))));
+  picker.onpointerdown=()=>utSaveEditorRange(editor);
+  picker.onchange=()=>{const count=Number(picker.value);picker.value='';if(count)utInsertColumns(editor,count)};
+  bar.append(picker);
+  const addRow=document.createElement('button');addRow.type='button';addRow.className='ut-columns-row-tool';
+  addRow.textContent='+ Tilføj række';addRow.title='Tilføj en række under den valgte række';
+  addRow.onmousedown=e=>{e.preventDefault();utAddColumnRow(editor)};bar.append(addRow);
+  const removeRow=document.createElement('button');removeRow.type='button';removeRow.className='ut-columns-remove';
+  removeRow.textContent='Fjern række';removeRow.title='Fjern den valgte række';
+  removeRow.onmousedown=e=>{e.preventDefault();utRemoveColumnRow(editor)};bar.append(removeRow);
   const remove=document.createElement('button');remove.type='button';remove.className='ut-columns-remove';
-  remove.textContent='Fjern kolonner';remove.title='Fjern kolonneopstillingen, men behold teksten';
-  remove.onmousedown=e=>{e.preventDefault();utRemoveTwoColumns(editor)};bar.append(remove);
+  remove.textContent='Fjern kolonner';remove.title='Opløs kolonneopstillingen, men behold teksten';
+  remove.onmousedown=e=>{e.preventDefault();utRemoveColumns(editor)};bar.append(remove);
  }
 }
 makeToolbar(itDescBar,itDesc);makeToolbar(wTextBar,wText);
