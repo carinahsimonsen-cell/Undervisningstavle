@@ -169,6 +169,11 @@ body.viewing #boardView.ut-agenda-dense .agenda .item.current .title{font-size:c
 .richedit .ut-text-red,.richdisplay .ut-text-red{color:#A11D32!important}
 .richedit .ut-text-green,.richdisplay .ut-text-green{color:#17633E!important}
 
+/* Vis kun kolonnevejledningen, når beskrivelsen faktisk indeholder kolonner.
+   :has() opdaterer visningen automatisk ved indsættelse og fjernelse af opstillingen. */
+#itemBack #itDesc + .ut-column-guide{display:none}
+#itemBack #itDesc:has(.ut-columns) + .ut-column-guide{display:block}
+
 /* Kolonneopstillinger har selvstændige skrivefelter og kan bestå af flere rækker. */
 .ut-columns{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(10px,1.3vw,17px);width:100%;max-width:100%;margin:12px 0;box-sizing:border-box;--ut-col-gap:clamp(12px,1.6vw,22px)}
 .ut-column-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ut-col-gap);align-items:start;min-width:0;box-sizing:border-box}
@@ -1215,7 +1220,7 @@ body.viewing #boardView .ut-board-topic-pill{
 
 <div class="modalback" id="itemBack"><form class="modal" id="itemForm"><h2 id="itemHead">Nyt programpunkt</h2>
 <div class="field"><label>Aktivitet</label><input id="itTitle" required></div>
-<div class="field"><label>Beskrivelse <span style="font-weight:400">(valgfri)</span></label><div id="itDescBar" class="richbar"></div><div id="itDesc" class="richedit" contenteditable="true"></div><div class="sub" style="margin-top:5px">Vælg <strong>2, 3 eller 4 kolonner</strong>. Når du indsætter kolonner, vises <strong>+ Tilføj række</strong> og <strong>Fjern række</strong> under hver række. <strong>Enter</strong> laver et nyt afsnit i samme celle. Du kan også ændre antal kolonner senere.</div></div>
+<div class="field"><label>Beskrivelse <span style="font-weight:400">(valgfri)</span></label><div id="itDescBar" class="richbar"></div><div id="itDesc" class="richedit" contenteditable="true"></div><div class="sub ut-column-guide" style="margin-top:5px">Vælg <strong>2, 3 eller 4 kolonner</strong>. Når du indsætter kolonner, vises <strong>+ Tilføj række</strong> og <strong>Fjern række</strong> under hver række. <strong>Enter</strong> laver et nyt afsnit i samme celle. Du kan også ændre antal kolonner senere.</div></div>
 <div class="field"><label>🎒 Du skal bruge… <span style="font-weight:400">(valgfri)</span></label><input id="itNeed" placeholder="Fx computer, lineal, bog, idrætstøj…"></div>
 <div class="grid2"><div class="field"><label>Arbejdsform <span class="sub">(vælg gerne flere i rækkefølge)</span></label><select id="itMode" class="hidden" aria-hidden="true" tabindex="-1"><option value="">Ingen</option><option>👩‍🏫 Fælles</option><option>👤 Individuelt</option><option>👥 Makker</option><option>👥👥 Gruppe</option><option>🚶 Bevægelse</option></select><div id="utModePicker" class="ut-mode-picker"></div><div id="utModeSequenceEditor" class="ut-mode-sequence-editor"></div><div class="sub" style="margin-top:6px">Klik på en arbejdsform for at tilføje den som næste trin. Træk de valgte trin for at ændre rækkefølgen. Den samme arbejdsform kan bruges flere gange. Fjern et enkelt trin med ×.</div></div><div class="field"><label>Forventet tid (valgfri)</label><div class="grid2" style="gap:8px"><div><label class="sub" for="itMinutes">Minutter</label><input id="itMinutes" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="0"></div><div><label class="sub" for="itSeconds">Sekunder</label><input id="itSeconds" type="number" min="0" max="59" step="1" inputmode="numeric" placeholder="0"></div></div></div></div><div id="utAgendaGroupFields" class="field" style="display:none;border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0"><label style="font-weight:650">👥 Inddeling til dette dagsordenspunkt (valgfrit)</label><div class="grid2" style="margin-top:8px"><div class="field"><label>Inddeling</label><select id="utAgendaGroupKind"><option value="none">Ingen kobling</option><option value="random">Dan tilfældige grupper/makkere</option><option value="manual">✏️ Opret inddeling selv</option></select></div><div class="field" id="utAgendaGroupPhaseWrap"><label>Koblingen hører til</label><select id="utAgendaGroupPhase"></select><div class="sub">Vælg det trin i arbejdsforløbet, hvor inddelingen skal bruges.</div></div><div class="field" id="utAgendaSavedWrap" style="display:none"></div><div class="field" id="utAgendaRandomWrap" style="display:none"><div class="grid2"><div class="field"><label>Fordel efter</label><select id="utAgendaRandomMode"><option value="size">Elever pr. gruppe</option><option value="count">Antal grupper</option></select></div><div class="field"><label id="utAgendaRandomNumberLabel">Elever pr. gruppe (2 = makkere)</label><input id="utAgendaGroupSize" type="number" min="2" max="30" value="2"></div></div><div id="utAgendaRandomHint" class="sub">Systemet fordeler en eventuel rest, så en elev ikke står alene.</div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><label style="display:flex;gap:8px;align-items:center"><input id="utAgendaGenderEnabled" type="checkbox" style="width:auto;min-height:auto"> Fordel efter køn</label><div id="utAgendaGenderModeWrap" style="display:none;margin:7px 0 0 26px"><select id="utAgendaGenderMode"><option value="same">Piger med piger og drenge med drenge</option><option value="mix">Bland kønnene så vidt muligt</option></select><div class="sub">Elever uden registreret køn behandles neutralt.</div></div></div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><label style="font-weight:650">⚠️ Elever der ikke må være sammen</label><div class="sub">Tilføj kun de kombinationer, du vil undgå på dette punkt.</div><div class="toolrow" style="margin-top:7px"><select id="utAgendaAvoidA" style="min-width:140px"></select><select id="utAgendaAvoidB" style="min-width:140px"></select><button class="btn" id="utAgendaAvoidAdd" type="button">+ Tilføj</button></div><div id="utAgendaAvoidList" style="margin-top:7px"></div></div></div></div><div id="utManualTools" style="display:none;margin:8px 0"><button class="btn" id="utManualOpen" type="button">✏️ Fordel eleverne</button><button class="btn" id="utManualSave" type="button" style="margin-left:6px">💾 Gem som fast inddeling</button><span id="utManualSummary" class="sub" style="margin-left:8px"></span></div><div class="sub">Inddelingen aktiveres, når punktet bliver det næste på dagsordenen. Du kan stadig skifte manuelt i gruppeværktøjet.</div>
 <div id="utAgendaExtras" style="display:none;border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
@@ -1242,6 +1247,18 @@ body.viewing #boardView .ut-board-topic-pill{
     <div class="sub" style="margin:5px 0 8px">Vælg først inddelingen ovenfor. Aktiviteten vises bagefter under <strong>Vis inddeling</strong> – der kommer ingen ekstra knap på dagsordenen.</div>
     <select id="utAgendaActivityKind"><option value="none">Ingen ekstra gruppeaktivitet</option><option value="rotation">🔄 Samtalerotation – behold par/grupper</option><option value="matrix">🧩 Matrixgrupper – bland eleverne</option></select>
     <div id="utAgendaActivityOptions" style="margin-top:10px"></div>
+<style id="ut-activity-preview-style">
+.ut-activity-editor-preview{margin:13px 0 4px;border:1px solid var(--line);border-radius:10px;background:#f8faf8;padding:11px 12px;}
+.ut-activity-editor-preview>summary{cursor:pointer;font-weight:700;font-size:15px;}
+.ut-activity-editor-preview .sub{margin:8px 0;}
+.ut-activity-preview-tools{display:flex;align-items:center;gap:8px;margin:8px 0;}
+.ut-activity-preview-tools label{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;font-weight:600;}
+.ut-activity-preview-tools select{width:auto;min-width:180px;max-width:100%;}
+.ut-activity-editor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:8px;}
+.ut-activity-editor-card{min-width:0;padding:9px 10px;border:1px solid #d7dfdb;border-radius:8px;background:#fff;color:#26362d;font-size:13px;line-height:1.4;overflow-wrap:anywhere;}
+.ut-activity-editor-card>strong{display:block;color:#24513d;font-size:14px;margin-bottom:5px;}
+.ut-activity-editor-card>div+div{border-top:1px solid #edf0ec;margin-top:4px;padding-top:4px;}
+</style>
   </div>
 </div>
 <div class="field" id="utAgendaPointExtras" style="border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0">
@@ -1836,6 +1853,52 @@ function utAgendaEditorPreviewGroups(groupCfg){
  }else if(groupCfg?.kind==='random'&&groupCfg.groups?.length)groups=groupCfg.groups.map(g=>[...g]);
  return groups.map(g=>g.filter(n=>activeSet.has(n))).filter(g=>g.length);
 }
+
+/* Prepare a concrete group roster in the editor. For a random division, freeze
+   the previewed roster into the draft, so the saved board uses these SAME pupils. */
+function utAgendaEnsureActivityPreviewGroups(cfg){
+ let groups=utAgendaEditorPreviewGroups(cfg);
+ if(!groups.length&&cfg?.kind==='random'){
+  const students=activeStudents();if(!students.length)return [];
+  const mode=cfg.mode||'size',num=mode==='count'?Math.max(1,Number(cfg.count)||Number(cfg.size)||1):Math.max(2,Number(cfg.size)||2);
+  const made=utGenerateConstrainedRandomGroups(students,num,cfg.rules||{},mode);
+  if(!made?.length)return [];
+  const matching=utGroupLinksDraft.find(x=>x.phaseIndex===cfg.phaseIndex&&x.kind==='random');
+  if(matching)matching.groups=made.map(g=>[...g]);
+  cfg.groups=made.map(g=>[...g]);groups=utAgendaEditorPreviewGroups(cfg);
+ }
+ return groups;
+}
+function utAgendaActivityAppendPreview(host,original,rounds,kind,p){
+ const section=document.createElement('details');section.className='ut-activity-editor-preview';section.open=true;
+ const summary=document.createElement('summary');summary.textContent='👁 Forhåndsvisning af grupper og runder';section.append(summary);
+ const intro=document.createElement('p');intro.className='sub';intro.textContent='Kontrollér den faktiske fordeling, inden du gemmer. Elevernes oprindelige grupper ændres ikke.';section.append(intro);
+ const bar=document.createElement('div');bar.className='ut-activity-preview-tools';
+ const label=document.createElement('label');label.textContent='Vis ';label.setAttribute('for','utActivityEditorPreviewRound');
+ const picker=document.createElement('select');picker.id='utActivityEditorPreviewRound';picker.className='btn';picker.add(new Option('Oprindelige grupper','original'));
+ (rounds||[]).forEach((_,i)=>picker.add(new Option((kind==='rotation'?'Samtalerunde ':'Matrixrunde ')+(i+1),String(i))));
+ const idx=Math.max(0,Math.min(rounds.length-1,Number(p.previewIndex)||0));picker.value=String(idx);
+ label.append(picker);bar.append(label);section.append(bar);
+ const grid=document.createElement('div');grid.className='ut-activity-editor-grid';section.append(grid);
+ function render(){
+  grid.replaceChildren();const originalView=picker.value==='original';
+  if(!originalView)p.previewIndex=Number(picker.value);
+  const chosen=originalView?original:(rounds[Number(picker.value)]||[]);
+  const noun=original.every(g=>g.length<=2)?'Par ':'Gruppe ';
+  chosen.forEach((members,i)=>{
+   const card=document.createElement('div');card.className='ut-activity-editor-card';
+   const heading=document.createElement('strong');heading.textContent=originalView?noun+(i+1):kind==='rotation'?'Samtale '+(i+1):'Matrixgruppe '+(i+1);card.append(heading);
+   if(originalView){const names=document.createElement('div');names.textContent=members.join(' · ');card.append(names)}
+   else if(kind==='rotation'){
+    members.forEach(j=>{const source=document.createElement('div');const b=document.createElement('b');b.textContent=noun+(j+1)+': ';source.append(b,document.createTextNode((original[j]||[]).join(', ')));card.append(source)})
+   }else{
+    members.forEach(m=>{const person=document.createElement('div');person.textContent=m.name+' (gruppe '+(m.source+1)+')';card.append(person)})
+   }
+   grid.append(card);
+  });
+ }
+ picker.onchange=render;render();host.append(section);
+}
 function utOutdoorGroupChoiceButton(title,names,selected,onClick){
  const btn=document.createElement('button');btn.type='button';btn.className='btn ut-outdoor-group-choice';
  const head=document.createElement('span');head.className='ut-outdoor-group-title';head.textContent=title+(selected?' 🚪 Ude':'');btn.append(head);
@@ -1904,25 +1967,18 @@ function utAgendaActivityEditorRefresh(){
  if(mode==='none')return;
  const data=ensure();
  const row=(label,element)=>{const wrap=document.createElement('label');wrap.className='ut-activity-field';wrap.style.margin='6px 0';const t=document.createElement('span');t.textContent=label;wrap.append(t,element);options.append(wrap);return wrap};
- function previewWarning(p,kind,roundCount){
-  let groups=utAgendaEditorPreviewGroups(cfg),estimated=false;
-  // For a not-yet-generated random grouping, an approximate group-size preview
-  // still allows a useful advance warning; the actual layout is checked again in Vis inddeling.
-  if(groups.length<2&&cfg.kind==='random'){
-   const pupils=activeStudents(),size=Math.max(2,Math.floor(Number(cfg.size)||2));
-   const groupCount=cfg.mode==='count'?Math.floor(Number(cfg.count)||Number(cfg.size)||1):Math.ceil(pupils.length/size);
-   if(pupils.length>=2&&groupCount>=2){
-    groups=Array.from({length:Math.min(groupCount,pupils.length)},()=>[]);
-    pupils.forEach((name,i)=>groups[i%groups.length].push(name));estimated=true;
-   }
-  }
-  if(groups.length<2){const msg=document.createElement('div');msg.className='sub';msg.textContent='Gentagelser kontrolleres, når den konkrete gruppeinddeling er dannet.';options.append(msg);return}
-  const rounds=kind==='rotation'?utActivityRoundRobin(groups.length,roundCount):utActivityMatrixRounds(groups,p.matrixCount,roundCount,p.seed||0);
-  const report=utActivityRepeatReport(rounds,kind);
-  utActivityAppendWarning(options,report,kind,p,null);
-  if(estimated){const msg=document.createElement('p');msg.className='sub';msg.textContent='Foreløbig kontrol ud fra gruppestørrelserne. Tavlen kontrollerer igen, når de faktiske grupper er dannet.';options.append(msg)}
+function previewAndWarning(p,kind,roundCount){
+ const groups=utAgendaEnsureActivityPreviewGroups(cfg);
+ if(groups.length<2){
+  const msg=document.createElement('div');msg.className='sub';
+  msg.textContent='Dan eller vælg mindst to konkrete grupper ovenfor for at se samtalerne og kontrollere gentagelser.';
+  options.append(msg);return;
  }
- if(mode==='rotation'){
+ const rounds=kind==='rotation'?utActivityRoundRobin(groups.length,roundCount):utActivityMatrixRounds(groups,p.matrixCount,roundCount,p.seed||0);
+ const report=utActivityRepeatReport(rounds,kind);
+ utActivityAppendWarning(options,report,kind,p,null);
+ utAgendaActivityAppendPreview(options,groups,rounds,kind,p);
+} if(mode==='rotation'){
   const p=data.rotation||(data.rotation={roundCount:3,roundIndex:0,minutes:[]});
   const input=document.createElement('input');input.type='number';input.min='1';input.max='12';input.step='1';input.className='ut-activity-number';input.value=String(Math.max(1,Math.min(12,Number(p.roundCount)||3)));
   row('Antal samtalerunder',input);
@@ -1937,7 +1993,7 @@ function utAgendaActivityEditorRefresh(){
    t.onchange=()=>{const v=t.value.trim();p.minutes[i]=v?Math.max(1,Math.min(180,Math.floor(Number(v)||1))):0;t.value=p.minutes[i]?String(p.minutes[i]):''};
    box.append(txt,t);list.append(box);
   }
-  previewWarning(p,'rotation',Math.max(1,Math.min(12,Math.floor(Number(p.roundCount)||3))));
+  previewAndWarning(p,'rotation',Math.max(1,Math.min(12,Math.floor(Number(p.roundCount)||3))));
  }else{
   const p=data.matrix||(data.matrix={matrixCount:4,seed:0,roundCount:1,roundIndex:0});
   const source=utAgendaEditorPreviewGroups(cfg);
@@ -1952,7 +2008,7 @@ function utAgendaActivityEditorRefresh(){
   mRounds.onchange=()=>{p.roundCount=Math.max(1,Math.min(12,Math.floor(Number(mRounds.value)||1)));p.roundIndex=Math.min(Number(p.roundIndex)||0,p.roundCount-1);p.allowRepeats=false;utAgendaActivityEditorRefresh()};
   const desc=document.createElement('p');desc.className='sub';desc.textContent='Eleverne fordeles på nye grupper, så der så vidt muligt kun er én fra hver oprindelig gruppe.';options.append(desc);
   const reshuffle=document.createElement('button');reshuffle.type='button';reshuffle.className='btn';reshuffle.textContent='↻ Lav en anden fordeling';reshuffle.onclick=()=>{p.seed=(Number(p.seed)||0)+1;p.allowRepeats=false;utAgendaActivityEditorRefresh()};options.append(reshuffle);
-  previewWarning(p,'matrix',Math.max(1,Math.min(12,Math.floor(Number(p.roundCount)||1))));
+  previewAndWarning(p,'matrix',Math.max(1,Math.min(12,Math.floor(Number(p.roundCount)||1))));
  }
  }finally{utActivityEditorRendering=false}
 }
@@ -2087,7 +2143,7 @@ function openAgendaItemGroupsSingle(item,cfgOverride=null,showOriginal=false){
  const groups=utAgendaGroupsForItem(item,true);if(!groups.length)return alert('Der er ingen elever at vise i inddelingen.');
  document.querySelector('.ut-group-overlay')?.remove();const overlay=document.createElement('div');overlay.className='ut-group-overlay';const panel=document.createElement('div');panel.className='ut-group-panel';
  const head=document.createElement('div');head.className='ut-group-head';const h=document.createElement('h2');const set=item.utGroup.kind==='saved'?groupSetsForClass().find(x=>x.id===item.utGroup.setId):null;h.textContent='👥 '+(set?groupSetDisplayName(set):(item.utGroup.kind==='random'?boardText('Dagens inddeling',"Today's groups"):item.title||boardText('Inddeling','Grouping')));const close=document.createElement('button');close.className='btn';close.textContent=boardText('✕ Luk','✕ Close');head.append(h,close);
- if(utActivityConfigured(originalItem,cfgOverride)){const tabs=document.createElement('div');tabs.className='ut-group-activity-tabs';const orig=document.createElement('button');orig.type='button';orig.className='btn';orig.textContent='👥 Oprindelige grupper';orig.setAttribute('aria-selected','true');const act=document.createElement('button');act.type='button';act.className='btn';act.textContent='🔄 '+(utActivityLabel(originalItem,cfgOverride)==='matrixgrupper'?'Matrixgrupper':'Samtalerotation');act.setAttribute('aria-selected','false');act.onclick=()=>{stopFit();overlay.remove();utOpenGroupActivities(originalItem,cfgOverride)};tabs.append(orig,act);panel.append(tabs)}
+ if(utActivityConfigured(originalItem,cfgOverride)){const tabs=document.createElement('div');tabs.className='ut-group-activity-tabs';const orig=document.createElement('button');orig.type='button';orig.className='btn';orig.textContent='👥 Oprindelige grupper';orig.setAttribute('aria-selected','true');const act=document.createElement('button');act.type='button';act.className='btn';act.textContent=utActivityLabel(originalItem,cfgOverride)==='matrixgrupper'?boardText('🧩 Matrixgrupper','🧩 Matrix groups','🧩 Matrixgruppen'):boardText('🔄 Samtalerotation','🔄 Conversation rotation','🔄 Gesprächsrotation');act.setAttribute('aria-selected','false');act.onclick=()=>{stopFit();overlay.remove();utOpenGroupActivities(originalItem,cfgOverride)};tabs.append(orig,act);panel.append(tabs)}
  const scroll=document.createElement('div');scroll.className='ut-group-scroll';const grid=document.createElement('div');grid.className='ut-group-grid';const extras=utAgendaSettings(item)||{},pairMode=groups.every(x=>x.length<=2),combined=extras.meetingEnabled?utDiscussionGroups(groups,extras.meetings||[]):[];
  if(combined.length){h.textContent=boardText('👥 Sammensatte grupper','👥 Combined groups','👥 Zusammengesetzte Gruppen');combined.forEach((d,displayIndex)=>{const card=document.createElement('div');card.className='ut-group-card';const title=document.createElement('h3');title.textContent=boardText('Sammensat gruppe ','Combined group ','Zusammengesetzte Gruppe ')+(displayIndex+1);if(extras.outdoorEnabled&&(extras.outdoorMeetings||[]).includes(d.meetingIndex)){const marker=document.createElement('span');marker.textContent=boardText(' 🚪 Ude',' 🚪 Outside',' 🚪 Draußen');marker.style.cssText='font-size:.75em;color:#20578b';title.append(marker)}card.append(title);const source=document.createElement('div');source.className='sub';source.style.cssText='font-weight:650;margin-bottom:7px';source.textContent=utDiscussionLabel(d,pairMode);card.append(source);d.students.forEach(n=>{const person=document.createElement('div');person.className='ut-group-person';person.textContent=n;card.append(person)});grid.append(card)})}
  else groups.forEach((g,i)=>{const card=document.createElement('div');card.className='ut-group-card';const title=document.createElement('h3');title.textContent=(pairMode?boardText('Par ','Pair '):boardText('Gruppe ','Group '))+(i+1);if(extras.outdoorEnabled&&(extras.outdoor||[]).includes(i)){const marker=document.createElement('span');marker.textContent=boardText(' 🚪 Ude',' 🚪 Outside');marker.style.cssText='font-size:.75em;color:#20578b';title.append(marker)}card.append(title);g.forEach(n=>{const person=document.createElement('div');person.className='ut-group-person';person.textContent=n;card.append(person)});grid.append(card)});scroll.append(grid);panel.append(head,scroll);const activityTabs=panel.querySelector('.ut-group-activity-tabs');if(activityTabs)head.after(activityTabs);
@@ -2109,33 +2165,48 @@ function openAgendaItemGroups(item){
    Ændrer ikke på den oprindelige gruppeinddeling eller enkeltstående gruppemøder. */
 function utActivityRoundRobin(total,rounds){
  if(total<2)return [];
- const odd=total%2===1,positions=Array.from({length:total},(_,i)=>i);
- if(odd)positions.push(-1);
- const count=positions.length,rotation=[...positions],history=new Map(),result=[];
- const key=(a,b)=>a<b?a+'-'+b:b+'-'+a;
- for(let round=0;round<rounds;round++){
-  const pairs=[],groups=[];let bye=null;
-  for(let i=0;i<count/2;i++){
-   const a=rotation[i],b=rotation[count-1-i];
-   if(a===-1||b===-1){bye=a===-1?b:a;continue}
-   pairs.push([a,b]);
+ const requested=Math.max(1,Math.min(12,Math.floor(Number(rounds)||1)));
+ const odd=total%2===1,rotation=Array.from({length:total},(_,i)=>i);
+ if(odd)rotation.push(-1);
+ const schedule=[],key=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+ for(let round=0;round<requested;round++){
+  const pairs=[];let bye=null;
+  for(let i=0;i<rotation.length/2;i++){
+   const a=rotation[i],b=rotation[rotation.length-1-i];
+   if(a===-1||b===-1)bye=a===-1?b:a;
+   else pairs.push([a,b]);
   }
-  if(bye!==null&&pairs.length){
-   let pick=0,score=Infinity;
-   pairs.forEach(([a,b],i)=>{
-    const penalty=(history.get(key(bye,a))||0)+(history.get(key(bye,b))||0);
-    if(penalty<score){score=penalty;pick=i}
-   });
-   const pair=pairs.splice(pick,1)[0];groups.push([bye,...pair]);
-  }
-  groups.push(...pairs);
-  for(const members of groups){for(let a=0;a<members.length;a++)for(let b=a+1;b<members.length;b++){
-   const k=key(members[a],members[b]);history.set(k,(history.get(k)||0)+1);
-  }}
-  result.push(groups);
+  schedule.push({pairs,bye});
   rotation.splice(1,0,rotation.pop());
  }
- return result;
+ if(!odd)return schedule.map(r=>r.pairs);
+ // The base round-robin pairings are fixed. Find the best third pair for each bye
+ // across ALL requested rounds, rather than greedily choosing it one round at a time.
+ // This prevents false repetition warnings (e.g. 13 groups over 3 rounds).
+ const future=schedule.map((_,i)=>new Set(schedule.slice(i+1).flatMap(r=>r.pairs.map(([a,b])=>key(a,b)))));
+ let beam=[{seen:new Set(),repeats:0,risks:0,choices:[],score:0}];
+ for(let round=0;round<schedule.length;round++){
+  const {pairs,bye}=schedule[round],next=[];
+  for(const state of beam){
+   for(let choice=0;choice<pairs.length;choice++){
+    const merges=pairs[choice],edges=pairs.map(([a,b])=>key(a,b));
+    const extras=[key(bye,merges[0]),key(bye,merges[1])];
+    edges.push(...extras);
+    const repeats=edges.reduce((n,k)=>n+(state.seen.has(k)?1:0),0);
+    const risks=extras.reduce((n,k)=>n+(future[round].has(k)?1:0),0);
+    const seen=new Set(state.seen);edges.forEach(k=>seen.add(k));
+    const rep=state.repeats+repeats,risk=state.risks+risks;
+    next.push({seen,repeats:rep,risks:risk,choices:[...state.choices,choice],score:rep*10000+risk*25+choice*0.001});
+   }
+  }
+  next.sort((a,b)=>a.score-b.score||a.repeats-b.repeats||a.risks-b.risks);
+  beam=next.slice(0,Math.min(128,next.length));
+ }
+ const chosen=beam[0]?.choices||[];
+ return schedule.map(({pairs,bye},round)=>{
+  const at=chosen[round]??0;
+  return [[bye,...pairs[at]],...pairs.filter((_,i)=>i!==at)];
+ });
 }
 function utActivityMatrix(original,requested,seed=0){
  const groups=original.map(x=>Array.isArray(x)?x:[]),total=groups.reduce((n,g)=>n+g.length,0);
@@ -2241,95 +2312,89 @@ function utActivityConfigured(item,cfg=null){return !!utActivityConfigFor(item,c
 function utActivityLabel(item,cfg=null){return utActivityConfigFor(item,cfg)?.activeMode==='matrix'?'matrixgrupper':'samtalerotation'}
 function utOpenGroupActivities(item,selectedCfg=null){
  if(!item||!utAgendaHasConcreteGroups(item))return;
- const links=utConcreteGroupLinks(item);
- if(!links.length)return;
+ const links=utConcreteGroupLinks(item);if(!links.length)return;
  const cfg=selectedCfg||links[0];
  const groupSource=links.length===1?item:{...item,utGroup:cfg,utGroups:[cfg]};
  const original=utAgendaGroupsForItem(groupSource,true).map(g=>[...g]);
- if(original.length<2)return alert('Der skal være mindst to makkerpar eller grupper for at lave samtalerotation.');
+ if(original.length<2)return alert(boardText('Der skal være mindst to par eller grupper.','At least two pairs or groups are needed.','Es werden mindestens zwei Paare oder Gruppen benötigt.'));
  const extras=utAgendaSettings(item),store=extras.utActivities||(extras.utActivities={});
  const phaseKey='phase-'+(Number.isInteger(cfg.phaseIndex)?cfg.phaseIndex:0);
  const byPhase=store[phaseKey]||(store[phaseKey]={});
  const signature=JSON.stringify(original);
- let mode=byPhase.activeMode==='matrix'?'matrix':'rotation';
+ const mode=byPhase.activeMode==='matrix'?'matrix':'rotation';
  const initialRounds=3,defaultMatrix=Math.max(Math.max(...original.map(g=>g.length)),Math.ceil(original.flat().length/4));
  function getPlan(kind){
   const current=byPhase[kind];
   if(current&&current.signature===signature)return current;
   const saved=current||{};
   const count=Math.max(1,Math.min(12,Math.floor(Number(saved.roundCount)||initialRounds)));
-  const next=kind==='rotation'?{signature,roundCount:count,roundIndex:Math.max(0,Math.min(count-1,Number(saved.roundIndex)||0)),minutes:Array.isArray(saved.minutes)?[...saved.minutes]:[],allowRepeats:!!saved.allowRepeats,rounds:utActivityRoundRobin(original.length,count)}:{signature,matrixCount:Math.max(Math.max(...original.map(g=>g.length)),Math.min(original.flat().length,Math.floor(Number(saved.matrixCount)||defaultMatrix))),seed:Number(saved.seed)||0,roundCount:Math.max(1,Math.min(12,Math.floor(Number(saved.roundCount)||1))),roundIndex:Math.max(0,Math.min(11,Math.floor(Number(saved.roundIndex)||0))),allowRepeats:!!saved.allowRepeats};
+  const next=kind==='rotation'?{signature,roundCount:count,roundIndex:Math.max(0,Math.min(count-1,Number(saved.roundIndex)||0)),minutes:Array.isArray(saved.minutes)?[...saved.minutes]:[],allowRepeats:!!saved.allowRepeats,rounds:utActivityRoundRobin(original.length,count),rotationAlgorithm:2}:{signature,matrixCount:Math.max(Math.max(...original.map(g=>g.length)),Math.min(original.flat().length,Math.floor(Number(saved.matrixCount)||defaultMatrix))),seed:Number(saved.seed)||0,roundCount:Math.max(1,Math.min(12,Math.floor(Number(saved.roundCount)||1))),roundIndex:Math.max(0,Math.min(11,Math.floor(Number(saved.roundIndex)||0))),allowRepeats:!!saved.allowRepeats};
   byPhase[kind]=next;save();return next;
  }
+ // Brug samme elevvenlige fuldskærmslayout som den eksisterende 'Vis inddeling'.
  document.querySelector('.ut-activity-overlay')?.remove();
- // Gruppeoversigten må gerne erstattes af den nye visning; den eksisterende inddeling ændres ikke.
  document.querySelector('.ut-group-overlay')?.remove();
- const overlay=document.createElement('div');overlay.className='ut-activity-overlay';
- const panel=document.createElement('section');panel.className='ut-activity-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Samtalerotation og matrixgrupper');
- const header=document.createElement('div');header.className='ut-activity-header';
- const title=document.createElement('div'),heading=document.createElement('h2'),subtitle=document.createElement('div');
- heading.textContent='👥 '+(mode==='matrix'?'Matrixgrupper':'Samtalerotation');subtitle.className='ut-activity-note';subtitle.textContent=item.title||'Grupper fra dagsordenspunktet';title.append(heading,subtitle);
- const close=document.createElement('button');close.type='button';close.className='btn';close.textContent='✕ Luk';header.append(title,close);
- if(links.length>1){const chooser=document.createElement('div');chooser.className='ut-activity-settings';const select=document.createElement('select');select.className='btn';links.forEach((link,i)=>select.add(new Option('Trin '+(link.phaseIndex+1)+' · '+utGroupLinkLabel(link),String(i))));select.value=String(Math.max(0,links.findIndex(link=>link.phaseIndex===cfg.phaseIndex)));select.onchange=()=>utOpenGroupActivities(item,links[Number(select.value)]);const label=document.createElement('label');label.className='ut-activity-field';label.append(document.createTextNode('Vælg inddeling'),select);chooser.append(label);panel.append(chooser)}
-
- const tabs=document.createElement('div');tabs.className='ut-group-activity-tabs';tabs.style.padding='0 20px';const originalButton=document.createElement('button');originalButton.type='button';originalButton.className='btn';originalButton.textContent='👥 Oprindelige grupper';originalButton.setAttribute('aria-selected','false');originalButton.onclick=()=>{overlay.remove();openAgendaItemGroupsSingle(item,cfg,true)};const activityButton=document.createElement('button');activityButton.type='button';activityButton.className='btn';activityButton.textContent=mode==='matrix'?'🧩 Matrixgrupper':'🔄 Samtalerotation';activityButton.setAttribute('aria-selected','true');tabs.append(originalButton,activityButton);panel.append(tabs);
- const settings=document.createElement('div');settings.className='ut-activity-settings';
- const results=document.createElement('div');results.className='ut-activity-results';
- const footer=document.createElement('div');footer.className='ut-activity-footer';
- panel.prepend(header);panel.append(settings,results,footer);overlay.append(panel);document.body.append(overlay);
- const dismiss=()=>overlay.remove();close.onclick=dismiss;overlay.addEventListener('click',e=>{if(e.target===overlay)dismiss()});
- function control(label,field){const wrap=document.createElement('label');wrap.className='ut-activity-field';const name=document.createElement('span');name.textContent=label;wrap.append(name,field);return wrap}
- function numberField(value,min,max,title){const n=document.createElement('input');n.type='number';n.min=String(min);n.max=String(max);n.step='1';n.value=String(value);n.className='ut-activity-number';n.setAttribute('aria-label',title);return n}
- function button(label,callback,primary=false){const b=document.createElement('button');b.type='button';b.className='btn'+(primary?' primary':'');b.textContent=label;b.onclick=callback;return b}
+ const overlay=document.createElement('div');overlay.className='ut-group-overlay';
+ const panel=document.createElement('div');panel.className='ut-group-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+ const head=document.createElement('div');head.className='ut-group-head';
+ const title=document.createElement('h2');
+ title.textContent=mode==='matrix'?boardText('🧩 Matrixgrupper','🧩 Matrix groups','🧩 Matrixgruppen'):boardText('🔄 Samtalerotation','🔄 Conversation rotation','🔄 Gesprächsrotation');
+ const close=document.createElement('button');close.type='button';close.className='btn';close.textContent=boardText('✕ Luk','✕ Close','✕ Schließen');head.append(title,close);panel.append(head);
+ if(links.length>1){
+  const bar=document.createElement('div');bar.className='ut-group-activity-tabs';bar.style.cssText='padding:0 18px;margin:7px 0';
+  const pick=document.createElement('select');pick.className='btn';pick.setAttribute('aria-label',boardText('Vælg inddeling','Choose grouping','Einteilung wählen'));
+  links.forEach((link,i)=>pick.add(new Option(boardText('Trin ','Step ','Schritt ')+(link.phaseIndex+1)+' · '+utGroupLinkLabel(link),String(i))));
+  pick.value=String(Math.max(0,links.findIndex(link=>link.phaseIndex===cfg.phaseIndex)));
+  pick.onchange=()=>{destroy();utOpenGroupActivities(item,links[Number(pick.value)])};bar.append(pick);panel.append(bar);
+ }
+ const tabs=document.createElement('div');tabs.className='ut-group-activity-tabs';tabs.style.cssText='padding:0 18px;margin:7px 0';
+ const orig=document.createElement('button');orig.type='button';orig.className='btn';orig.textContent=boardText('👥 Oprindelige grupper','👥 Original groups','👥 Ursprüngliche Gruppen');orig.setAttribute('aria-selected','false');
+ orig.onclick=()=>{destroy();openAgendaItemGroupsSingle(item,cfg,true)};
+ const active=document.createElement('button');active.type='button';active.className='btn';active.textContent=mode==='matrix'?boardText('🧩 Matrixgrupper','🧩 Matrix groups','🧩 Matrixgruppen'):boardText('🔄 Samtalerotation','🔄 Conversation rotation','🔄 Gesprächsrotation');active.setAttribute('aria-selected','true');
+ tabs.append(orig,active);panel.append(tabs);
+ const scroll=document.createElement('div');scroll.className='ut-group-scroll';
+ const grid=document.createElement('div');grid.className='ut-group-grid';scroll.append(grid);panel.append(scroll);
+ const actions=document.createElement('div');actions.className='ut-group-actions';panel.append(actions);
+ overlay.append(panel);document.body.append(overlay);
+ let stopFit=()=>{};
+ const destroy=()=>{stopFit();overlay.remove()};
+ close.onclick=destroy;overlay.onclick=e=>{if(e.target===overlay)destroy()};
+ function makeButton(text,action,primary=false){const b=document.createElement('button');b.type='button';b.className='btn'+(primary?' primary':'');b.textContent=text;b.onclick=action;return b}
+ function makeCard(label,names){
+  const card=document.createElement('div');card.className='ut-group-card';const h=document.createElement('h3');h.textContent=label;card.append(h);
+  names.forEach(name=>{const person=document.createElement('div');person.className='ut-group-person';person.textContent=name;card.append(person)});
+  grid.append(card);
+ }
  function render(){
-  settings.replaceChildren();results.replaceChildren();footer.replaceChildren();
-  const pairs=original.every(g=>g.length<=2);const noun=pairs?'Par ':'Gruppe ';
+  stopFit();grid.replaceChildren();actions.replaceChildren();
+  const pairs=original.every(g=>g.length<=2),noun=pairs?boardText('Par ','Pair ','Paar '):boardText('Gruppe ','Group ','Gruppe ');
+  const p=getPlan(mode);p.roundCount=Math.max(1,Math.min(12,Math.floor(Number(p.roundCount)||(mode==='rotation'?3:1))));
+  p.roundIndex=Math.max(0,Math.min(p.roundCount-1,Math.floor(Number(p.roundIndex)||0)));
+  let currentRound=[];
   if(mode==='rotation'){
-   const p=getPlan('rotation');p.roundCount=Math.max(1,Math.min(12,Math.floor(Number(p.roundCount)||3)));
-   p.roundIndex=Math.max(0,Math.min(p.roundCount-1,Math.floor(Number(p.roundIndex)||0)));
-   if(!Array.isArray(p.rounds)||p.rounds.length!==p.roundCount)p.rounds=utActivityRoundRobin(original.length,p.roundCount);
-   const report=utActivityRepeatReport(p.rounds,'rotation');
-   utActivityAppendWarning(settings,report,'rotation',p,()=>{save();render()});
-   const minutes=Array.isArray(p.minutes)?p.minutes:[];
-   const duration=Number(minutes[p.roundIndex])||0;
-   if(duration){
-    const info=document.createElement('span');info.className='ut-activity-note';info.textContent='⏱ Runde '+(p.roundIndex+1)+': '+duration+' minutter';
-    const timerButton=button('Sæt tavlens timer til '+duration+' min',()=>setTimer(duration*60));
-    settings.append(info,timerButton);
-   }
-   const current=document.createElement('div');current.className='ut-activity-round-title';current.textContent='Runde '+(p.roundIndex+1)+' af '+p.roundCount;results.append(current);
-   const summary=document.createElement('p');summary.className='ut-activity-note';summary.textContent='De oprindelige '+(pairs?'makkerpar':'grupper')+' forbliver sammen. Ingen skifter makker under rotationen.';results.append(summary);
-   const grid=document.createElement('div');grid.className='ut-activity-grid';
-   (p.rounds[p.roundIndex]||[]).forEach((indices,i)=>{
-    const card=document.createElement('article');card.className='ut-activity-card';const h=document.createElement('h3');h.textContent='Samtale '+(i+1);card.append(h);
-    const source=document.createElement('div');source.className='ut-activity-sources';source.textContent=indices.map(j=>noun+(j+1)).join(' + ');card.append(source);
-    indices.forEach(j=>{const people=document.createElement('div');people.className='ut-activity-original';const tag=document.createElement('strong');tag.textContent=noun+(j+1);people.append(tag);for(const name of original[j]){const span=document.createElement('span');span.textContent=name;people.append(span)}card.append(people)});grid.append(card);
-   });results.append(grid);
-   const prev=button('← Forrige runde',()=>{p.roundIndex--;save();render()});prev.disabled=p.roundIndex===0;
-   const next=button('Næste runde →',()=>{if(report.firstRepeatRound&&p.roundIndex+2>=report.firstRepeatRound&&!p.allowRepeats){if(!confirm('Fra runde '+report.firstRepeatRound+' møder nogle par eller grupper hinanden igen. Vil du fortsætte alligevel?'))return;p.allowRepeats=true}p.roundIndex++;save();render()},true);next.disabled=p.roundIndex===p.roundCount-1;
-   const note=document.createElement('span');note.className='ut-activity-note';note.textContent='Skift runde manuelt – timeren starter ikke automatisk.';
-   footer.append(prev,note,next);
-
+   if(p.rotationAlgorithm!==2||!Array.isArray(p.rounds)||p.rounds.length!==p.roundCount){p.rounds=utActivityRoundRobin(original.length,p.roundCount);p.rotationAlgorithm=2;save()}
+   currentRound=p.rounds[p.roundIndex]||[];
+   currentRound.forEach((indices,i)=>makeCard(boardText('Samtale ','Conversation ','Gespräch ')+(i+1),indices.flatMap(j=>original[j]||[])));
   }else{
-   const p=getPlan('matrix'),total=original.flat().length,minGroups=Math.max(...original.map(g=>g.length));
-   p.matrixCount=Math.max(minGroups,Math.min(total,Math.floor(Number(p.matrixCount)||defaultMatrix)));
-   p.roundCount=Math.max(1,Math.min(12,Math.floor(Number(p.roundCount)||1)));
-   p.roundIndex=Math.max(0,Math.min(p.roundCount-1,Math.floor(Number(p.roundIndex)||0)));
-   const rounds=utActivityMatrixRounds(original,p.matrixCount,p.roundCount,p.seed||0);
-   const report=utActivityRepeatReport(rounds,'matrix');
-   const detail=document.createElement('span');detail.className='ut-activity-note';detail.textContent='Matrixgrupperne er valgt under Redigér programpunkt.';settings.append(detail);
-   utActivityAppendWarning(settings,report,'matrix',p,()=>{save();render()});
-   const current=document.createElement('div');current.className='ut-activity-round-title';current.textContent='Matrixrunde '+(p.roundIndex+1)+' af '+p.roundCount;results.append(current);
-   const hint=document.createElement('div');hint.className='ut-activity-note';hint.textContent='Hver ny gruppe har så vidt muligt højst én elev fra hver oprindelig gruppe. Den oprindelige inddeling bevares.';results.append(hint);
-   const matrix=rounds[p.roundIndex]||[],grid=document.createElement('div');grid.className='ut-activity-grid';
-   matrix.forEach((members,i)=>{const card=document.createElement('article');card.className='ut-activity-card';const heading=document.createElement('h3');heading.textContent='Matrixgruppe '+(i+1);card.append(heading);
-    members.forEach(member=>{const row=document.createElement('div');row.className='ut-activity-matrix-person';const name=document.createElement('strong');name.textContent=member.name;const from=document.createElement('span');from.textContent='fra '+noun.toLocaleLowerCase('da-DK')+(member.source+1);row.append(name,from);card.append(row)});grid.append(card)});
-   results.append(grid);
-   const prev=button('← Forrige runde',()=>{p.roundIndex--;save();render()});prev.disabled=p.roundIndex===0;
-   const next=button('Næste runde →',()=>{if(report.firstRepeatRound&&p.roundIndex+2>=report.firstRepeatRound&&!p.allowRepeats){if(!confirm('Fra matrixrunde '+report.firstRepeatRound+' vil nogle elever møde tidligere makkere igen. Vil du fortsætte alligevel?'))return;p.allowRepeats=true}p.roundIndex++;save();render()},true);next.disabled=p.roundIndex===p.roundCount-1;
-   const note=document.createElement('span');note.className='ut-activity-note';note.textContent='Skift mellem runderne manuelt. Gruppeinddelingen ændres ikke permanent.';
-   footer.append(prev,note,next);
+   const total=original.flat().length,minimum=Math.max(...original.map(g=>g.length));
+   p.matrixCount=Math.max(minimum,Math.min(total,Math.floor(Number(p.matrixCount)||defaultMatrix)));
+   currentRound=utActivityMatrixRounds(original,p.matrixCount,p.roundCount,p.seed||0)[p.roundIndex]||[];
+   currentRound.forEach((members,i)=>makeCard(boardText('Matrixgruppe ','Matrix group ','Matrixgruppe ')+(i+1),members.map(m=>m.name)));
   }
+  const prev=makeButton(boardText('← Forrige runde','← Previous round','← Vorherige Runde'),()=>{p.roundIndex--;save();render()});prev.disabled=p.roundIndex===0;
+  const status=document.createElement('span');status.className='ut-group-result';
+  status.textContent=boardText('Runde ','Round ','Runde ')+(p.roundIndex+1)+' '+boardText('af ','of ','von ')+p.roundCount;
+  actions.append(prev,status);
+  if(mode==='rotation'){
+   const duration=Number(Array.isArray(p.minutes)?p.minutes[p.roundIndex]:0)||0;
+   if(duration>0){
+    const timer=makeButton('⏱ '+boardText('Indstil timer: ','Set timer: ','Timer einstellen: ')+duration+' min',()=>setTimer(duration*60));
+    timer.title=boardText('Timeren starter ikke automatisk','The timer does not start automatically','Der Timer startet nicht automatisch');actions.append(timer);
+   }
+  }
+  const next=makeButton(boardText('Næste runde →','Next round →','Nächste Runde →'),()=>{p.roundIndex++;save();render()},true);next.disabled=p.roundIndex>=p.roundCount-1;actions.append(next);
+  // Eventuelle gentagelser håndteres i lærerens redigeringsvindue, aldrig i elevvisningen.
+  stopFit=utScheduleAgendaGroupFit(panel,grid);
  }
  render();
 }
