@@ -1698,7 +1698,7 @@ function utDiscussionLabel(d,isPairs=true,b=board()){
 }
 // Indstillingerne hører til dagsordenspunktet, ikke den gemte masterinddeling.
 function utAgendaSettings(item){if(!item)return null;item.utGroupExtras=item.utGroupExtras||{outdoorEnabled:false,meetingEnabled:false,outdoor:[],outdoorMeetings:[],outdoorStudents:[],meetings:[],registered:false};if(!Array.isArray(item.utGroupExtras.outdoorMeetings))item.utGroupExtras.outdoorMeetings=[];if(!Array.isArray(item.utGroupExtras.outdoorStudents))item.utGroupExtras.outdoorStudents=[];item.utGroupExtras.meetings=utNormalizeMeetings(item.utGroupExtras.meetings);return item.utGroupExtras}
-function utAgendaGroupCount(item){const cfg=item?.utGroup||{};if(cfg.dayGroups?.length)return cfg.dayGroups.filter(g=>g.length).length;if(cfg.kind==='saved'){const set=groupSetsForClass().find(x=>x.id===cfg.setId);if(!set)return 0;const active=new Set(activeStudents());return set.groups.filter(g=>g.some(n=>active.has(n))).length}if(cfg.kind==='random')return cfg.groups?.length||(cfg.mode==='count'?Math.max(1,Math.min(activeStudents().length,+cfg.count||+cfg.size||1)):utRandomTargetSizes(activeStudents().length,Math.max(2,+cfg.size||2)).length);if(cfg.kind==='manual'){if((cfg.groups||[]).some(g=>g.length))return (cfg.groups||[]).filter(g=>g.length).length;if(cfg.sourceItemId){const src=board()?.items?.find(x=>x.id===cfg.sourceItemId);if(src&&src!==item)return utAgendaGroupCount(src)}return 0}return 0}
+function utAgendaGroupCount(item){const cfg=item?.utGroup||{};const day=utEffectiveDayGroups(item,cfg);if(day?.length)return day.filter(g=>g.length).length;if(cfg.kind==='saved'){const set=groupSetsForClass().find(x=>x.id===cfg.setId);if(!set)return 0;const active=new Set(activeStudents());return set.groups.filter(g=>g.some(n=>active.has(n))).length}if(cfg.kind==='random')return cfg.groups?.length||(cfg.mode==='count'?Math.max(1,Math.min(activeStudents().length,+cfg.count||+cfg.size||1)):utRandomTargetSizes(activeStudents().length,Math.max(2,+cfg.size||2)).length);if(cfg.kind==='manual'){if((cfg.groups||[]).some(g=>g.length))return (cfg.groups||[]).filter(g=>g.length).length;if(cfg.sourceItemId){const src=board()?.items?.find(x=>x.id===cfg.sourceItemId);if(src&&src!==item)return utAgendaGroupCount(src)}return 0}return 0}
 function utAgendaApplyExtras(w,item){const cfg=utAgendaSettings(item);w.utOutdoor=cfg?.outdoorEnabled?[...(cfg.outdoor||[])]:[];w.utOutdoorMeetings=cfg?.outdoorEnabled?[...(cfg.outdoorMeetings||[])]:[];w.utMeetings=cfg?.meetingEnabled?utNormalizeMeetings(cfg.meetings).map(m=>({members:[...m.members],dir:m.dir})):[]}
 function utAgendaCaptureExtras(w){const item=utAgendaActiveItem();if(!item||!utAgendaHasConcreteGroups(item))return;const cfg=utAgendaSettings(item);if(cfg.outdoorEnabled){cfg.outdoor=[...(w.utOutdoor||[])];cfg.outdoorMeetings=[...(w.utOutdoorMeetings||[])];}if(cfg.meetingEnabled)cfg.meetings=utNormalizeMeetings(w.utMeetings).map(m=>({members:[...m.members],dir:m.dir}));}
 
@@ -1727,8 +1727,8 @@ let utGroupLinksDraft=[];
 let utActiveGroupPhaseIndex=null;
 function utAgendaGroupSync(){const b=board(),item=utAgendaActiveItem();if(!b||!item||!utAgendaHasConcreteGroups(item))return;
  let w=(b.widgets||[]).find(x=>x.type==='groups');if(!w){w={id:uid(),type:'groups',title:'👥 Grupper / makkere',mode:'size',number:2,groups:[]};b.widgets=b.widgets||[];b.widgets.push(w)}
- const cfg=item.utGroup,token=item.id+'|'+cfg.kind+'|'+(cfg.setId||'')+'|'+(cfg.mode||'size')+'|'+(cfg.mode==='count'?(cfg.count||cfg.size||''):(cfg.size||''))+'|'+JSON.stringify(cfg.rules||{})+'|'+JSON.stringify(cfg.dayGroups||cfg.groups||[]);if(w.utAgendaToken===token)return;
- if(cfg.dayGroups?.length){const active=new Set(activeStudents());w.groupRoster=cfg.dayGroups.map(g=>[...g]);w.groups=w.groupRoster.map(g=>g.filter(n=>active.has(n))).filter(g=>g.length);w.loadedSetId=cfg.kind==='saved'?(cfg.setId||''):'';w.loadedSetName=cfg.kind==='saved'?(groupSetsForClass().find(x=>x.id===cfg.setId)?.name||'Dagens inddeling'):cfg.kind==='random'?'Tilfældig inddeling':'Manuel inddeling'}
+ const cfg=item.utGroup,dayForItem=utEffectiveDayGroups(item,cfg),token=item.id+'|'+cfg.kind+'|'+(cfg.setId||'')+'|'+(cfg.mode||'size')+'|'+(cfg.mode==='count'?(cfg.count||cfg.size||''):(cfg.size||''))+'|'+JSON.stringify(cfg.rules||{})+'|'+JSON.stringify(dayForItem||cfg.groups||[]);if(w.utAgendaToken===token)return;
+ if(dayForItem?.length){const active=new Set(activeStudents());w.groupRoster=dayForItem.map(g=>[...g]);w.groups=w.groupRoster.map(g=>g.filter(n=>active.has(n))).filter(g=>g.length);w.loadedSetId=cfg.kind==='saved'?(cfg.setId||''):'';w.loadedSetName=cfg.kind==='saved'?(groupSetsForClass().find(x=>x.id===cfg.setId)?.name||'Dagens inddeling'):cfg.kind==='random'?'Tilfældig inddeling':'Manuel inddeling'}
  else if(cfg.kind==='saved'){const set=groupSetsForClass().find(x=>x.id===cfg.setId);if(!set){w.utAgendaToken=token;save();return}loadGroupSet(w,set.id)}
  else if(cfg.kind==='random'&&cfg.groups?.length){const active=new Set(activeStudents());w.groupRoster=cfg.groups.map(g=>[...g]);w.groups=w.groupRoster.map(g=>g.filter(n=>active.has(n))).filter(g=>g.length);w.loadedSetId='';w.loadedSetName='Tilfældig inddeling'}
  else if(cfg.kind==='random'){const randomMode=cfg.mode||'size',randomNumber=randomMode==='count'?Math.max(1,+cfg.count||+cfg.size||1):Math.max(2,+cfg.size||2);const made=utGenerateConstrainedRandomGroups(activeStudents(),randomNumber,cfg.rules||{},randomMode);if(!made){alert(randomMode==='count'?'Det er ikke muligt at lave præcis '+randomNumber+' grupper med de valgte regler. Prøv et andet antal grupper eller ændr reglerne.':'Det er ikke muligt at lave en gyldig tilfældig inddeling med de valgte regler. Prøv at ændre gruppestørrelsen eller reglerne.');w.utAgendaToken=token;save();return}w.groups=made.map(g=>[...g]);w.groupRoster=made.map(g=>[...g]);cfg.groups=made.map(g=>[...g]);w.loadedSetId='';w.loadedSetName='Tilfældig inddeling'}
@@ -1736,12 +1736,10 @@ function utAgendaGroupSync(){const b=board(),item=utAgendaActiveItem();if(!b||!i
  utAgendaApplyExtras(w,item);w.utAgendaToken=token;resetGroupDraw(w);save();document.querySelector('.ut-group-float')?.remove();
 }
 function utAgendaConcreteGroups(item){
- const cfg=item?.utGroup||{};let groups=[];
- if(cfg.dayGroups?.length)groups=cfg.dayGroups.map(g=>[...g]);
+ const cfg=item?.utGroup||{};let groups=[];const effectiveDay=utEffectiveDayGroups(item,cfg);
+ if(effectiveDay?.length)groups=effectiveDay.map(g=>[...g]);
  else if(cfg.kind==='saved'){
-  const shared=cfg.setId?board()?.items?.find(x=>x!==item&&x?.utGroup?.kind==='saved'&&x.utGroup.setId===cfg.setId&&x.utGroup.dayGroups?.length)?.utGroup?.dayGroups:null;
-  if(shared?.length)groups=shared.map(g=>[...g]);
-  else {const set=groupSetsForClass().find(x=>x.id===cfg.setId);groups=(set?.groups||[]).map(g=>[...g])}
+  const set=groupSetsForClass().find(x=>x.id===cfg.setId);groups=(set?.groups||[]).map(g=>[...g]);
  }
  else if(cfg.kind==='manual')groups=(cfg.groups||[]).map(g=>[...g]);
  else if(cfg.kind==='random'&&cfg.groups?.length)groups=cfg.groups.map(g=>[...g]);
@@ -1806,7 +1804,7 @@ function utCaptureCurrentGroupPhase(item){
  else if(value==='seatmate')next={kind:'seatmate'};else if(value==='table')next={kind:'table'};else if(value==='manual')next={kind:'manual',groups:(utManualDraft||[]).map(g=>[...g])};else if(value.startsWith('set:'))next={kind:'saved',setId:value.slice(4)};else if(value==='random')next=randomMode==='count'?{kind:'random',mode:'count',count:Math.max(1,num),rules:utRandomRulesFromUI()}:{kind:'random',mode:'size',size:Math.max(2,num),rules:utRandomRulesFromUI()};else next={kind:'none'};
  next.phaseIndex=phaseIndex;
  const sameRules=next.kind!=='random'||JSON.stringify(old?.rules||{})===JSON.stringify(next.rules||{});const sameRandom=next.kind!=='random'||(((old?.mode||'size')===(next.mode||'size'))&&((next.mode==='count'?+(old?.count||old?.size):+old?.size)===(next.mode==='count'?+next.count:+next.size))&&sameRules);const same=old&&old.kind===next.kind&&(next.kind!=='saved'||old.setId===next.setId)&&(next.kind!=='manual'||(old.sourceItemId||'')===(next.sourceItemId||''))&&sameRandom;
- if(same&&old.dayGroups?.length)next.dayGroups=old.dayGroups.map(g=>[...g]);if(same&&next.kind==='random'&&old.groups?.length)next.groups=old.groups.map(g=>[...g]);
+ if(same&&old.dayGroups?.length)next.dayGroups=old.dayGroups.map(g=>[...g]);if(same&&old.pointGroups?.length)next.pointGroups=old.pointGroups.map(g=>[...g]);if(same&&next.kind==='random'&&old.groups?.length)next.groups=old.groups.map(g=>[...g]);
  utGroupLinksDraft=utGroupLinksDraft.filter(x=>x.phaseIndex!==phaseIndex);if(next.kind!=='none')utGroupLinksDraft.push(next);utGroupLinksDraft.sort((a,b)=>a.phaseIndex-b.phaseIndex);
 }
 function utLoadGroupPhase(item,phaseIndex){
@@ -1871,7 +1869,7 @@ function utAgendaEditorInit(item){
 }
 function utAgendaEditorPreviewGroups(groupCfg){
  const activeSet=new Set(activeStudents());let groups=[];
- if(groupCfg?.dayGroups?.length)groups=groupCfg.dayGroups.map(g=>[...g]);
+ if(groupCfg?.pointGroups?.length)groups=groupCfg.pointGroups.map(g=>[...g]);else if(groupCfg?.dayGroups?.length)groups=groupCfg.dayGroups.map(g=>[...g]);
  else if(groupCfg?.kind==='saved'){
   const set=groupSetsForClass().find(x=>x.id===groupCfg.setId);groups=(set?.groups||[]).map(g=>[...g]);
  }else if(groupCfg?.kind==='manual'){
@@ -2083,11 +2081,20 @@ function utAgendaLinkedFrom(items,rootIndex,targetIndex){if(rootIndex<0||targetI
 function utSetAgendaGroupStatus(index,status){const b=board();if(!b?.items?.[index])return;b.items[index].status=status;let i=index;while(i<b.items.length-1&&b.items[i]?.type!=='pause'&&b.items[i+1]?.type!=='pause'&&b.items[i]?.utLinkedNext){i++;if(b.items[i].status==='open')b.items[i].status=status==='done'?'skipped':status}const nextOpen=b.items.find(x=>x.status==='open');b.utActiveItemId=nextOpen?.id||'';save();renderAgenda()}
 function utReopenAgendaGroup(index){const b=board();if(!b?.items?.[index])return;b.items[index].status='open';let i=index;while(i<b.items.length-1&&b.items[i]?.type!=='pause'&&b.items[i+1]?.type!=='pause'&&b.items[i]?.utLinkedNext){i++;if(b.items[i].status==='skipped')b.items[i].status='open'}b.utActiveItemId=b.items[index].id;save();renderAgenda()}
 function ib(t,title,fn,cls=""){let x=document.createElement("button");x.className="icon "+cls;x.textContent=t;x.title=title;x.onclick=fn;return x}
+function utEffectiveDayGroups(item,cfg=item?.utGroup){
+ if(!cfg)return null;
+ if(Array.isArray(cfg.pointGroups)&&cfg.pointGroups.length)return cfg.pointGroups;
+ if(Array.isArray(cfg.dayGroups)&&cfg.dayGroups.length)return cfg.dayGroups;
+ if(cfg.kind==='saved'&&cfg.setId){
+  const matching=board()?.items?.find(x=>x?.utGroup?.kind==='saved'&&x.utGroup.setId===cfg.setId&&x.utGroup.dayGroups?.length);
+  return matching?.utGroup?.dayGroups||null;
+ }
+ return null;
+}
 function utAgendaGroupsForItem(item,freezeRandom=true){
  const cfg=item?.utGroup||{},active=activeStudents(),activeSet=new Set(active);let groups=[];
- const sharedDay=cfg.kind==='saved'&&cfg.setId?board()?.items?.find(x=>x?.utGroup?.kind==='saved'&&x.utGroup.setId===cfg.setId&&x.utGroup.dayGroups?.length)?.utGroup?.dayGroups:null;
- if(sharedDay?.length)groups=sharedDay.map(g=>[...g]);
- else if(cfg.dayGroups?.length)groups=cfg.dayGroups.map(g=>[...g]);
+ const effectiveDay=utEffectiveDayGroups(item,cfg);
+ if(effectiveDay?.length)groups=effectiveDay.map(g=>[...g]);
  else if(cfg.kind==='saved'){const set=groupSetsForClass().find(x=>x.id===cfg.setId);groups=(set?.groups||[]).map(g=>[...g])}
  else if(cfg.kind==='manual'){if((cfg.groups||[]).some(g=>g.length))groups=(cfg.groups||[]).map(g=>[...g]);else if(cfg.sourceItemId){const source=board()?.items?.find(x=>x.id===cfg.sourceItemId);if(source&&source!==item){groups=utAgendaGroupsForItem(source,freezeRandom).map(g=>[...g]);if(groups.length&&freezeRandom){cfg.groups=groups.map(g=>[...g]);save()}}}}
  else if(cfg.kind==='random'){
@@ -2099,11 +2106,10 @@ function utAgendaGroupsForItem(item,freezeRandom=true){
  return groups;
 }
 
-/* Omplaceringer fra en oprindelig gruppe med fravær, uden ekstra forklarende tekst. */
+/* Omplacerede elever markeres uanset fravær hos deres faste makker. */
 function utAbsenceMovedNames(item,cfg=item?.utGroup){
  if(!cfg)return new Set();
- const shared=cfg.kind==='saved'&&cfg.setId?board()?.items?.find(x=>x?.utGroup?.kind==='saved'&&x.utGroup.setId===cfg.setId&&x.utGroup.dayGroups?.length)?.utGroup?.dayGroups:null;
- const actualGroups=cfg.dayGroups?.length?cfg.dayGroups:shared;
+ const actualGroups=utEffectiveDayGroups(item,cfg);
  if(!actualGroups?.length)return new Set();
  const original=cfg.kind==='saved'?groupSetsForClass().find(g=>g.id===cfg.setId)?.groups:
    (cfg.kind==='manual'||cfg.kind==='random')?cfg.groups:null;
@@ -2111,7 +2117,7 @@ function utAbsenceMovedNames(item,cfg=item?.utGroup){
  const active=new Set(activeStudents()),moved=new Set();
  const today=actualGroups.map(g=>Array.isArray(g)?g:[]);
  for(const group of original){
-  if(!Array.isArray(group)||group.length<2||!group.some(n=>!active.has(n)))continue;
+  if(!Array.isArray(group)||group.length<2)continue;
   for(const name of group){
    if(!active.has(name))continue;
    const target=today.find(g=>g.includes(name));
@@ -2197,7 +2203,18 @@ function openAgendaItemGroupsSingle(item,cfgOverride=null,showOriginal=false){
  const scroll=document.createElement('div');scroll.className='ut-group-scroll';const grid=document.createElement('div');grid.className='ut-group-grid';const extras=utAgendaSettings(item)||{},pairMode=groups.every(x=>x.length<=2),combined=extras.meetingEnabled?utDiscussionGroups(groups,extras.meetings||[]):[];
  if(combined.length){h.textContent=boardText('👥 Sammensatte grupper','👥 Combined groups','👥 Zusammengesetzte Gruppen');combined.forEach((d,displayIndex)=>{const card=document.createElement('div');card.className='ut-group-card';const title=document.createElement('h3');title.textContent=boardText('Sammensat gruppe ','Combined group ','Zusammengesetzte Gruppe ')+(displayIndex+1);if(extras.outdoorEnabled&&(extras.outdoorMeetings||[]).includes(d.meetingIndex)){const marker=document.createElement('span');marker.textContent=boardText(' 🚪 Ude',' 🚪 Outside',' 🚪 Draußen');marker.style.cssText='font-size:.75em;color:#20578b';title.append(marker)}card.append(title);const source=document.createElement('div');source.className='sub';source.style.cssText='font-weight:650;margin-bottom:7px';source.textContent=utDiscussionLabel(d,pairMode);card.append(source);d.students.forEach(n=>{const person=document.createElement('div');person.className='ut-group-person';person.textContent=n;card.append(person)});grid.append(card)})}
  else groups.forEach((g,i)=>{const card=document.createElement('div');card.className='ut-group-card';const title=document.createElement('h3');title.textContent=(pairMode?boardText('Par ','Pair '):boardText('Gruppe ','Group '))+(i+1);if(extras.outdoorEnabled&&(extras.outdoor||[]).includes(i)){const marker=document.createElement('span');marker.textContent=boardText(' 🚪 Ude',' 🚪 Outside');marker.style.cssText='font-size:.75em;color:#20578b';title.append(marker)}card.append(title);g.forEach(n=>{const person=document.createElement('div');person.className='ut-group-person';person.textContent=n;card.append(person)});grid.append(card)});grid.querySelectorAll('.ut-group-person').forEach(el=>{if(movedNames.has(el.textContent.trim()))el.classList.add('ut-absence-moved')});scroll.append(grid);panel.append(head,scroll);const activityTabs=panel.querySelector('.ut-group-activity-tabs');if(activityTabs)head.after(activityTabs);
- if(!document.body.classList.contains('viewing')){const bar=document.createElement('div');bar.className='ut-group-editbar';const hint=document.createElement('span');hint.className='sub';hint.textContent='Tilpasningen gælder denne time og bruges på alle dagsordenspunkter med samme faste inddeling. Den faste gemte inddeling ændres ikke.';const edit=document.createElement('button');edit.className='btn primary';edit.textContent='✏️ Tilpas til denne time';edit.onclick=()=>{overlay.remove();openManualGroups({groups:[]},newGroups=>{const dayGroups=newGroups.map(g=>[...g]);if(item.utGroup.kind==='saved'&&item.utGroup.setId){board().items.forEach(x=>{if(x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId)x.utGroup.dayGroups=dayGroups.map(g=>[...g])})}else item.utGroup.dayGroups=dayGroups;const gw=board()?.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;save();renderAgenda();renderWidgets();openAgendaItemGroups(item)},groups,null,{dayGroupItem:item})};bar.append(hint,edit);const hasSharedDay=item.utGroup.kind==='saved'&&item.utGroup.setId?board()?.items?.some(x=>x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId&&x.utGroup.dayGroups?.length):item.utGroup.dayGroups?.length;if(hasSharedDay){const reset=document.createElement('button');reset.className='btn';reset.textContent='↺ Nulstil dagens tilpasning';reset.onclick=()=>{if(item.utGroup.kind==='saved'&&item.utGroup.setId){board().items.forEach(x=>{if(x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId)delete x.utGroup.dayGroups})}else delete item.utGroup.dayGroups;const gw=board()?.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;save();overlay.remove();renderAgenda();renderWidgets();openAgendaItemGroups(item)};bar.append(reset)}panel.append(bar)}
+ if(!document.body.classList.contains('viewing')){const bar=document.createElement('div');bar.className='ut-group-editbar';const hint=document.createElement('span');hint.className='sub';hint.textContent=item.utGroup.pointGroups?.length?'Denne inddeling gælder kun dette programpunkt. Den faste inddeling ændres ikke.':'Tilpasningen bruges på dagsordenspunkter med samme faste inddeling. Den faste gemte inddeling ændres ikke.';const edit=document.createElement('button');edit.className='btn primary';edit.textContent='✏️ Tilpas til denne time';edit.onclick=()=>{overlay.remove();openManualGroups({groups:[]},(newGroups,_names,pointOnly)=>{
+ const dayGroups=newGroups.map(g=>[...g]);
+ if(pointOnly){item.utGroup.pointGroups=dayGroups}
+ else{
+  delete item.utGroup.pointGroups;
+  if(item.utGroup.kind==='saved'&&item.utGroup.setId){
+   board().items.forEach(x=>{if(x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId)x.utGroup.dayGroups=dayGroups.map(g=>[...g])});
+  }else item.utGroup.dayGroups=dayGroups;
+ }
+ const gw=board()?.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;
+ save();renderAgenda();renderWidgets();openAgendaItemGroups(item)
+},groups,null,{dayGroupItem:item})};bar.append(hint,edit);const hasSharedDay=!!utEffectiveDayGroups(item,item.utGroup)?.length;if(hasSharedDay){const reset=document.createElement('button');reset.className='btn';reset.textContent='↺ Nulstil dagens tilpasning';reset.onclick=()=>{if(item.utGroup.pointGroups?.length)delete item.utGroup.pointGroups;else if(item.utGroup.kind==='saved'&&item.utGroup.setId){board().items.forEach(x=>{if(x?.utGroup?.kind==='saved'&&x.utGroup.setId===item.utGroup.setId)delete x.utGroup.dayGroups})}else delete item.utGroup.dayGroups;const gw=board()?.widgets?.find(w=>w.type==='groups');if(gw)gw.utAgendaToken=null;save();overlay.remove();renderAgenda();renderWidgets();openAgendaItemGroups(item)};bar.append(reset)}panel.append(bar)}
  overlay.append(panel);document.body.append(overlay);const stopFit=utScheduleAgendaGroupFit(panel,grid);close.onclick=()=>{stopFit();overlay.remove()};overlay.onclick=e=>{if(e.target===overlay){stopFit();overlay.remove()}};
 }
 
@@ -3115,8 +3132,10 @@ function utPreviousDayGroupChoice(item){
   if(prev.id===b.id||prev.classId!==b.classId||!prev.date||prev.date>=b.date)continue;
   for(const oldItem of prev.items||[]){
    const oldCfg=oldItem?.utGroup;
-   if(oldCfg?.kind!=='saved'||oldCfg.setId!==cfg.setId||!Array.isArray(oldCfg.dayGroups)||!oldCfg.dayGroups.length)continue;
-   options.push({date:prev.date,slot:Number(prev.slot)||0,groups:oldCfg.dayGroups.map(g=>[...g])});
+   if(oldCfg?.kind!=='saved'||oldCfg.setId!==cfg.setId)continue;
+   const priorGroups=oldCfg.pointGroups?.length?oldCfg.pointGroups:oldCfg.dayGroups;
+   if(!Array.isArray(priorGroups)||!priorGroups.length)continue;
+   options.push({date:prev.date,slot:Number(prev.slot)||0,groups:priorGroups.map(g=>[...g])});
   }
  }
  options.sort((a,b)=>b.date.localeCompare(a.date)||b.slot-a.slot);
@@ -3181,6 +3200,13 @@ function openManualGroups(w,onCommit=null,initialGroups=null,studentsOverride=nu
  const layout=document.createElement('div');layout.className='ut-manual-layout';layout.style.cssText='display:grid;gap:16px;align-items:start';
  const pool=document.createElement('div');pool.className='ut-group-card ut-manual-pool';const poolTitle=document.createElement('h3');pool.append(poolTitle);
  const right=document.createElement('div');const grid=document.createElement('div');grid.className='ut-group-grid';grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))!important;grid-template-rows:none!important;align-items:start!important;overflow:visible';right.append(grid);layout.append(pool,right);scroll.append(intro,layout);
+ let pointOnlyToggle=null;
+ if(editItem){
+  const scopeRow=document.createElement('label');scopeRow.style.cssText='display:flex;align-items:center;gap:9px;margin:0 0 12px;cursor:pointer';
+  pointOnlyToggle=document.createElement('input');pointOnlyToggle.type='checkbox';pointOnlyToggle.checked=!!savedCfg?.pointGroups?.length;
+  scopeRow.append(pointOnlyToggle,document.createTextNode('Kun dette programpunkt'));
+  scroll.append(scopeRow);
+ }
  const bar=document.createElement('div');bar.className='ut-group-editbar';const add=document.createElement('button');add.className='btn';add.textContent='+ Tilføj gruppe';const del=document.createElement('button');del.className='btn';del.textContent='− Fjern tom gruppe';const stat=document.createElement('span');stat.className='sub';const commit=document.createElement('button');commit.className='btn primary';commit.textContent=(meta?.mode==='createSet'||meta?.mode==='editSet')?'✓ Gem inddeling':'✓ Brug inddeling';bar.append(add,del,stat,commit);panel.append(head,scroll);panel.append(bar);overlay.append(panel);document.body.append(overlay);
  let groups=initialGroups?.length?initialGroups.map(g=>[...g]):[[],[]],chosen=0;const amount=document.createElement('input');amount.type='number';amount.min='1';amount.max='50';amount.value='2';amount.className='btn';amount.style.width='75px';amount.setAttribute('aria-label','Antal tomme grupper');const createAmount=document.createElement('button');createAmount.className='btn';createAmount.textContent='Opret tomme grupper';const countRow=document.createElement('div');countRow.className='toolrow';countRow.append('Antal grupper:',amount,createAmount);scroll.insertBefore(countRow,layout);createAmount.onclick=()=>{const n=Math.max(1,Math.min(50,Math.floor(+amount.value||2)));if(groups.some(g=>g.length)&&!confirm('Vil du starte forfra med '+n+' tomme grupper?'))return;groups=Array.from({length:n},()=>[]);chosen=0;render()};
  const prevFocus=document.activeElement;
@@ -3204,7 +3230,7 @@ function openManualGroups(w,onCommit=null,initialGroups=null,studentsOverride=nu
   stat.textContent=assigned.size+' af '+students.length+' placeret';commit.disabled=missing.length>0||!assigned.size;
  }
  add.onclick=()=>{groups.push([]);chosen=groups.length-1;render()};del.onclick=()=>{const idx=groups.findLastIndex(g=>g.length===0);if(idx<0)return alert('Flyt først eleverne ud af en gruppe, før den fjernes.');groups.splice(idx,1);if(!groups.length)groups=[[]];chosen=Math.min(chosen,groups.length-1);render()};
- commit.onclick=()=>{if(students.some(n=>!groups.flat().includes(n)))return alert('Placér alle fremmødte elever først.');let names=null;if(nameInput){const name=nameInput.value.trim();if(!name)return alert('Skriv et navn til inddelingen.');const duplicate=(meta?.sets||[]).find(x=>x!==meta?.set&&String(x.name||'').toLocaleLowerCase('da')===name.toLocaleLowerCase('da'));if(duplicate)return alert('Der findes allerede en inddeling med det navn.');names={name,nameEn:(nameEnInput?.value||'').trim(),nameDe:(nameDeInput?.value||'').trim()}}if(onCommit){onCommit(groups.filter(g=>g.length).map(g=>[...g]),names);dismiss();return}w.groups=groups.filter(g=>g.length).map(g=>[...g]);w.groupRoster=w.groups.map(g=>[...g]);w.loadedSetName='';w.utMeetings=[];w.utOutdoor=[];resetGroupDraw(w);save();dismiss();renderWidgets();openGroupOverview(w)};
+ commit.onclick=()=>{if(students.some(n=>!groups.flat().includes(n)))return alert('Placér alle fremmødte elever først.');let names=null;if(nameInput){const name=nameInput.value.trim();if(!name)return alert('Skriv et navn til inddelingen.');const duplicate=(meta?.sets||[]).find(x=>x!==meta?.set&&String(x.name||'').toLocaleLowerCase('da')===name.toLocaleLowerCase('da'));if(duplicate)return alert('Der findes allerede en inddeling med det navn.');names={name,nameEn:(nameEnInput?.value||'').trim(),nameDe:(nameDeInput?.value||'').trim()}}if(onCommit){onCommit(groups.filter(g=>g.length).map(g=>[...g]),names,!!pointOnlyToggle?.checked);dismiss();return}w.groups=groups.filter(g=>g.length).map(g=>[...g]);w.groupRoster=w.groups.map(g=>[...g]);w.loadedSetName='';w.utMeetings=[];w.utOutdoor=[];resetGroupDraw(w);save();dismiss();renderWidgets();openGroupOverview(w)};
  render();close.focus();
 }
 function openGroupOverview(w,readOnly=false){
