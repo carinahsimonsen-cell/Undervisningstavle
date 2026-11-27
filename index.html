@@ -1235,6 +1235,8 @@ body.viewing #boardView .ut-board-topic-pill{
    <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
    <button class="btn editonly" id="appearance">🎨 Udseende</button>
    <button class="btn editonly" id="backupBtn">💾 Sikkerhedskopi</button>
+   <button class="btn editonly" id="utPilotCalendarBtn" type="button">📅 Til elevkalender</button>
+   <button class="btn editonly" id="utPilotStudentViewBtn" type="button">👁 Vis for klassen</button>
    <button class="btn primary editonly" id="addWidget">+ Tilføj element</button>
    <button class="btn editonly" id="helpBtnBoard">❓ Hjælp</button>
    <button class="btn" id="viewBtn">👁 Visning</button>
@@ -5912,6 +5914,15 @@ body.viewing #boardView .ut-board-more-wrap{display:none!important}
   }
 }
 </style>
+<script>
+/* Minimal adapter til elevkalenderen: kun de nødvendige læreroplysninger. */
+window.utElevCalendarContext = () => ({board: board(), classes: state.classes, attachmentList: utItemAttachmentList});
+</script>
+<script type="module">
+import { openTeacherCalendar } from './elevkalender-app.js';
+document.getElementById('utPilotCalendarBtn')?.addEventListener('click',()=>openTeacherCalendar().catch(err=>{console.error(err);alert('Elevkalenderen kunne ikke åbnes: '+(err?.message||err))}));
+document.getElementById('utPilotStudentViewBtn')?.addEventListener('click',()=>{window.open('./elevkalender.html?preview=1','_blank','noopener')});
+</script>
 </body></html>
 
 <style id="ut-v81-need-separation">
