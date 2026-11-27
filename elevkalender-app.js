@@ -106,7 +106,7 @@ export async function openTeacherCalendar(){
 
 export async function studentCalendar(){
  const root=document.getElementById('studentApp');if(!root)return;
- const state={entries:[],classKey:'',onlyHomework:false,showAll:false,month:'',classes:[]};
+ const state={entries:[],classKey:'',onlyHomework:false,month:'',classes:[]};
  const now=new Date(),today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
  const qs=new URLSearchParams(location.search);const demo=qs.get('preview')==='1';const requested=qs.get('klasse')||'';
  const existingClass=(()=>{try{return localStorage.getItem('elevkalender.sidsteKlasse')||''}catch{return ''}})();
@@ -128,16 +128,15 @@ export async function studentCalendar(){
  function render(){
   const published=current();const lessons=published.map(e=>({...e,displayDate:e.date,kind:'lesson'}));const homeworks=published.filter(e=>e.homework&&dateString(e.dueDate));const due=homeworks.map(e=>({...e,displayDate:e.dueDate,kind:'due'}));
   const all=state.onlyHomework ? due : [...lessons,...due.filter(d=>d.dueDate!==d.date)];
-  const display=state.onlyHomework ? (state.showAll?all:all.filter(e=>e.displayDate>=today)) : all;
+  const display=all;
   const classOptions=state.classes.map(([k,n])=>`<option value="${esc(k)}" ${k===state.classKey?'selected':''}>${esc(n)}</option>`).join('');
   const groups=group(display);
   const upcomingHomeworkCount=new Set(homeworks.filter(e=>e.dueDate>=today).map(e=>e.id||`${e.classKey}|${e.subject}|${e.date}|${e.dueDate}|${e.homework}`)).size;
   const homeworkHint=upcomingHomeworkCount?`<span class="homework-hint">Du har ${upcomingHomeworkCount} kommende ${upcomingHomeworkCount===1?'lektie':'lektier'}</span>`:'';
-  root.innerHTML=`${demo?'<div class="notice" style="margin:0 0 16px;background:#fff8e9;border-color:#e4d4ad">🧪 <strong>Prøvevisning</strong> – kun opslag gemt i denne browser. Dette er ikke offentliggjort til eleverne.</div>':''}<header><div><h1>Klassens kalender</h1><p>Undervisning · Materialer · Lektier</p></div><span class="cal-icon">📅</span></header><div class="filters"><label>Klasse<select id="classSelect">${classOptions}</select></label><div class="tabs"><button id="tabAll" class="${state.onlyHomework?'':'active'}">Kalender</button><button id="tabHw" class="${state.onlyHomework?'active':''}">Kun lektier${homeworkHint}</button></div></div>${state.onlyHomework?`<div class="subtoolbar"><strong>${state.showAll?'Alle lektier':'Kommende lektier'}</strong><button id="toggleHistory">${state.showAll?'Vis kommende':'Se tidligere lektier'}</button></div>`:''}<div id="timeline">${groups.length?groups.map(([day,items])=>`<section class="day" data-day="${esc(day)}"><h2>${esc(formatDate(day))}</h2><div class="day-entries">${items.map(e=>card(e,e.kind==='due'?'due':'lesson')).join('')}</div></section>`).join(''):'<div class="notice">Ingen opslag i denne visning endnu.</div>'}</div><footer>Opslagene opdateres af klassens lærere. Lektier vises på datoen, de skal være lavet til.</footer>`;
+  root.innerHTML=`${demo?'<div class="notice" style="margin:0 0 16px;background:#fff8e9;border-color:#e4d4ad">🧪 <strong>Prøvevisning</strong> – kun opslag gemt i denne browser. Dette er ikke offentliggjort til eleverne.</div>':''}<header><div><h1>Klassens kalender</h1><p>Undervisning · Materialer · Lektier</p></div><span class="cal-icon">📅</span></header><div class="filters"><label>Klasse<select id="classSelect">${classOptions}</select></label><div class="tabs"><button id="tabAll" class="${state.onlyHomework?'':'active'}">Kalender</button><button id="tabHw" class="${state.onlyHomework?'active':''}">Kun lektier${homeworkHint}</button></div></div><div id="timeline">${groups.length?groups.map(([day,items])=>`<section class="day${state.onlyHomework&&day<today?' past-due':''}" data-day="${esc(day)}"><h2>${esc(formatDate(day))}</h2><div class="day-entries">${items.map(e=>card(e,e.kind==='due'?'due':'lesson')).join('')}</div></section>`).join(''):'<div class="notice">Ingen opslag i denne visning endnu.</div>'}</div><footer>Opslagene opdateres af klassens lærere. Lektier vises på datoen, de skal være lavet til.</footer>`;
   $(root,'#classSelect').onchange=e=>{state.classKey=e.target.value;try{localStorage.setItem('elevkalender.sidsteKlasse',state.classKey)}catch{};render()};
   $(root,'#tabAll').onclick=()=>{state.onlyHomework=false;render()};
   $(root,'#tabHw').onclick=()=>{state.onlyHomework=true;render()};
-  const h=$(root,'#toggleHistory');if(h)h.onclick=()=>{state.showAll=!state.showAll;render()};
 
  }
  render();
