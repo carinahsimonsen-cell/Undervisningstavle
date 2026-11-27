@@ -433,6 +433,14 @@ body.viewing .agenda .item .actions .icon:hover{background:color-mix(in srgb,var
 .ut-previous-group-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;margin-bottom:12px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}
 .ut-original-partners{display:block;font-size:.75em;line-height:1.4;font-weight:400;color:#65716a;margin-top:3px;white-space:normal;overflow-wrap:anywhere}
 .ut-manual-panel .ut-group-person.ut-absence-moved .ut-original-partners{color:#695d46}
+
+/* Elevkalenderens handlinger samles i én menu; tavlens visningsknapper er separate. */
+.ut-elevkalender-menu{position:relative;display:inline-flex;align-items:center}
+.ut-elevkalender-menu>summary{list-style:none;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer;user-select:none}
+.ut-elevkalender-menu>summary::-webkit-details-marker{display:none}
+.ut-elevkalender-menu[open]>summary{background:var(--soft)}
+.ut-elevkalender-options{position:absolute;z-index:3000;right:0;top:calc(100% + 6px);display:grid;gap:5px;min-width:215px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:var(--shadow)}
+.ut-elevkalender-options>.btn{text-align:left;white-space:nowrap}
 </style>
 <style id="withStyles">
 .withLayout{display:flex!important;flex-direction:row!important;align-items:stretch;gap:0;min-height:0}
@@ -1235,8 +1243,13 @@ body.viewing #boardView .ut-board-topic-pill{
    <button class="btn editonly" id="participantsBtn">👥 Dagens elever</button><button class="btn editonly" id="renameBoard">✎ Tavle</button>
    <button class="btn editonly" id="appearance">🎨 Udseende</button>
    <button class="btn editonly" id="backupBtn">💾 Sikkerhedskopi</button>
-   <button class="btn editonly" id="utPilotCalendarBtn" type="button">📅 Til elevkalender</button>
-   <button class="btn editonly" id="utPilotStudentViewBtn" type="button">👁 Vis for klassen</button>
+   <details class="ut-elevkalender-menu editonly" id="utElevkalenderMenu">
+    <summary class="btn" aria-label="Elevkalender – åbn menu">📅 Elevkalender <span aria-hidden="true">▾</span></summary>
+    <div class="ut-elevkalender-options">
+     <button class="btn" id="utPilotCalendarBtn" type="button">📥 Overfør fra tavlen</button>
+     <button class="btn" id="utPilotStudentViewBtn" type="button">👁 Vis for klassen</button>
+    </div>
+   </details>
    <button class="btn primary editonly" id="addWidget">+ Tilføj element</button>
    <button class="btn editonly" id="helpBtnBoard">❓ Hjælp</button>
    <button class="btn" id="viewBtn">👁 Visning</button>
@@ -5920,8 +5933,11 @@ window.utElevCalendarContext = () => ({board: board(), classes: state.classes, a
 </script>
 <script type="module">
 import { openTeacherCalendar } from './elevkalender-app.js';
-document.getElementById('utPilotCalendarBtn')?.addEventListener('click',()=>openTeacherCalendar().catch(err=>{console.error(err);alert('Elevkalenderen kunne ikke åbnes: '+(err?.message||err))}));
-document.getElementById('utPilotStudentViewBtn')?.addEventListener('click',()=>{window.open('./elevkalender.html?preview=1','_blank','noopener')});
+const utElevkalenderMenu=document.getElementById('utElevkalenderMenu');
+document.getElementById('utPilotCalendarBtn')?.addEventListener('click',()=>{utElevkalenderMenu.open=false;openTeacherCalendar().catch(err=>{console.error(err);alert('Elevkalenderen kunne ikke åbnes: '+(err?.message||err))})});
+document.getElementById('utPilotStudentViewBtn')?.addEventListener('click',()=>{utElevkalenderMenu.open=false;window.open('./elevkalender.html?preview=1','_blank','noopener')});
+document.addEventListener('click',event=>{if(utElevkalenderMenu?.open&&!utElevkalenderMenu.contains(event.target))utElevkalenderMenu.open=false});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&utElevkalenderMenu?.open){utElevkalenderMenu.open=false;utElevkalenderMenu.querySelector('summary')?.focus()}});
 </script>
 </body></html>
 
