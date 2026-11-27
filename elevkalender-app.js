@@ -1,6 +1,6 @@
 /* Undervisningstavle 2.0 – Elevkalender. Fælles opslag via Firestore.
    Kun lærer-konti med teachers/{uid} kan skrive (sikres af firestore.rules).
-   Google Slides, lokale filer, lærernoter og gruppe-/fraværsdata publiceres aldrig automatisk. */
+   Lokale filer, lærernoter og gruppe-/fraværsdata publiceres aldrig automatisk. */
 import { firebaseConfig } from './elevkalender-config.js';
 
 const DEMO_STORE='utElevCalendarDemoEntriesV1';
@@ -24,7 +24,21 @@ const $ = (root, sel) => root.querySelector(sel);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const plain = html => {const e=document.createElement('div');e.innerHTML=String(html??'');return(e.innerText||e.textContent||'').trim()};
 const url = value => { try {const u=new URL(String(value));return ['https:','http:'].includes(u.protocol)?u.href:''}catch {return ''} };
-const isSlides = u => /(?:docs\.google\.com\/presentation\/|slides\.google\.com)/i.test(u||'');
+const slidesInfo = value => { try { const u=new URL(String(value||'')); if(u.hostname!=='docs.google.com')return null; const m=u.pathname.match(/^\/presentation\/d\/([A-Za-z0-9_-]+)/); return m?{id:m[1],url:u}:null }catch{return null} };
+// Teacher board uses /preview for embedding; students should open the regular Slides page.
+// A numeric preview slide index cannot reliably be translated into a Slides slide ID.
+const studentMaterial = attachment => {
+ const source=url(attachment?.url||''); if(!source)return null;
+ const info=slidesInfo(source);
+ if(!info)return {name:String(attachment?.displayName||attachment?.name||attachment?.fileName||'Materiale'),url:source};
+ const destination=new URL(`https://docs.google.com/presentation/d/${info.id}/edit`);
+ const slideId=info.url.hash.match(/(?:^#|[&#])slide=id\.([A-Za-z0-9_-]+)/);
+ if(slideId)destination.hash=`slide=id.${slideId[1]}`;
+ const start=Math.floor(Number(attachment?.slideStart)||Number(info.url.searchParams.get('slide'))||0);
+ const base=String(attachment?.displayName||attachment?.name||attachment?.fileName||'Google Slides');
+ const named=start>0&&!/\bdias\s*\d+/i.test(base)?`${base} (dias ${start})`:base;
+ return {name:named,url:destination.href};
+};
 const dateString = value => /^\d{4}-\d{2}-\d{2}$/.test(String(value||'')) ? String(value) : '';
 const formatDate = str => str && dateString(str) ? new Intl.DateTimeFormat('da-DK',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(str+'T12:00:00Z')) : (str || 'Uden dato');
 const yearOf = iso => {const y=Number(iso.slice(0,4)),m=Number(iso.slice(5,7));return `${m>=8?y:y-1}/${String((m>=8?y:y-1)+1).slice(-2)}`};
@@ -71,15 +85,20 @@ export async function openTeacherCalendar(){
  const texts=items.map(x=>({id:String(x.id),title:String(x.title||'Uden overskrift'),text:plain(x.desc||'')}));
  const originalAttachments=items.flatMap(item=>{
   const data=context?.attachmentList?.(item)||(item.attachments||[]);
-  return data.map(a=>({name:String(a.name||a.fileName||item.title||'Materiale'),url:url(a.url||'')}));
- }).filter(x=>x.url&&!isSlides(x.url)).filter((x,i,arr)=>arr.findIndex(y=>y.url===x.url)===i);
+  return data.map(a=>studentMaterial({...a,name:a.displayName||a.name||a.fileName||item.title||'Materiale'})).filter(Boolean);
+ }).filter((x,i,arr)=>arr.findIndex(y=>y.url===x.url)===i);
  function composeText(ids){return texts.filter(x=>ids.has(x.id)).map(x=>x.title+(x.text?' – '+x.text:'')).join('\n')}
  async function editor(){
    const key=uidSafe(account.uid+'_'+b.id);
    try{if(demo){current=demoEntries().find(x=>x.id===key)||null}else{const doc=await dbSdk.getDoc(dbSdk.doc(db,'calendarEntries',key));current=doc.exists()?doc.data():null;const draft=localStorage.getItem('utElevDraft:'+key);if(draft)current=JSON.parse(draft)}}catch(e){error(noteMessage(e));return}
    selected=new Set(current?.selectedItemIds??texts.map(x=>x.id));links=(current?.materials||[]).map(x=>({...x}));
    // Reuse links only when they were saved; otherwise suggest board materials.
-   if(!current)links=originalAttachments.map(x=>({...x,checked:true}));
+   if(!current)links=originalAttachments.map(x=>({...x}));
+   else if(!current.slidesSuggested) {
+     // Suggest slides once for entries saved before this update; afterwards teacher removals persist.
+     const existingSlides=new Set(links.map(l=>slidesInfo(l.url)?.id).filter(Boolean));
+     for(const a of originalAttachments){const info=slidesInfo(a.url);if(info&&!existingSlides.has(info.id)){links.push({...a});existingSlides.add(info.id)}}
+   }
    d.innerHTML=header()+`${demo?'<div class="info">🧪 Prøvevisning: Opslagene gemmes kun i denne browser. De er ikke offentlige og kan ikke ses på andre enheder endnu.</div>':''}<div class="muted">Gennemse og ret teksten. Du bestemmer, hvad der vises for eleverne. Faste grupper, fravær og lærernoter overføres ikke.</div><label class="field">Hentet fra dagsordenen</label><div class="checklist" id="ec-items"></div><label class="field" for="ec-text">Indhold til eleverne</label><textarea id="ec-text"></textarea><label class="field">Materialer og links</label><div class="checklist" id="ec-links"></div><button class="btn" type="button" id="ec-addlink" style="margin-top:8px">+ Tilføj link</button><label class="field" for="ec-homework">Lektier (valgfrit)</label><textarea id="ec-homework" style="min-height:70px" placeholder="Fx Læs side 12–18"></textarea><label class="field" for="ec-due">Lektier til dato</label><input id="ec-due" type="date"><div class="muted" style="margin-top:12px">Lektien vises både på dagen, den bliver givet, og på datoen, den er til. Lokale filer kan ikke overføres automatisk; indsæt et link, som eleverne må åbne.</div><div id="ec-message"></div><div class="row-buttons"><button class="btn primary" id="ec-publish">${demo?'Gem i prøvekalender':current?'Opdater elevopslag':'Offentliggør'}</button>${demo?'': '<button class="btn" id="ec-draft">Gem kladde</button>'}<button class="btn" id="ec-preview">👁 Vis for klassen</button>${demo?'':'<button class="btn" id="ec-logout">Log ud</button>'}</div>`;
    wireClose();const field=$(d,'#ec-text');field.value=current?.text??composeText(selected);$(d,'#ec-homework').value=current?.homework||'';$(d,'#ec-due').value=current?.dueDate||'';
    const list=$(d,'#ec-items');for(const it of texts){const lab=document.createElement('label');lab.className='choose';const ch=document.createElement('input');ch.type='checkbox';ch.checked=selected.has(it.id);lab.append(ch,document.createTextNode(it.title));list.append(lab);ch.onchange=()=>{const before=composeText(selected);if(ch.checked)selected.add(it.id);else selected.delete(it.id);if(!field.value.trim()||field.value.trim()===before)field.value=composeText(selected)}}
@@ -90,7 +109,7 @@ export async function openTeacherCalendar(){
      const hw=$(d,'#ec-homework').value.trim(),due=$(d,'#ec-due').value;
      if(hw&&!dateString(due))return error('Vælg en dato, som lektierne skal være lavet til.');
      const attachments=[];for(const link of links){if(!link.name&&!link.url)continue;const safe=url(link.url);if(!safe||!/^https:/.test(safe))return error('Materialelinks skal være gyldige https-adresser.');attachments.push({name:String(link.name||'Materiale').trim().slice(0,150),url:safe})}
-     const entry={id:key,ownerUid:account.uid,classKey:classKey(className,date),className,schoolYear:yearOf(date),subject:String(b.subject||'Fag'),date,boardId:String(b.id),text:field.value.trim(),materials:attachments,homework:hw,dueDate:hw?due:'',selectedItemIds:[...selected],published:true,updatedAt:demo?new Date().toISOString():dbSdk.serverTimestamp()};
+     const entry={id:key,ownerUid:account.uid,classKey:classKey(className,date),className,schoolYear:yearOf(date),subject:String(b.subject||'Fag'),date,boardId:String(b.id),text:field.value.trim(),materials:attachments,homework:hw,dueDate:hw?due:'',selectedItemIds:[...selected],slidesSuggested:true,published:true,updatedAt:demo?new Date().toISOString():dbSdk.serverTimestamp()};
      try{
        if(demo){saveDemoEntry(entry);current={...entry};status('Gemt i prøvekalenderen på denne computer. Tryk »Vis for klassen« for at kontrollere visningen.');return}
        if(!published){const local={...entry,updatedAt:null};localStorage.setItem('utElevDraft:'+key,JSON.stringify(local));current=local;status('Kladde gemt på denne computer. Kun du kan se den her.');return}
@@ -121,7 +140,7 @@ export async function studentCalendar(){
  state.classKey=state.classes.find(([k])=>k===requested)?.[0]||state.classes.find(([k])=>k===existingClass)?.[0]||state.classes[0]?.[0]||'';
  function subjectColors(subject){const palette=[['#dce9fb','#234d7d'],['#ede3f8','#64418d'],['#f5e8d5','#795628'],['#def0e8','#285c4b'],['#f6dfdf','#853a42'],['#e3eaee','#425c69']];let hash=0;for(const c of String(subject))hash=(hash*31+c.charCodeAt(0))>>>0;return palette[hash%palette.length]}
  function badge(subject){const [bg,ink]=subjectColors(subject);return `<span class="subject" style="background:${bg};color:${ink}">${esc(subject)}</span>`}
- function matLinks(e){return (e.materials||[]).filter(m=>url(m.url)&&!isSlides(m.url)).map(m=>`<a href="${esc(url(m.url))}" target="_blank" rel="noopener noreferrer" class="material">📄 ${esc(m.name||'Materiale')}</a>`).join('')}
+ function matLinks(e){return (e.materials||[]).map(studentMaterial).filter(Boolean).map(m=>`<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer" class="material">${slidesInfo(m.url)?'🎞️':'📄'} ${esc(m.name||'Materiale')}</a>`).join('')}
  function card(e,context){let content='';if(context==='due')content=`<div class="homework"><strong>Lektier til i dag:</strong> ${esc(e.homework)}</div>`;else{if(e.text)content+=`<div class="bodytext">${esc(e.text)}</div>`;if(matLinks(e))content+=`<div class="materials">${matLinks(e)}</div>`;if(e.homework)content+=`<div class="homework"><strong>Lektier til ${esc(formatDate(e.dueDate))}:</strong> ${esc(e.homework)}</div>`}return `<article class="entry">${badge(e.subject)}${content}</article>`}
  function group(entries,filter){const days=new Map();for(const e of entries){const date=e.displayDate;if(filter&&date!==filter)continue;if(!days.has(date))days.set(date,[]);days.get(date).push(e)}return [...days].sort((a,b)=>b[0].localeCompare(a[0]))}
  function current(){return state.entries.filter(x=>x.classKey===state.classKey)}
