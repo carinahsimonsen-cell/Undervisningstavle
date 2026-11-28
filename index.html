@@ -1230,7 +1230,7 @@ body.viewing #boardView .ut-board-topic-pill{
 </head>
 <body>
 <section id="scheduleView">
- <div class="apphead"><div class="brand">Undervisningstavle</div><div class="weeknav"><button class="btn" id="prevWeek">‹</button><div class="weektitle" id="weekTitle"></div><button class="btn" id="nextWeek">›</button><button class="btn" id="todayWeek">Denne uge</button><button class="btn" id="yearOverviewBtn" type="button">📅 Årsoversigt</button><button class="btn" id="classesBtn" type="button">👥 Klasser</button><button class="btn" id="scheduleSettings" type="button">⚙️ Ringetider</button></div></div>
+ <div class="apphead"><div class="brand">Undervisningstavle</div><div class="weeknav"><button class="btn" id="prevWeek">‹</button><div class="weektitle" id="weekTitle"></div><button class="btn" id="nextWeek">›</button><button class="btn" id="todayWeek">Denne uge</button><button class="btn" id="yearOverviewBtn" type="button">📅 Årsoversigt</button><button class="btn" id="utHomeStudentCalendar" type="button" title="Åbn elevkalenderen og administrer dine opslag">📚 Elevkalender</button><button class="btn" id="classesBtn" type="button">👥 Klasser</button><button class="btn" id="scheduleSettings" type="button">⚙️ Ringetider</button></div></div>
  <div class="schedule" id="schedule"></div>
 </section>
 
@@ -5934,6 +5934,7 @@ window.utElevCalendarContext = () => ({board: board(), classes: state.classes, a
 <script type="module">
 import { openTeacherCalendar } from './elevkalender-app.js';
 const utElevkalenderMenu=document.getElementById('utElevkalenderMenu');
+document.getElementById('utHomeStudentCalendar')?.addEventListener('click',()=>window.open('./elevkalender.html?laerer=1','_blank','noopener'));
 document.getElementById('utPilotCalendarBtn')?.addEventListener('click',()=>{utElevkalenderMenu.open=false;openTeacherCalendar().catch(err=>{console.error(err);alert('Elevkalenderen kunne ikke åbnes: '+(err?.message||err))})});
 document.getElementById('utPilotStudentViewBtn')?.addEventListener('click',()=>{utElevkalenderMenu.open=false;window.open('./elevkalender.html','_blank','noopener')});
 document.addEventListener('click',event=>{if(utElevkalenderMenu?.open&&!utElevkalenderMenu.contains(event.target))utElevkalenderMenu.open=false});

@@ -186,9 +186,9 @@ export async function openTeacherCalendar(){
 
 export async function studentCalendar(){
  const root=document.getElementById('studentApp');if(!root)return;
- const state={entries:[],classKey:'',subject:'',onlyHomework:false,month:'',classes:[]};
+ const state={entries:[],classKey:'',subject:'',onlyHomework:false,month:'',classes:[],teacher:null,teacherVerified:false,teacherBusy:false};
  const now=new Date(),today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
- const qs=new URLSearchParams(location.search);const demo=qs.get('preview')==='1';const requested=qs.get('klasse')||'';
+ const qs=new URLSearchParams(location.search);const demo=qs.get('preview')==='1';const teacherPage=qs.get('laerer')==='1'&&!demo;const requested=qs.get('klasse')||'';
  const existingClass=(()=>{try{return localStorage.getItem('elevkalender.sidsteKlasse')||''}catch{return ''}})();
  function showError(msg){root.innerHTML=`<div class="notice">${esc(msg)}</div>`}
  if(!demo&&!ready){showError('Elevkalenderen er endnu ikke tilsluttet skolens fælles opslag. Åbn prøvevisningen fra Undervisningstavlen via »Vis for klassen«.');return}
@@ -211,7 +211,7 @@ export async function studentCalendar(){
  function subjectColors(subject){const normalized=String(subject||'').trim().toLocaleLowerCase('da-DK');if(familiarSubjects[normalized])return familiarSubjects[normalized];const palette=[['#dce9fb','#28598f'],['#ede3f8','#64418d'],['#f5e8d5','#795628'],['#def0e8','#285c4b'],['#f6dfdf','#853a42'],['#e3eaee','#425c69']];let hash=0;for(const c of normalized)hash=(hash*31+c.charCodeAt(0))>>>0;return palette[hash%palette.length]}
  function badge(subject){const [bg,ink]=subjectColors(subject);return `<span class="subject" style="background:${bg};color:${ink}">${esc(subject)}</span>`}
  function matLinks(e,homeworkOnly=false){return (homeworkOnly?(e.homeworkMaterials||[]):(e.materials||[])).map(studentMaterial).filter(Boolean).map(m=>`<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer" class="material">${slidesInfo(m.url)?'🎞️':'📄'} ${esc(m.name||'Materiale')}</a>`).join('')}
- function card(e,context){let content='';if(context==='due'){content=`<div class="homework"><strong>Lektier til i dag:</strong> ${esc(e.homework)}</div>`;if(matLinks(e,true))content+=`<div class="materials">${matLinks(e,true)}</div>`}else{if(e.text)content+=`<div class="bodytext">${esc(e.text)}</div>`;if(matLinks(e))content+=`<div class="materials">${matLinks(e)}</div>`;if(e.homework)content+=`<div class="homework"><strong>Lektier til ${esc(formatDate(e.dueDate))}:</strong> ${esc(e.homework)}</div>`}const [bg,ink]=subjectColors(e.subject);return `<article class="entry" style="--subject-bg:${bg};--subject-color:${ink}">${badge(e.subject)}${content}</article>`}
+ function card(e,context){let content='';if(context==='due'){content=`<div class="homework"><strong>Lektier til i dag:</strong> ${esc(e.homework)}</div>`;if(matLinks(e,true))content+=`<div class="materials">${matLinks(e,true)}</div>`}else{if(e.text)content+=`<div class="bodytext">${esc(e.text)}</div>`;if(matLinks(e))content+=`<div class="materials">${matLinks(e)}</div>`;if(e.homework)content+=`<div class="homework"><strong>Lektier til ${esc(formatDate(e.dueDate))}:</strong> ${esc(e.homework)}</div>`}const [bg,ink]=subjectColors(e.subject);return `<article class="entry" style="--subject-bg:${bg};--subject-color:${ink}">${badge(e.subject)}${content}${teacherPage&&state.teacherVerified&&state.teacher?.uid===e.ownerUid?`<div class="teacher-actions"><button type="button" data-edit="${esc(e.id)}">✎ Rediger</button><button type="button" class="danger" data-delete="${esc(e.id)}">Slet opslag</button></div>`:''}</article>`}
  function group(entries,filter){const days=new Map();for(const e of entries){const date=e.displayDate;if(filter&&date!==filter)continue;if(!days.has(date))days.set(date,[]);days.get(date).push(e)}return [...days].sort((a,b)=>b[0].localeCompare(a[0]))}
  function current(){return state.entries.filter(x=>x.classKey===state.classKey)}
  function render(){
@@ -229,12 +229,104 @@ export async function studentCalendar(){
   const groups=group(all);
   const upcomingHomeworkCount=new Set(homeworks.filter(e=>e.dueDate>=today).map(e=>e.id||`${e.classKey}|${e.subject}|${e.date}|${e.dueDate}|${e.homework}`)).size;
   const homeworkHint=upcomingHomeworkCount?`<span class="homework-hint">Du har ${upcomingHomeworkCount} kommende ${upcomingHomeworkCount===1?'lektie':'lektier'}</span>`:'';
-  root.innerHTML=`${demo?'<div class="notice" style="margin:0 0 16px;background:#fff8e9;border-color:#e4d4ad">🧪 <strong>Prøvevisning</strong> – kun opslag gemt i denne browser. Dette er ikke offentliggjort til eleverne.</div>':''}<header><div><h1>Klassens kalender</h1><p>Undervisning · Materialer · Lektier</p></div><span class="cal-icon">📅</span></header><div class="filters"><label>Klasse<select id="classSelect">${classOptions}</select></label><label>Fag<select id="subjectSelect">${subjectOptions}</select></label><div class="tabs"><button id="tabAll" class="${state.onlyHomework?'':'active'}">Kalender</button><button id="tabHw" class="${state.onlyHomework?'active':''}">Kun lektier${homeworkHint}</button></div></div><div id="timeline">${groups.length?groups.map(([day,items])=>`<section class="day${state.onlyHomework&&day<today?' past-due':''}" data-day="${esc(day)}"><h2>${esc(formatDate(day))}</h2><div class="day-entries">${items.map(e=>card(e,e.kind==='due'?'due':'lesson')).join('')}</div></section>`).join(''):'<div class="notice">Ingen opslag i denne visning endnu.</div>'}</div><footer>Opslagene opdateres af klassens lærere. I »Kun lektier« vises lektier på datoen, de skal være lavet til.</footer>`;
+  root.innerHTML=`${demo?'<div class="notice" style="margin:0 0 16px;background:#fff8e9;border-color:#e4d4ad">🧪 <strong>Prøvevisning</strong> – kun opslag gemt i denne browser. Dette er ikke offentliggjort til eleverne.</div>':''}<header><div><h1>Klassens kalender</h1><p>Undervisning · Materialer · Lektier</p></div>${teacherPage?`<div class="teacher-header">${state.teacherVerified?`<span class="teacher-ready">✓ Læreradministration</span><button type="button" id="teacherLogout">Log ud</button>`:`<button type="button" id="teacherLogin">🔐 Log ind som lærer</button>`}</div>`:'<span class="cal-icon">📅</span>'}</header><div class="filters"><label>Klasse<select id="classSelect">${classOptions}</select></label><label>Fag<select id="subjectSelect">${subjectOptions}</select></label><div class="tabs"><button id="tabAll" class="${state.onlyHomework?'':'active'}">Kalender</button><button id="tabHw" class="${state.onlyHomework?'active':''}">Kun lektier${homeworkHint}</button></div></div><div id="timeline">${groups.length?groups.map(([day,items])=>`<section class="day${state.onlyHomework&&day<today?' past-due':''}" data-day="${esc(day)}"><h2>${esc(formatDate(day))}</h2><div class="day-entries">${items.map(e=>card(e,e.kind==='due'?'due':'lesson')).join('')}</div></section>`).join(''):'<div class="notice">Ingen opslag i denne visning endnu.</div>'}</div><footer>Opslagene opdateres af klassens lærere. I »Kun lektier« vises lektier på datoen, de skal være lavet til.</footer>`;
+  if(teacherPage){
+    const login=$(root,'#teacherLogin');if(login)login.onclick=()=>teacherLogin();
+    const logout=$(root,'#teacherLogout');if(logout)logout.onclick=async()=>{if(!teacherServices)return;await teacherServices.authSdk.signOut(teacherServices.auth);state.teacher=null;state.teacherVerified=false;render()};
+    for(const btn of root.querySelectorAll('[data-edit]'))btn.onclick=()=>teacherEdit(state.entries.find(e=>e.id===btn.dataset.edit));
+    for(const btn of root.querySelectorAll('[data-delete]'))btn.onclick=()=>teacherDelete(state.entries.find(e=>e.id===btn.dataset.delete));
+  }
   $(root,'#classSelect').onchange=e=>{state.classKey=e.target.value;state.subject='';try{localStorage.setItem('elevkalender.sidsteKlasse',state.classKey)}catch{};render()};
   $(root,'#subjectSelect').onchange=e=>{state.subject=e.target.value;render()};
   $(root,'#tabAll').onclick=()=>{state.onlyHomework=false;render()};
   $(root,'#tabHw').onclick=()=>{state.onlyHomework=true;render()};
 
  }
- render();
+  let teacherServices=null;
+  function teacherOverlay(title,inner){
+    document.getElementById('elevcal-teacher-overlay')?.remove();
+    const backdrop=document.createElement('div');backdrop.className='elevcal-teacher-backdrop';backdrop.id='elevcal-teacher-overlay';
+    backdrop.innerHTML=`<section class="elevcal-teacher-dialog" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="elevcal-dialog-head"><h2>${esc(title)}</h2><button type="button" class="ec-secondary" id="ec-modal-close">✕ Luk</button></div>${inner}</section>`;
+    document.body.append(backdrop);
+    const close=()=>backdrop.remove();backdrop.querySelector('#ec-modal-close').onclick=close;
+    backdrop.addEventListener('click',ev=>{if(ev.target===backdrop)close()});
+    return {element:backdrop,close};
+  }
+  async function checkTeacher(){
+    teacherServices=await services();const {auth,authSdk,db,dbSdk}=teacherServices;
+    if(typeof auth.authStateReady==='function')await auth.authStateReady();
+    if(!auth.currentUser)return false;
+    const teacherDoc=await dbSdk.getDoc(dbSdk.doc(db,'teachers',auth.currentUser.uid));
+    state.teacherVerified=teacherDoc.exists()&&teacherDoc.data().active===true;
+    state.teacher=state.teacherVerified?auth.currentUser:null;
+    render();return state.teacherVerified;
+  }
+  async function teacherLogin(){
+    const {element,close}=teacherOverlay('Log ind som lærer',`<p class="ec-muted">Brug din eksisterende lærerlogin til elevkalenderen.</p><form id="ec-admin-login" class="ec-admin-form"><label>Mailadresse<input type="email" name="email" autocomplete="username" required></label><label>Adgangskode<input type="password" name="password" autocomplete="current-password" required></label><p class="ec-admin-msg" role="status"></p><button type="submit" class="ec-primary">Log ind</button></form>`);
+    const form=element.querySelector('form'),status=element.querySelector('.ec-admin-msg');
+    form.onsubmit=async ev=>{
+      ev.preventDefault();const button=form.querySelector('button[type=submit]');button.disabled=true;status.textContent='Logger ind …';
+      try{teacherServices=await services();await teacherServices.authSdk.signInWithEmailAndPassword(teacherServices.auth,form.elements.email.value,form.elements.password.value);
+        if(!await checkTeacher()){status.textContent='Kontoen er ikke godkendt som lærer.';return}
+        close();
+      }catch(err){status.textContent='Login mislykkedes: '+noteMessage(err)}finally{button.disabled=false}
+    };
+  }
+  function teacherMaterialsEditor(container,items,name){
+    let links=(items||[]).map(x=>({...x}));
+    const host=container.querySelector(`[data-material-list="${name}"]`);
+    const redraw=()=>{
+      host.replaceChildren();
+      for(const [i,link] of links.entries()){
+        const row=document.createElement('div');row.className='ec-material-row';
+        const title=document.createElement('input');title.placeholder='Navn på materialet';title.value=link.name||'';
+        const address=document.createElement('input');address.placeholder='https://…';address.type='url';address.value=link.url||'';
+        const remove=document.createElement('button');remove.type='button';remove.className='ec-secondary';remove.textContent='Fjern';
+        title.oninput=()=>{link.name=title.value};address.oninput=()=>{link.url=address.value};remove.onclick=()=>{links.splice(i,1);redraw()};
+        row.append(title,address,remove);host.append(row);
+      }
+    };
+    container.querySelector(`[data-add-material="${name}"]`).onclick=()=>{if(links.length>=30)return;links.push({name:'',url:''});redraw()};redraw();
+    return ()=>{const result=[];for(const link of links){if(!link.name&&!link.url)continue;const safe=url(link.url);if(!safe||!safe.startsWith('https:'))throw new Error('Alle materialelinks skal være gyldige https-adresser.');result.push({name:String(link.name||'Materiale').trim().slice(0,150),url:safe,...(link.slideStart>0?{slideStart:link.slideStart}:{})})}return result};
+  }
+  function teacherEdit(entry){
+    if(!entry||!state.teacherVerified||entry.ownerUid!==state.teacher?.uid)return;
+    const {element,close}=teacherOverlay('Rediger opslag',`<p class="ec-muted">${esc(entry.subject)} · ${esc(formatDate(entry.date))} · ${esc(entry.className)}</p>
+      <form class="ec-admin-form" id="ec-admin-edit"><label>Indhold til eleverne<textarea name="lesson" rows="5"></textarea></label>
+      <div class="ec-section"><h3>Materialer til undervisningen</h3><div data-material-list="lesson"></div><button type="button" class="ec-secondary" data-add-material="lesson">+ Tilføj link</button></div>
+      <label>Lektier (valgfrit)<textarea name="homework" rows="3"></textarea></label><label>Lektier til dato<input name="due" type="date"></label>
+      <div class="ec-section"><h3>Materialer til lektien</h3><p class="ec-muted">Disse links vises kun i lektieoversigten.</p><div data-material-list="homework"></div><button type="button" class="ec-secondary" data-add-material="homework">+ Tilføj link</button></div>
+      <p class="ec-admin-msg" role="status"></p><div class="ec-actions"><button type="submit" class="ec-primary">Gem ændringer</button><button type="button" class="ec-secondary" id="ec-admin-cancel">Annuller</button></div></form>`);
+    const form=element.querySelector('form');
+    form.elements.lesson.value=entry.text||'';form.elements.homework.value=entry.homework||'';form.elements.due.value=entry.dueDate||'';
+    const lessonLinks=teacherMaterialsEditor(element,entry.materials,'lesson');
+    const homeworkLinks=teacherMaterialsEditor(element,entry.homeworkMaterials,'homework');
+    element.querySelector('#ec-admin-cancel').onclick=close;
+    form.onsubmit=async ev=>{
+      ev.preventDefault();const status=element.querySelector('.ec-admin-msg'),button=form.querySelector('[type=submit]');
+      if(!state.teacherVerified||entry.ownerUid!==teacherServices?.auth.currentUser?.uid)return;
+      const hw=form.elements.homework.value.trim(),due=form.elements.due.value;
+      if(hw&&!dateString(due)){status.textContent='Vælg en dato for lektien.';return}
+      let materials,homeworkMaterials;
+      try{materials=lessonLinks();homeworkMaterials=hw?homeworkLinks():[]}catch(err){status.textContent=err.message;return}
+      const update={id:entry.id,ownerUid:entry.ownerUid,classKey:entry.classKey,className:entry.className,schoolYear:entry.schoolYear,subject:entry.subject,date:entry.date,boardId:entry.boardId,
+        selectedItemIds:Array.isArray(entry.selectedItemIds)?entry.selectedItemIds:[],text:form.elements.lesson.value.trim(),materials,homework:hw,dueDate:hw?due:'',homeworkMaterials,
+        slidesSuggested:true,published:true,updatedAt:teacherServices.dbSdk.serverTimestamp()};
+      button.disabled=true;status.textContent='Gemmer …';
+      try{await teacherServices.dbSdk.setDoc(teacherServices.dbSdk.doc(teacherServices.db,'calendarEntries',entry.id),update);
+        state.entries=state.entries.map(e=>e.id===entry.id?{...update,updatedAt:null}:e);close();render();
+      }catch(err){status.textContent='Kunne ikke gemme: '+noteMessage(err)}finally{button.disabled=false}
+    };
+  }
+  async function teacherDelete(entry){
+    if(!entry||!state.teacherVerified||entry.ownerUid!==state.teacher?.uid)return;
+    if(!window.confirm(`Vil du slette opslaget fra ${entry.subject} den ${formatDate(entry.date)}?\n\nTilknyttede lektier slettes også. Undervisningstavlen ændres ikke. Dette kan ikke fortrydes.`))return;
+    try{await teacherServices.dbSdk.deleteDoc(teacherServices.dbSdk.doc(teacherServices.db,'calendarEntries',entry.id));
+      state.entries=state.entries.filter(e=>e.id!==entry.id);render();
+    }catch(err){window.alert('Kunne ikke slette opslaget: '+noteMessage(err))}
+  }
+  render();
+  if(teacherPage){
+    try{await checkTeacher()}catch(err){console.warn('Lærergodkendelse kunne ikke hentes',err)}
+  }
 }
