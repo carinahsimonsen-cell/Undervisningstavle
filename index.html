@@ -5935,7 +5935,7 @@ window.utElevCalendarContext = () => ({board: board(), classes: state.classes, a
 import { openTeacherCalendar } from './elevkalender-app.js';
 const utElevkalenderMenu=document.getElementById('utElevkalenderMenu');
 document.getElementById('utPilotCalendarBtn')?.addEventListener('click',()=>{utElevkalenderMenu.open=false;openTeacherCalendar().catch(err=>{console.error(err);alert('Elevkalenderen kunne ikke åbnes: '+(err?.message||err))})});
-document.getElementById('utPilotStudentViewBtn')?.addEventListener('click',()=>{utElevkalenderMenu.open=false;window.open('./elevkalender.html?preview=1','_blank','noopener')});
+document.getElementById('utPilotStudentViewBtn')?.addEventListener('click',()=>{utElevkalenderMenu.open=false;window.open('./elevkalender.html','_blank','noopener')});
 document.addEventListener('click',event=>{if(utElevkalenderMenu?.open&&!utElevkalenderMenu.contains(event.target))utElevkalenderMenu.open=false});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&utElevkalenderMenu?.open){utElevkalenderMenu.open=false;utElevkalenderMenu.querySelector('summary')?.focus()}});
 </script>
