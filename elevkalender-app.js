@@ -48,6 +48,10 @@ const formatDate = str => str && dateString(str) ? new Intl.DateTimeFormat('da-D
 const yearOf = iso => {const y=Number(iso.slice(0,4)),m=Number(iso.slice(5,7));return `${m>=8?y:y-1}/${String((m>=8?y:y-1)+1).slice(-2)}`};
 const classKey = (name,iso) => `${yearOf(iso)} · ${String(name||'').trim().toLowerCase().replace(/\s+/g,' ')}`;
 const label = (name,iso) => `${String(name||'').trim()} · ${yearOf(iso)}`;
+// An individual teacher may name a class differently on their own board.
+// Shared calendar class IDs come from previously published calendar posts.
+const classChoiceStore = (uid,sourceClassId,iso) => `utElevClassChoice:${uid}:${sourceClassId}:${yearOf(iso)}`;
+const similarClassName = str => String(str||'').normalize('NFKC').toLocaleLowerCase('da-DK').replace(/[^\p{L}\p{N}]/gu,'');
 const uidSafe = str => String(str||'').replace(/[^a-zA-Z0-9_-]/g,'-').slice(0,160);
 function noteMessage(err) { return ({'auth/invalid-credential':'Ugyldig mail eller adgangskode.','auth/invalid-email':'Ugyldig mailadresse.','permission-denied':'Du har ikke læreradgang til at offentliggøre.','auth/too-many-requests':'For mange forsøg. Prøv senere.'})[err?.code] || err?.message || String(err) }
 
@@ -58,6 +62,7 @@ function baseStyle(){if(document.getElementById('elevcal-teacher-style'))return;
 .elevcal-editor textarea,.elevcal-editor input:not([type=checkbox]){width:100%;margin-top:5px;border:1px solid #becdc3;border-radius:8px;padding:10px;font:inherit;color:#223429;background:#fff}
 .elevcal-editor textarea{min-height:110px;resize:vertical}.elevcal-editor .choose{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid #e8eee8}.elevcal-editor .choose input{margin-top:4px}
 .elevcal-editor .row-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}.elevcal-editor .info{background:#edf5ee;border-radius:8px;padding:10px;margin:9px 0}.elevcal-editor .error{background:#fff0eb;color:#793b2b;border-radius:8px;padding:10px;margin:9px 0}
+.elevcal-editor .ec-class-choice{padding:12px 14px;border:1px solid #d6e5da;background:#f4f8f3;border-radius:10px;margin:16px 0 10px}.elevcal-editor .ec-class-choice select{display:block;width:100%;margin-top:7px;padding:10px;border:1px solid #becdc3;border-radius:8px;font:inherit;background:#fff;color:#223429}.elevcal-editor .ec-class-choice .muted{margin:6px 0 0}.elevcal-editor .ec-class-choice input{margin-top:8px}
 .elevcal-editor .ec-homework-materials{margin-top:16px;border-top:1px solid #e3e9e3;padding-top:3px}.elevcal-editor .ec-choose-material{display:flex;align-items:end;gap:8px;margin:9px 0}.elevcal-editor .ec-choose-material select{min-width:0;flex:1;padding:10px;border:1px solid #becdc3;border-radius:8px;background:#fff;color:#223429;font:inherit}.elevcal-editor .ec-choose-material button{flex-shrink:0}@media(max-width:600px){.elevcal-editor .ec-choose-material{flex-wrap:wrap}.elevcal-editor .ec-choose-material select{flex-basis:100%}}
 .elevcal-editor .ec-delete{margin-left:auto;border:1px solid #dcb4b4;background:#fff7f7;color:#9b3030;font-weight:600}.elevcal-editor .ec-delete:hover{background:#ffeded}
 .elevcal-editor .checklist{border:1px solid #e3e9e3;border-radius:9px;max-height:220px;overflow:auto;padding:6px 12px}.elevcal-editor .linkline{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;align-items:end;margin:8px 0}
@@ -71,7 +76,7 @@ export async function openTeacherCalendar(){
  const cls=context?.classes?.find(c=>c.id===b.classId);
  const className=String(cls?.name||'').trim();const date=dateString(b.date);
  const overlay=document.createElement('div');overlay.className='elevcal-backdrop';const d=document.createElement('div');d.className='elevcal-editor';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');overlay.append(d);document.body.append(overlay);
- let selected=new Set(), links=[], homeworkLinks=[], current=null, serverPublished=false, servicesRef=null, account=null, authValidated=false;
+ let selected=new Set(), links=[], homeworkLinks=[], current=null, serverPublished=false, servicesRef=null, account=null, authValidated=false, sharedClasses=[];
  const close=()=>overlay.remove();overlay.onclick=e=>{if(e.target===overlay)close()};
  function header(){return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h2>📅 Til elevkalender</h2><button class="btn" id="ec-close">✕ Luk</button></div><div class="muted">${esc(className||'Klasse mangler')} · ${esc(b.subject||'Fag')} · ${esc(formatDate(date))}</div>`}
  function error(message){const el=$ (d,'#ec-message');if(el){el.className='error';el.textContent=message}else alert(message)}
@@ -97,6 +102,17 @@ export async function openTeacherCalendar(){
  async function editor(){
    const key=uidSafe(account.uid+'_'+b.id);
    try{if(demo){current=demoEntries().find(x=>x.id===key)||null;serverPublished=Boolean(current)}else{const doc=await dbSdk.getDoc(dbSdk.doc(db,'calendarEntries',key));serverPublished=doc.exists();current=serverPublished?doc.data():null;const draft=localStorage.getItem('utElevDraft:'+key);if(draft)current=JSON.parse(draft)}}catch(e){error(noteMessage(e));return}
+    // Read shared classes from all published posts, without requiring any new Firestore collections.
+    // Legacy posts retain their existing classKey and className unchanged.
+    try{
+      const entries=demo?demoEntries():(await dbSdk.getDocs(dbSdk.collection(db,'calendarEntries'))).docs.map(x=>x.data());
+      const classMap=new Map();
+      for(const post of entries){
+        if(post.published!==true||post.schoolYear!==yearOf(date)||!post.classKey||!post.className)continue;
+        if(!classMap.has(post.classKey))classMap.set(post.classKey,{key:post.classKey,name:post.className});
+      }
+      sharedClasses=[...classMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'da'));
+    }catch(e){error('Kunne ikke hente klasselisten: '+noteMessage(e));return}
    selected=new Set(current?.selectedItemIds??texts.map(x=>x.id));links=(current?.materials||[]).map(x=>{const normalized=studentMaterial(x);return normalized?{...x,...normalized}:{...x}});homeworkLinks=(current?.homeworkMaterials||[]).map(x=>{const normalized=studentMaterial(x);return normalized?{...x,...normalized}:{...x}});
    // Upgrade an existing saved Slides material using the board's start slide;
    // do not add back materials which the teacher deliberately removed.
@@ -116,8 +132,40 @@ export async function openTeacherCalendar(){
      const existingSlides=new Set(links.map(l=>slidesInfo(l.url)?.id).filter(Boolean));
      for(const a of originalAttachments){const info=slidesInfo(a.url);if(info&&!existingSlides.has(info.id)){links.push({...a});existingSlides.add(info.id)}}
    }
-   d.innerHTML=header()+`${demo?'<div class="info">🧪 Prøvevisning: Opslagene gemmes kun i denne browser. De er ikke offentlige og kan ikke ses på andre enheder endnu.</div>':''}<div class="muted">Gennemse og ret teksten. Du bestemmer, hvad der vises for eleverne. Faste grupper, fravær og lærernoter overføres ikke.</div><label class="field">Hentet fra dagsordenen</label><div class="checklist" id="ec-items"></div><label class="field" for="ec-text">Indhold til eleverne</label><textarea id="ec-text"></textarea><label class="field">Materialer og links</label><div class="checklist" id="ec-links"></div><button class="btn" type="button" id="ec-addlink" style="margin-top:8px">+ Tilføj link</button><label class="field" for="ec-homework">Lektier (valgfrit)</label><textarea id="ec-homework" style="min-height:70px" placeholder="Fx Læs side 12–18"></textarea><label class="field" for="ec-due">Lektier til dato</label><input id="ec-due" type="date"><div class="ec-homework-materials"><label class="field">Materialer til lektien (valgfrit)</label><div class="muted">Vælg et materiale fra tavlen, eller indsæt et andet link. De følger kun lektien, ikke undervisningens materialeliste.</div><div class="ec-choose-material"><select id="ec-hw-from-board" aria-label="Vælg materiale fra tavlen"></select><button class="btn" type="button" id="ec-hw-add-board">Tilføj valgt</button></div><div id="ec-homework-links"></div><button class="btn" type="button" id="ec-hw-addlink">+ Tilføj andet link</button></div><div class="muted" style="margin-top:12px">I kalenderen vises lektien på dagen, den gives. Under »Kun lektier« vises den på datoen, den skal være lavet til. Lokale filer kan ikke overføres automatisk; indsæt et link, som eleverne må åbne.</div><div id="ec-message"></div><div class="row-buttons"><button class="btn primary" id="ec-publish">${demo?'Gem i prøvekalender':current?'Opdater elevopslag':'Offentliggør'}</button>${demo?'': '<button class="btn" id="ec-draft">Gem kladde</button>'}<button class="btn" id="ec-preview">👁 Vis for klassen</button>${serverPublished?'<button class="btn ec-delete" type="button" id="ec-delete">Slet fra elevkalender</button>':''}${demo?'':'<button class="btn" id="ec-logout">Log ud</button>'}</div>`;
-   wireClose();const field=$(d,'#ec-text');field.value=current?.text??composeText(selected);$(d,'#ec-homework').value=current?.homework||'';$(d,'#ec-due').value=current?.dueDate||'';
+   d.innerHTML=header()+`${demo?'<div class="info">🧪 Prøvevisning: Opslagene gemmes kun i denne browser. De er ikke offentlige og kan ikke ses på andre enheder endnu.</div>':''}<div class="muted">Gennemse og ret teksten. Du bestemmer, hvad der vises for eleverne. Faste grupper, fravær og lærernoter overføres ikke.</div><div class="ec-class-choice"><label class="field" for="ec-class" style="margin-top:0">Klasse i elevkalenderen</label><p class="muted">Vælg den fælles klasse – den behøver ikke hedde det samme som på din tavle. Valget huskes for din klasse på denne computer.</p><select id="ec-class"></select><div id="ec-class-new" style="display:none"><label class="field" for="ec-class-name">Navn på ny klasse</label><input id="ec-class-name" maxlength="100" placeholder="Fx 7.A"></div></div><label class="field">Hentet fra dagsordenen</label><div class="checklist" id="ec-items"></div><label class="field" for="ec-text">Indhold til eleverne</label><textarea id="ec-text"></textarea><label class="field">Materialer og links</label><div class="checklist" id="ec-links"></div><button class="btn" type="button" id="ec-addlink" style="margin-top:8px">+ Tilføj link</button><label class="field" for="ec-homework">Lektier (valgfrit)</label><textarea id="ec-homework" style="min-height:70px" placeholder="Fx Læs side 12–18"></textarea><label class="field" for="ec-due">Lektier til dato</label><input id="ec-due" type="date"><div class="ec-homework-materials"><label class="field">Materialer til lektien (valgfrit)</label><div class="muted">Vælg et materiale fra tavlen, eller indsæt et andet link. De følger kun lektien, ikke undervisningens materialeliste.</div><div class="ec-choose-material"><select id="ec-hw-from-board" aria-label="Vælg materiale fra tavlen"></select><button class="btn" type="button" id="ec-hw-add-board">Tilføj valgt</button></div><div id="ec-homework-links"></div><button class="btn" type="button" id="ec-hw-addlink">+ Tilføj andet link</button></div><div class="muted" style="margin-top:12px">I kalenderen vises lektien på dagen, den gives. Under »Kun lektier« vises den på datoen, den skal være lavet til. Lokale filer kan ikke overføres automatisk; indsæt et link, som eleverne må åbne.</div><div id="ec-message"></div><div class="row-buttons"><button class="btn primary" id="ec-publish">${demo?'Gem i prøvekalender':current?'Opdater elevopslag':'Offentliggør'}</button>${demo?'': '<button class="btn" id="ec-draft">Gem kladde</button>'}<button class="btn" id="ec-preview">👁 Vis for klassen</button>${serverPublished?'<button class="btn ec-delete" type="button" id="ec-delete">Slet fra elevkalender</button>':''}${demo?'':'<button class="btn" id="ec-logout">Log ud</button>'}</div>`;
+    wireClose();
+    const classSelector=$(d,'#ec-class'),classNew=$(d,'#ec-class-new'),classNameInput=$(d,'#ec-class-name');
+    const mapStorageKey=classChoiceStore(account.uid,b.classId||b.id,date);
+    let remembered='';try{remembered=localStorage.getItem(mapStorageKey)||''}catch{}
+    const currentClassKey=current?.classKey||'';
+    const suggested=sharedClasses.find(x=>x.key===(currentClassKey||remembered||classKey(className,date)))?.key||'';
+    classSelector.innerHTML=`<option value="">Vælg klasse …</option>`+sharedClasses.map(x=>`<option value="${esc(x.key)}">${esc(x.name)} · ${esc(yearOf(date))}</option>`).join('')+`<option value="__new__">+ Opret ny klasse</option>`;
+    classSelector.value=suggested||(sharedClasses.length?'':'__new__');
+    classNameInput.value=className;
+    function drawClassFields(){classNew.style.display=classSelector.value==='__new__'?'block':'none'}
+    classSelector.onchange=drawClassFields;drawClassFields();
+    function calendarClassChoice(){
+      const choice=classSelector.value;
+      if(!choice)throw new Error('Vælg først den klasse, opslaget skal vises under.');
+      if(choice!=='__new__'){
+        const found=sharedClasses.find(x=>x.key===choice);
+        if(!found)throw new Error('Den valgte klasse findes ikke længere. Åbn vinduet igen.');
+        return found;
+      }
+      const name=classNameInput.value.trim();
+      if(!name||name.length>100)throw new Error('Skriv et klassenavn på højst 100 tegn.');
+      const lookalike=sharedClasses.find(x=>similarClassName(x.name)===similarClassName(name));
+      if(lookalike)throw new Error(`Klassen »${lookalike.name}« findes allerede. Vælg den i listen i stedet.`);
+      return {key:classKey(name,date),name};
+    }
+    function rememberCalendarClass(value){
+      try{localStorage.setItem(mapStorageKey,value)}catch{}
+      if(classSelector.value==='__new__'){
+        const found=sharedClasses.find(x=>x.key===value);
+        if(found){const opt=document.createElement('option');opt.value=found.key;opt.textContent=`${found.name} · ${yearOf(date)}`;classSelector.insertBefore(opt,classSelector.lastElementChild);classSelector.value=value;drawClassFields()}
+      }
+    }
+    const field=$(d,'#ec-text');field.value=current?.text??composeText(selected);$(d,'#ec-homework').value=current?.homework||'';$(d,'#ec-due').value=current?.dueDate||'';
    const list=$(d,'#ec-items');for(const it of texts){const lab=document.createElement('label');lab.className='choose';const ch=document.createElement('input');ch.type='checkbox';ch.checked=selected.has(it.id);lab.append(ch,document.createTextNode(it.title));list.append(lab);ch.onchange=()=>{const before=composeText(selected);if(ch.checked)selected.add(it.id);else selected.delete(it.id);if(!field.value.trim()||field.value.trim()===before)field.value=composeText(selected)}}
    function redrawLinks(){const host=$(d,'#ec-links');host.replaceChildren();if(!links.length){host.textContent='Ingen links endnu.';return}links.forEach((l,i)=>{const row=document.createElement('div');row.className='linkline';const name=document.createElement('input');name.placeholder='Navn på materiale';name.value=l.name||'';const input=document.createElement('input');input.type='url';input.placeholder='https://…';input.value=l.url||'';const del=document.createElement('button');del.className='btn';del.type='button';del.textContent='Fjern';name.oninput=()=>{l.name=name.value};input.oninput=()=>{l.url=input.value};del.onclick=()=>{links.splice(i,1);redrawLinks()};row.append(name,input,del);host.append(row)})}
    $(d,'#ec-addlink').onclick=()=>{links.push({name:'',url:''});redrawLinks()};redrawLinks();
@@ -152,11 +200,12 @@ export async function openTeacherCalendar(){
      const homeworkAttachments=[];
      if(hw){for(const link of homeworkLinks){if(!link.name&&!link.url)continue;const safe=url(link.url);if(!safe||!/^https:/.test(safe))return error('Links til lektiematerialer skal være gyldige https-adresser.');homeworkAttachments.push({name:String(link.name||'Materiale').trim().slice(0,150),url:safe,...(link.slideStart>0&&slidesInfo(safe)?{slideStart:Math.floor(Number(link.slideStart))}:{})})}}
      if(attachments.length>30||homeworkAttachments.length>30)return error('Du kan højst tilføje 30 materialer i hver kategori.');
-     const entry={id:key,ownerUid:account.uid,classKey:classKey(className,date),className,schoolYear:yearOf(date),subject:String(b.subject||'Fag'),date,boardId:String(b.id),text:field.value.trim(),materials:attachments,homework:hw,dueDate:hw?due:'',homeworkMaterials:homeworkAttachments,selectedItemIds:[...selected],slidesSuggested:true,published:true,updatedAt:demo?new Date().toISOString():dbSdk.serverTimestamp()};
+     let chosenClass;try{chosenClass=calendarClassChoice()}catch(e){return error(e.message)}
+     const entry={id:key,ownerUid:account.uid,classKey:chosenClass.key,className:chosenClass.name,schoolYear:yearOf(date),subject:String(b.subject||'Fag'),date,boardId:String(b.id),text:field.value.trim(),materials:attachments,homework:hw,dueDate:hw?due:'',homeworkMaterials:homeworkAttachments,selectedItemIds:[...selected],slidesSuggested:true,published:true,updatedAt:demo?new Date().toISOString():dbSdk.serverTimestamp()};
      try{
-       if(demo){saveDemoEntry(entry);current={...entry};serverPublished=true;status('Gemt i prøvekalenderen på denne computer. Tryk »Vis for klassen« for at kontrollere visningen.');return}
+       if(demo){saveDemoEntry(entry);current={...entry};serverPublished=true;rememberCalendarClass(chosenClass.key);status('Gemt i prøvekalenderen på denne computer. Tryk »Vis for klassen« for at kontrollere visningen.');return}
        if(!published){const local={...entry,updatedAt:null};localStorage.setItem('utElevDraft:'+key,JSON.stringify(local));current=local;status('Kladde gemt på denne computer. Kun du kan se den her.');return}
-       status('Offentliggør …');await dbSdk.setDoc(dbSdk.doc(db,'calendarEntries',key),entry);localStorage.removeItem('utElevDraft:'+key);current={...entry};serverPublished=true;status('Offentliggjort! Eleverne kan nu se opslaget på elevsiden.')
+       status('Offentliggør …');await dbSdk.setDoc(dbSdk.doc(db,'calendarEntries',key),entry);localStorage.removeItem('utElevDraft:'+key);current={...entry};serverPublished=true;if(!sharedClasses.some(x=>x.key===chosenClass.key))sharedClasses.push(chosenClass);rememberCalendarClass(chosenClass.key);status('Offentliggjort! Eleverne kan nu se opslaget på elevsiden.')
      }catch(e){error('Kunne ikke gemme: '+noteMessage(e))}
    }
    $(d,'#ec-publish').onclick=()=>save(true);if(!demo)$(d,'#ec-draft').onclick=()=>save(false);
@@ -178,7 +227,7 @@ export async function openTeacherCalendar(){
        wireClose();$(d,'#ec-done').onclick=close;
      }catch(e){deleteButton.disabled=false;error('Kunne ikke slette: '+noteMessage(e))}
    };
-   $(d,'#ec-preview').onclick=async()=>{if(demo){await save(true);if(!current)return;window.open('./elevkalender.html?preview=1&klasse='+encodeURIComponent(classKey(className,date)),'_blank')}else window.open('./elevkalender.html?klasse='+encodeURIComponent(classKey(className,date)),'_blank','noopener')};
+   $(d,'#ec-preview').onclick=async()=>{if(demo){await save(true);if(!current)return;window.open('./elevkalender.html?preview=1&klasse='+encodeURIComponent(current.classKey),'_blank')}else{if(!serverPublished)return error('Offentliggør først opslaget, før du åbner klassen.');window.open('./elevkalender.html?klasse='+encodeURIComponent(current.classKey),'_blank','noopener')}};
    if(!demo)$(d,'#ec-logout').onclick=async()=>{await authSdk.signOut(auth);authScreen()};
  }
  if(demo)await editor();else if(auth.currentUser)await verify();else authScreen();
